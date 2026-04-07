@@ -1,0 +1,38 @@
+@media print {
+  #ascii-bg,
+  .nav,
+  .palette-toggle,
+  .page-header {
+    display: none !important;
+  }
+
+  .content-layer {
+    position: static;
+  }
+
+  .page-main {
+    background: none !important;
+    padding: 0 !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  a {
+    color: black;
+    text-decoration: underline;
+  }
+
+  .terminal-frame {
+    border: 1px solid #ccc;
+  }
+
+  .terminal-titlebar {
+    background: #f0f0f0;
+    color: #333;
+  }
+}
