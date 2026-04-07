@@ -1,0 +1,26 @@
+:root,
+:root[data-palette="dark-terminal"] {
+  --bg: #0d1117;
+  --bg-surface: #161b22;
+  --fg: #c9d1d9;
+  --fg-muted: #8b949e;
+  --accent: #58a6ff;
+  --accent-bright: #79c0ff;
+  --green: #3fb950;
+  --amber: #d29922;
+  --border: #30363d;
+  --cursor: #58a6ff;
+}
+
+:root[data-palette="amber-crt"] {
+  --bg: #0a0a00;
+  --bg-surface: #0f0f00;
+  --fg: #ffb000;
+  --fg-muted: #b07800;
+  --accent: #ff6600;
+  --accent-bright: #ff8833;
+  --green: #33ff00;
+  --amber: #ffb000;
+  --border: #332800;
+  --cursor: #ffb000;
+}
