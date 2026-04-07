@@ -1,10 +1,25 @@
-# ASCII Art
+# ASCII Animated Background
 
 Using the Pretext demo as inspiration (see `./resources/REFERENCES.md` and `./resources/pretext-demos`), a reactive art hero using ASCII characters is displayed in the background of the website, behind all elements, in an opaque and non-intrusive way. It should reflow dynamically as the viewport resizes by having Pretext re-layout the text in real time, and be animated using a source field as in the Pretext demo.
 
 # Curl-Friendly Terminal Rendering
 
-Since the website will be hosted on Vercel, detecting the `User-Agent` header via Vercel's Edge Middleware is possible. This allows the website to serve different content for `curl`/`wget` vs browsers; exactly like ysap.sh (see `./resources/ysap`). Browser users see the normal website, terminal users get clean plain text readable in their terminal.
+Since the website will be hosted on Vercel, detecting the `User-Agent` header via Vercel's Edge Middleware is possible. This allows the website to serve different content for `curl`/`wget` vs browsers; exactly like `ysap.sh` (see `./resources/ysap`). Browser users see the normal website, terminal users get clean plain text readable in their terminal.
+
+## Artistic Elements
+
+Using the website through `curl` should also return some exclusive elements on the response, such as a logo, website title, description, src, etc., much like `ysap.sh`. The logo specifically should include colored "underline lines" according to the color palette.
+
+```bash
+readarray -t LOGO << EOF
+AA  AA  AAAA     AAA   AAAAA 
+CC  CC CC  BB  ACB BCA CC  CC
+ BCCB   BBBBCA CCAAACC CCAACB
+  CC   BCAAACB CC   CC CC    
+DDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EOF
+```
 
 ## Curl Demo in the website
 
@@ -29,18 +44,23 @@ Clicking on one of the blog cards opens it fully for reading, while still having
 
 # Projects Page TODO
 
-The website will allow for project descriptions, with similar structure as the blogs page:
+The main projects page follows a terminal `ls -la` entry, which the user can then click into to learn more about the project, relevant links, etc.
 
-```bash
-┌── cat ~/projects/slkards.md ──────────────────────────┐
-│                                                        │
-│  # SLKARDS                                             │
-│  2026-04-01 · discord, project, opensource              │
-│                                                        │
-│  Post description here rendered from Markdown...       │
-│                                                        │
-└────────────────────────────────────────────────────────┘
+```plaintext
+drwxr-xr-x  slk  2026-03-15  lsalik.dev/
+  Terminal-inspired personal website.
+  Stack: TBD · TBD · TBD
+  Status: Alpha (in development)
+  → github.com/lsalik2/lsalik.dev
+
+drwxr-xr-x  slk  2026-01-20  slkards/
+  Discord-based TCG bot.
+  Stack: Python
+  Status: Live
+  → slkards.wiki
 ```
+
+Clicking on one of the entries allows the user to see more in-depth information about the project, links, etc.
 
 # Resume Page
 

@@ -20,4 +20,4 @@ guest@lsalik:~$ cd /projects
 
 # Content 
 
-All content (blog posts, project descriptions, resume entries) is authored in **Markdown files** that are compiled at build time. This keeps the repo simple and the editing workflow familiar.
+All content (blog posts, project descriptions, resume entries) is authored in **Markdown files**. This keeps the repo simple and the editing workflow familiar.
