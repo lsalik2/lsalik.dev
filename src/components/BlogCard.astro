@@ -1,0 +1,83 @@
+---
+interface Props {
+  title: string;
+  date: Date;
+  tags: string[];
+  description: string;
+  slug: string;
+}
+
+const { title, date, tags, description, slug } = Astro.props;
+const dateStr = date.toISOString().slice(0, 10);
+const tagsStr = tags.join(', ');
+---
+<a href={`/blog/${slug}`} class="blog-card">
+  <div class="card-frame">
+    <div class="card-titlebar">
+      <span>── cat ~/blog/{slug}.md ──</span>
+    </div>
+    <div class="card-body">
+      <p class="card-title"># {title}</p>
+      <p class="card-meta">{dateStr} · {tagsStr}</p>
+      <p class="card-desc">{description}</p>
+    </div>
+  </div>
+</a>
+
+<style>
+  .blog-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-frame {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: border-color 0.15s ease;
+  }
+
+  .blog-card:hover .card-frame {
+    border-color: var(--accent);
+  }
+
+  .card-titlebar {
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-surface);
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: border-color 0.15s ease;
+  }
+
+  .blog-card:hover .card-titlebar {
+    border-bottom-color: var(--accent);
+  }
+
+  .card-body {
+    padding: 1rem;
+    background-color: var(--bg);
+  }
+
+  .card-title {
+    margin: 0 0 0.4rem;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .card-meta {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+  }
+
+  .card-desc {
+    margin: 0;
+    color: var(--fg);
+  }
+</style>
