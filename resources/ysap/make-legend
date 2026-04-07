@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+#
+# Generate the Legend (help message) - intended to be passed to `tools/box`
+#
+# Author: Dave Eddy <dave@daveeddy.com>
+# Date: April 05, 2025
+# License: MIT
+
+. ./colors || exit
+
+UNDERLINE=$'\x1b[3m'
+
+format-box() {
+	local title=$1
+	shift
+
+	if [[ -z $1 ]]; then
+		return
+	fi
+	local cmd_re='^(\$ [^ ]+)(.*)$'
+	{
+		echo '%'
+		local line name url
+		for line in "$@"; do
+			IFS='%' read -r name url <<< "$line"
+
+			if [[ $name =~ $cmd_re ]]; then
+				local cmd=${BASH_REMATCH[1]}
+				local rest=${BASH_REMATCH[2]}
+
+				echo -n "$COLOR3$cmd$RST$COLOR5$rest"
+			else
+				echo -n "$COLOR5$name$RST"
+			fi
+
+			echo -n '%'
+			echo -n "$COLOR1$UNDERLINE$url$RST"
+			echo
+		done
+	} | ./tools/box -s '%' -hp 1 -tc "$COLOR5" -T plain -t "$title"
+}
+
+full='false'
+while getopts 'f' opt; do
+	case "$opt" in
+		f) full='true';;
+		*) exit 1;;
+	esac
+done
+
+legend=(
+	'$ curl ysap.sh%Get this page'
+	'$ curl ysap.sh/episodes%Get the list of episodes in the YSAP series'
+	'$ curl ysap.sh/json%Get the above in JSON format'
+	'$ curl ysap.sh/help%Get the full list of available endpoints'
+)
+resources=()
+extras=()
+
+if $full; then
+	legend+=(
+		'$ curl ysap.sh/ping%Get a 200 with the text pong'
+		'$ curl [-46] ysap.sh/ip%Get your current IP address as a string'
+	)
+
+	resources+=(
+		'$ curl style.ysap.sh%Bash Style Guide for writing safe scripts'
+	)
+
+	extras+=(
+		'$ curl xmas.ysap.sh | bash%Christmas tree animation'
+		'$ curl nightfall.ysap.sh | bash%Music Album TUI'
+	)
+fi
+
+format-box Legend "${legend[@]}"
+format-box Resources "${resources[@]}"
+format-box Extras "${extras[@]}"

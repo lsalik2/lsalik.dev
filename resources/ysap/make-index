@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#
+# Generate the page as seen by `curl ysap.sh`
+#
+# Author: Dave Eddy <dave@daveeddy.com>
+# Date: April 05, 2025
+# License: MIT
+
+. ./colors || exit
+
+{
+./make-header -p 7 |
+    ./tools/box -hp 4 -T plain
+
+./make-news
+
+./make-body
+
+./make-legend
+
+} | ./tools/rtrim-ansi-aware
