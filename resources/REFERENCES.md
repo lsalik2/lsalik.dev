@@ -4,7 +4,7 @@
 https://github.com/chenglou/pretext.git
 
 ## Why?
-A variable typographic with ASCII art. Provide a source field and it creates a nice animation of the source in ASCII art. I personally like the Monospace × Single Weight variant. I would like to use it as an animated logo on the website.
+A variable typographic with ASCII art. Provide a source field and it creates a nice animation of the source in ASCII art. I personally like the Monospace × Single Weight variant. I would like to use it either as an animated logo or an opaque, animated background.
 
 # ysap
 ## Sources:
