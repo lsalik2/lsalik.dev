@@ -1,3 +1,5 @@
+@import './palettes.css';
+
 @font-face {
   font-family: "Loskeley Mono";
   src: url("/fonts/LoskeleyMono-Regular.woff2") format("woff2");
@@ -5,8 +7,6 @@
   font-style: normal;
   font-display: swap;
 }
-
-@import './palettes.css';
 
 *,
 *::before,
