@@ -1,0 +1,28 @@
+---
+---
+<button id="palette-toggle-btn" class="palette-toggle" type="button" aria-label="Switch color palette">
+  <span class="palette-icon">[theme:</span>
+  <span id="palette-label">dark-terminal</span><span class="palette-icon">]</span>
+</button>
+
+<style>
+  .palette-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--fg-muted);
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .palette-toggle:hover {
+    color: var(--accent-bright);
+    border-color: var(--accent);
+  }
+
+  .palette-icon {
+    color: var(--fg-muted);
+  }
+</style>
