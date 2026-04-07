@@ -1,0 +1,114 @@
+---
+import { getCollection } from 'astro:content';
+import Page from '../../layouts/Page.astro';
+
+export const prerender = true;
+
+const projects = await getCollection('projects');
+projects.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+<Page title="Projects" path="/projects">
+  <h1 class="page-heading">~/projects</h1>
+  <div class="ls-listing">
+    {projects.map(project => {
+      const dateStr = project.data.date.toISOString().slice(0, 10);
+      const stackStr = project.data.stack.join(' · ');
+      return (
+        <a href={`/projects/${project.id}`} class="project-entry">
+          <div class="entry-header">
+            <span class="permissions">{project.data.permissions}</span>
+            <span class="owner">slk</span>
+            <span class="date">{dateStr}</span>
+            <span class="name">{project.data.title}/</span>
+          </div>
+          <div class="entry-body">
+            <div class="description">{project.data.description}</div>
+            <div class="stack">Stack: {stackStr}</div>
+            <div class="status">Status: {project.data.status}</div>
+            {project.data.repo && (
+              <div class="repo">→ {project.data.repo.replace('https://', '')}</div>
+            )}
+          </div>
+        </a>
+      );
+    })}
+  </div>
+</Page>
+
+<style>
+  .page-heading {
+    color: var(--accent);
+    margin: 0 0 1.5rem;
+    font-size: 1.2rem;
+  }
+
+  .ls-listing {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .project-entry {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 0.75rem;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .project-entry:hover {
+    border-color: var(--accent);
+    background-color: var(--bg-surface);
+  }
+
+  .entry-header {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+  }
+
+  .permissions {
+    color: var(--fg-muted);
+  }
+
+  .owner {
+    color: var(--green);
+  }
+
+  .date {
+    color: var(--fg-muted);
+  }
+
+  .name {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .entry-body {
+    padding-left: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    font-size: 0.85rem;
+  }
+
+  .description {
+    color: var(--fg);
+  }
+
+  .stack {
+    color: var(--fg-muted);
+  }
+
+  .status {
+    color: var(--amber);
+  }
+
+  .repo {
+    color: var(--accent);
+  }
+</style>
