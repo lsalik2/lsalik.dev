@@ -1,7 +1,22 @@
 import { defineMiddleware } from 'astro:middleware';
 import { getCollection } from 'astro:content';
-import { renderHome, renderBlogIndex, renderBlogPost, renderProjectsIndex, renderResume, renderLinks } from './curl/render';
+import {
+  renderHome,
+  renderBlogIndex,
+  renderBlogPost,
+  renderProjectsIndex,
+  renderResume,
+  renderContact,
+  renderAbout,
+  renderSources,
+} from './curl/render';
 import { bold, dim } from './curl/ansi';
+
+// Raw markdown bodies for the about and sources pages. Vite's ?raw query
+// gives us the file's text content directly, which is what the curl renderers
+// want (no Astro markdown component rendering for the terminal output).
+import aboutRaw from './data/about.md?raw';
+import sourcesRaw from './data/sources.md?raw';
 
 const TERMINAL_AGENTS = ['curl/', 'wget/', 'httpie/', 'fetch/', 'libfetch/'];
 
@@ -23,12 +38,19 @@ function textResponse(body: string): Response {
 
 export const onRequest = defineMiddleware(async ({ request }, next) => {
   const ua = request.headers.get('user-agent');
+  const { pathname } = new URL(request.url);
+
+  // /links → /contact redirect (applies to both browser and curl traffic).
+  if (pathname === '/links' || pathname === '/links/') {
+    return new Response(null, {
+      status: 308,
+      headers: { Location: '/contact' },
+    });
+  }
 
   if (!isTerminalClient(ua)) {
     return next();
   }
-
-  const { pathname } = new URL(request.url);
 
   if (pathname === '/' || pathname === '') {
     return textResponse(renderHome());
@@ -100,10 +122,18 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     return textResponse(renderResume('Visit lsalik.dev/resume for full resume content.'));
   }
 
-  if (pathname === '/links' || pathname === '/links/') {
-    return textResponse(renderLinks([
+  if (pathname === '/contact' || pathname === '/contact/') {
+    return textResponse(renderContact([
       { label: 'GitHub', url: 'https://github.com/lsalik2' },
     ]));
+  }
+
+  if (pathname === '/about' || pathname === '/about/') {
+    return textResponse(renderAbout(aboutRaw));
+  }
+
+  if (pathname === '/sources' || pathname === '/sources/') {
+    return textResponse(renderSources(sourcesRaw));
   }
 
   return next();
