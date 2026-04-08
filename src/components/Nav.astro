@@ -8,10 +8,12 @@ const { path } = Astro.props;
 const segments = path === '/' ? [] : path.split('/').filter(Boolean);
 
 const navLinks = [
+  { href: '/about', label: 'about' },
   { href: '/projects', label: 'projects' },
   { href: '/blog', label: 'blog' },
   { href: '/resume', label: 'resume' },
-  { href: '/links', label: 'links' },
+  { href: '/contact', label: 'contact' },
+  { href: '/sources', label: 'sources' },
 ];
 ---
 <nav class="nav">
