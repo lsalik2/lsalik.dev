@@ -1,15 +1,18 @@
 # whoami
 
-Hi, I'm SLK. This is my corner of the internet.
+Hi, my name is Luis Salik. I'm a software engineer specializing in machine learning, web development and data analysis. Welcome to my personal website.
 
-I build things — mostly software, mostly in the open. If it shows up on this site, it's because it was worth writing down.
+I like to build things; mostly software, mostly in the open. A lot of it never sees the daylight, but if it shows up on this site, it's because it was worth publishing.
 
 ## interests
 
-- operating systems, terminals, old text UIs
+- autonomous control systems
+- operating systems and low-level programming
+- machine learning and its applications
+- game design and development
 - small, owned infrastructure
 - anything that runs offline
 
 ## elsewhere
 
-See `~/contact` for ways to reach me.
+See `~/contact` for my socials and ways to reach me.
