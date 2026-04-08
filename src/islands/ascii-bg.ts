@@ -48,20 +48,18 @@ export function renderLayers(
   phases: readonly number[],
 ): RenderLayersResult {
   const layerCount = phases.length;
-  // For each cell, compute every layer's brightness; the brightest wins that cell.
-  const cellBrightness: number[] = new Array(layerCount);
 
   const layerChars: string[][] = Array.from({ length: layerCount }, () =>
     new Array<string>(cols * rows).fill(' '),
   );
 
+  // For each cell, compute every layer's brightness; the brightest wins that cell.
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       let maxB = 0;
       let maxL = 0;
       for (let li = 0; li < layerCount; li++) {
         const b = sample(c, r, t, phases[li]);
-        cellBrightness[li] = b;
         if (b > maxB) {
           maxB = b;
           maxL = li;
