@@ -1,0 +1,73 @@
+---
+import Page from '../layouts/Page.astro';
+import PageHeader from '../components/PageHeader.astro';
+import TerminalFrame from '../components/TerminalFrame.astro';
+import '../styles/print.css';
+
+const resumeModule = await import('../data/resume.md');
+const ResumeContent = resumeModule.default;
+---
+<Page title="Resume" path="/resume">
+  <PageHeader heading="~/resume" description="less ~/resume — my CV, feel free to download it." />
+  <TerminalFrame title="cat ~/resume.md">
+    <div class="resume-content">
+      <ResumeContent />
+    </div>
+  </TerminalFrame>
+
+  <div class="resume-actions">
+    <a href="/resume.pdf" class="download-link" download>Download PDF</a>
+  </div>
+</Page>
+
+<style>
+  .resume-actions {
+    margin-top: 1rem;
+  }
+
+  .download-link {
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--accent);
+    padding: 0.4rem 0.9rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    transition: background-color 0.15s, color 0.15s;
+  }
+
+  .download-link:hover {
+    background-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .resume-content :global(h1) {
+    color: var(--accent);
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .resume-content :global(h2) {
+    color: var(--accent);
+    font-size: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .resume-content :global(ul) {
+    list-style: none;
+    padding: 0;
+  }
+
+  .resume-content :global(ul li)::before {
+    content: '- ';
+  }
+
+  .resume-content :global(em) {
+    color: var(--fg-muted);
+    font-style: normal;
+  }
+
+  .resume-content :global(p) {
+    margin-bottom: 0.5rem;
+  }
+</style>

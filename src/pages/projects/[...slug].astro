@@ -1,0 +1,132 @@
+---
+import { getCollection, render } from 'astro:content';
+import Page from '../../layouts/Page.astro';
+import TerminalFrame from '../../components/TerminalFrame.astro';
+
+const slug = Astro.params.slug;
+const projects = await getCollection('projects');
+const project = projects.find(p => p.id === slug);
+if (!project) return Astro.redirect('/projects');
+const { Content } = await render(project);
+const dateStr = project.data.date.toISOString().slice(0, 10);
+const stackStr = project.data.stack.join(' · ');
+---
+<Page title={project.data.title} path="/projects">
+  <TerminalFrame title={`cat ~/projects/${project.id}/README.md`}>
+    <div class="project-meta">
+      <div class="meta-row">
+        <span class="meta-key">Status</span>
+        <span class="meta-value status">{project.data.status}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Stack</span>
+        <span class="meta-value muted">{stackStr}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Updated</span>
+        <span class="meta-value muted">{dateStr}</span>
+      </div>
+      {project.data.url && (
+        <div class="meta-row">
+          <span class="meta-key">URL</span>
+          <a class="meta-value link" href={project.data.url} target="_blank" rel="noopener noreferrer">{project.data.url}</a>
+        </div>
+      )}
+      <div class="meta-row">
+        <span class="meta-key">Repo</span>
+        <a class="meta-value link" href={project.data.repo} target="_blank" rel="noopener noreferrer">{project.data.repo}</a>
+      </div>
+    </div>
+    <hr class="divider" />
+    <div class="project-content">
+      <Content />
+    </div>
+  </TerminalFrame>
+</Page>
+
+<style>
+  .project-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .meta-key {
+    color: var(--fg-muted);
+    min-width: 6rem;
+  }
+
+  .meta-value {
+    color: var(--fg);
+  }
+
+  .meta-value.status {
+    color: var(--amber);
+  }
+
+  .meta-value.muted {
+    color: var(--fg-muted);
+  }
+
+  .meta-value.link,
+  a.meta-value {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .meta-value.link:hover,
+  a.meta-value:hover {
+    text-decoration: underline;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--fg-muted);
+    margin: 1rem 0;
+    opacity: 0.3;
+  }
+
+  .project-content :global(h1),
+  .project-content :global(h2),
+  .project-content :global(h3),
+  .project-content :global(h4) {
+    color: var(--accent);
+  }
+
+  .project-content :global(h1)::before { content: '# '; }
+  .project-content :global(h2)::before { content: '## '; }
+  .project-content :global(h3)::before { content: '### '; }
+  .project-content :global(h4)::before { content: '#### '; }
+
+  .project-content :global(p) {
+    margin-bottom: 1rem;
+  }
+
+  .project-content :global(pre),
+  .project-content :global(code) {
+    background-color: var(--bg-surface);
+    border-radius: 3px;
+  }
+
+  .project-content :global(pre) {
+    padding: 1rem;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+
+  .project-content :global(code) {
+    padding: 0.1em 0.3em;
+  }
+
+  .project-content :global(pre code) {
+    padding: 0;
+    background: none;
+  }
+</style>

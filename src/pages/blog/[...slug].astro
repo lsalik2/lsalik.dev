@@ -1,0 +1,66 @@
+---
+import { getCollection, render } from 'astro:content';
+import Page from '../../layouts/Page.astro';
+import TerminalFrame from '../../components/TerminalFrame.astro';
+
+const slug = Astro.params.slug;
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+const post = posts.find(p => p.id === slug);
+if (!post) return Astro.redirect('/blog');
+const { Content } = await render(post);
+const dateStr = post.data.date.toISOString().slice(0, 10);
+const tagsStr = post.data.tags.join(', ');
+---
+<Page title={post.data.title} path="/blog">
+  <TerminalFrame title={`cat ~/blog/${post.id}.md`}>
+    <p class="post-meta">{dateStr} · {tagsStr}</p>
+    <div class="post-content">
+      <Content />
+    </div>
+  </TerminalFrame>
+</Page>
+
+<style>
+  .post-meta {
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    margin: 0 0 1.25rem;
+  }
+
+  .post-content :global(h1),
+  .post-content :global(h2),
+  .post-content :global(h3),
+  .post-content :global(h4) {
+    color: var(--accent);
+  }
+
+  .post-content :global(h1)::before { content: '# '; }
+  .post-content :global(h2)::before { content: '## '; }
+  .post-content :global(h3)::before { content: '### '; }
+  .post-content :global(h4)::before { content: '#### '; }
+
+  .post-content :global(p) {
+    margin-bottom: 1rem;
+  }
+
+  .post-content :global(pre),
+  .post-content :global(code) {
+    background-color: var(--bg-surface);
+    border-radius: 3px;
+  }
+
+  .post-content :global(pre) {
+    padding: 1rem;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+
+  .post-content :global(code) {
+    padding: 0.1em 0.3em;
+  }
+
+  .post-content :global(pre code) {
+    padding: 0;
+    background: none;
+  }
+</style>

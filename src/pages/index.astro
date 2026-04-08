@@ -1,0 +1,107 @@
+---
+import Page from '../layouts/Page.astro';
+---
+<Page title="Home" path="/">
+  <section class="hero">
+    <h1 class="hero-title">lsalik.dev</h1>
+    <p class="hero-desc">aerospace and software engineer</p>
+    <p class="hero-line"><span class="hero-prompt">$</span> tip: you can also <code>curl lsalik.dev</code> from any terminal!</p>
+  </section>
+
+  <section class="curl-demo">
+    <div class="curl-demo-frame">
+      <div class="curl-demo-titlebar">~ — bash — 80x24</div>
+      <div class="curl-demo-body">
+        <pre id="curl-demo-output"></pre>
+      </div>
+    </div>
+  </section>
+  <script src="../islands/curl-demo.ts"></script>
+</Page>
+
+<style>
+  .hero {
+    padding: 1.5rem 0 1rem;
+  }
+
+  .hero-title {
+    font-size: 1.5rem;
+    color: var(--accent);
+    margin: 0 0 0.5rem;
+  }
+
+  .hero-desc {
+    color: var(--fg-muted);
+    margin: 0;
+  }
+
+  .hero-line {
+    color: var(--fg-muted);
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+  }
+
+  .hero-prompt {
+    color: var(--green);
+    margin-right: 0.25rem;
+  }
+
+  .hero-line code {
+    font-family: inherit;
+    color: var(--accent);
+    background: none;
+    padding: 0;
+  }
+
+  .curl-demo {
+    padding: 1rem 0;
+  }
+
+  .curl-demo-frame {
+    border: 1px solid var(--border, #444);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .curl-demo-titlebar {
+    background-color: var(--bg-surface);
+    color: var(--fg-muted);
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    border-bottom: 1px solid var(--border, #444);
+  }
+
+  .curl-demo-body {
+    background-color: var(--bg);
+    min-height: 200px;
+    padding: 0.75rem 1rem;
+  }
+
+  #curl-demo-output {
+    font: inherit;
+    line-height: 1;
+    white-space: pre-wrap;
+    margin: 0;
+  }
+</style>
+
+<style is:global>
+  .ansi-bold { font-weight: bold; }
+  .ansi-dim { opacity: 0.6; }
+  .ansi-underline { text-decoration: underline; }
+  .ansi-red { color: var(--ansi-red, #e06c75); }
+  .ansi-green { color: var(--ansi-green, #98c379); }
+  .ansi-amber { color: var(--ansi-amber, #e5c07b); }
+  .ansi-blue { color: var(--ansi-blue, #61afef); }
+  .ansi-cyan { color: var(--ansi-cyan, #56b6c2); }
+
+  .cursor-inline {
+    color: var(--cursor, var(--accent, #98c379));
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+</style>

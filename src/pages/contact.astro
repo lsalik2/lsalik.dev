@@ -1,0 +1,57 @@
+---
+import Page from '../layouts/Page.astro';
+import PageHeader from '../components/PageHeader.astro';
+
+const links = [
+  { label: 'GitHub', url: 'https://github.com/lsalik2' },
+];
+---
+<Page title="Contact" path="/contact">
+  <PageHeader heading="~/contact" description="cat ~/contact — how to reach me, socials included." />
+  <div class="links-list">
+    {links.map(link => (
+      <a href={link.url} class="link-entry" target="_blank" rel="noopener noreferrer">
+        <span class="link-arrow">→</span>
+        <span class="link-url">{link.url.replace('https://', '')}</span>
+        <span class="link-label">{link.label}</span>
+      </a>
+    ))}
+  </div>
+</Page>
+
+<style>
+  .links-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+
+  .link-entry {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: inherit;
+    padding: 0.4rem 0;
+    transition: opacity 0.15s;
+  }
+
+  .link-entry:hover {
+    opacity: 0.8;
+  }
+
+  .link-arrow {
+    color: var(--green);
+    flex-shrink: 0;
+  }
+
+  .link-url {
+    color: var(--accent);
+  }
+
+  .link-label {
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+  }
+</style>

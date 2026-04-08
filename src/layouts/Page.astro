@@ -1,0 +1,46 @@
+---
+import Base from './Base.astro';
+import Nav from '../components/Nav.astro';
+import PaletteToggle from '../components/PaletteToggle.astro';
+
+interface Props {
+  title: string;
+  path: string;
+}
+
+const { title, path } = Astro.props;
+---
+<Base title={title}>
+  <div class="page-container">
+    <header class="page-header">
+      <Nav path={path} />
+      <PaletteToggle />
+    </header>
+    <main class="page-main">
+      <slot />
+    </main>
+  </div>
+  <script src="../islands/palette-toggle.ts"></script>
+</Base>
+
+<style>
+  .page-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .page-main {
+    padding: 1rem 0 3rem;
+    background-color: color-mix(in srgb, var(--bg) 90%, transparent);
+    border-radius: 4px;
+    padding: 1.5rem;
+  }
+</style>
