@@ -21,12 +21,9 @@ const navLinks = [
     <a href="/" class="prompt-user">lsalik@dev</a><span class="prompt-sep">:</span><span class="prompt-root">~</span>{segments.map((seg, i) => {
       const href = '/' + segments.slice(0, i + 1).join('/');
       const isCurrent = i === segments.length - 1;
-      return <>
-        <span class="prompt-sep">/</span>
-        {isCurrent
-          ? <span class="prompt-path-current">{seg}</span>
-          : <a href={href} class="prompt-path">{seg}</a>}
-      </>;
+      return <>{isCurrent
+        ? <><span class="prompt-sep">/</span><span class="prompt-path-current">{seg}</span></>
+        : <><span class="prompt-sep">/</span><a href={href} class="prompt-path">{seg}</a></>}</>;
     })}<span class="prompt-dollar">$</span><span class="cursor" aria-hidden="true"></span>
   </div>
   <div class="nav-links">
