@@ -143,9 +143,9 @@ function initBackground(): void {
   const PARTICLE_STAMP_RADIUS = 12;
 
   const LAYER_CONFIGS = [
-    { color: 'var(--fg-muted)', timeOffset: 0, velocityScale: 1.0 },
-    { color: 'var(--accent)', timeOffset: 3.7, velocityScale: 0.7 },
-    { color: 'var(--green)', timeOffset: 7.2, velocityScale: 1.3 },
+    { color: 'var(--fg)', timeOffset: 0, velocityScale: 1.0 },
+    { color: 'var(--fg-muted)', timeOffset: 3.7, velocityScale: 0.7 },
+    { color: 'var(--accent)', timeOffset: 7.2, velocityScale: 1.3 },
   ];
 
   let cols = 0;
