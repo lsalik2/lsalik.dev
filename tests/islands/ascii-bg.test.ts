@@ -1,100 +1,75 @@
 import { describe, it, expect } from 'vitest';
-
 import {
-  createBrightnessField,
-  splatStamp,
-  createFieldStamp,
-  brightnessToChar,
-  stepParticles,
-  type Particle,
+  sample,
+  charForBrightness,
+  renderLayers,
+  RAMP,
 } from '../../src/islands/ascii-bg';
 
-describe('brightnessToChar', () => {
-  const RAMP = ' -_:,;^+/|\\?0oOQ#%@';
-
-  it('returns space for zero brightness', () => {
-    expect(brightnessToChar(0)).toBe(' ');
+describe('sample', () => {
+  it('returns values within [0, 1] across a grid of inputs', () => {
+    for (let x = 0; x < 40; x++) {
+      for (let y = 0; y < 20; y++) {
+        for (const t of [0, 1.5, 7.3]) {
+          for (const phase of [0, 3.7, 7.2]) {
+            const v = sample(x, y, t, phase);
+            expect(v).toBeGreaterThanOrEqual(0);
+            expect(v).toBeLessThanOrEqual(1);
+          }
+        }
+      }
+    }
   });
 
-  it('returns densest char for max brightness', () => {
-    expect(brightnessToChar(1)).toBe('@');
-  });
-
-  it('returns a mid-range char for 0.5', () => {
-    const ch = brightnessToChar(0.5);
-    const idx = RAMP.indexOf(ch);
-    expect(idx).toBeGreaterThan(5);
-    expect(idx).toBeLessThan(RAMP.length - 1);
+  it('is deterministic for fixed inputs', () => {
+    const a = sample(4, 5, 1.25, 3.7);
+    const b = sample(4, 5, 1.25, 3.7);
+    expect(a).toBe(b);
   });
 });
 
-describe('createFieldStamp', () => {
-  it('creates a stamp with correct dimensions', () => {
-    const stamp = createFieldStamp(10, 2, 2);
-    expect(stamp.radiusX).toBeGreaterThan(0);
-    expect(stamp.radiusY).toBeGreaterThan(0);
-    expect(stamp.values.length).toBe(stamp.sizeX * stamp.sizeY);
+describe('charForBrightness', () => {
+  it('maps 0 to the first ramp glyph', () => {
+    expect(charForBrightness(0)).toBe(RAMP[0]);
   });
 
-  it('has peak value at center', () => {
-    const stamp = createFieldStamp(10, 2, 2);
-    const centerIdx = stamp.radiusY * stamp.sizeX + stamp.radiusX;
-    const centerVal = stamp.values[centerIdx];
-    expect(centerVal).toBeGreaterThan(0);
-    for (let i = 0; i < stamp.values.length; i++) {
-      expect(centerVal).toBeGreaterThanOrEqual(stamp.values[i]);
-    }
+  it('maps values just under 1 to the last ramp glyph', () => {
+    expect(charForBrightness(0.9999)).toBe(RAMP[RAMP.length - 1]);
   });
-});
 
-describe('createBrightnessField', () => {
-  it('creates a Float32Array of correct size', () => {
-    const field = createBrightnessField(10, 8);
-    expect(field).toBeInstanceOf(Float32Array);
-    expect(field.length).toBe(10 * 8);
+  it('clamps values above 1 to the last ramp glyph', () => {
+    expect(charForBrightness(10)).toBe(RAMP[RAMP.length - 1]);
+  });
+
+  it('clamps values below 0 to the first ramp glyph', () => {
+    expect(charForBrightness(-5)).toBe(RAMP[0]);
   });
 });
 
-describe('splatStamp', () => {
-  it('writes stamp values into the field', () => {
-    const field = createBrightnessField(20, 20);
-    const stamp = createFieldStamp(5, 1, 1);
-    splatStamp(field, 20, 20, 10, 10, stamp);
-    let hasNonZero = false;
-    for (let i = 0; i < field.length; i++) {
-      if (field[i] > 0) { hasNonZero = true; break; }
-    }
-    expect(hasNonZero).toBe(true);
-  });
-
-  it('clamps values to 1', () => {
-    const field = createBrightnessField(20, 20);
-    const stamp = createFieldStamp(5, 1, 1);
-    for (let i = 0; i < 100; i++) {
-      splatStamp(field, 20, 20, 10, 10, stamp);
-    }
-    for (let i = 0; i < field.length; i++) {
-      expect(field[i]).toBeLessThanOrEqual(1);
+describe('renderLayers', () => {
+  it('returns one string per phase, each cols*rows + separator newlines', () => {
+    const cols = 12;
+    const rows = 5;
+    const result = renderLayers(cols, rows, 0.5, [0, 3.7, 7.2]);
+    expect(result.layers).toHaveLength(3);
+    for (const layer of result.layers) {
+      const linesInLayer = layer.split('\n');
+      expect(linesInLayer).toHaveLength(rows);
+      for (const line of linesInLayer) {
+        expect([...line]).toHaveLength(cols);
+      }
     }
   });
-});
 
-describe('stepParticles', () => {
-  it('updates particle positions', () => {
-    const particles: Particle[] = [
-      { x: 100, y: 100, vx: 0, vy: 0 },
-    ];
-    stepParticles(particles, 1.0, 200, 150);
-    expect(particles[0].x).not.toBe(100);
-    expect(particles[0].y).not.toBe(100);
+  it('is deterministic for the same inputs', () => {
+    const a = renderLayers(10, 4, 1.0, [0, 3.7, 7.2]);
+    const b = renderLayers(10, 4, 1.0, [0, 3.7, 7.2]);
+    expect(a.layers).toEqual(b.layers);
   });
 
-  it('wraps particles that go out of bounds', () => {
-    const particles: Particle[] = [
-      { x: -100, y: -100, vx: -5, vy: -5 },
-    ];
-    stepParticles(particles, 1.0, 200, 150);
-    expect(particles[0].x).toBeGreaterThan(-50);
-    expect(particles[0].y).toBeGreaterThan(-50);
+  it('differs when t changes', () => {
+    const a = renderLayers(10, 4, 1.0, [0, 3.7, 7.2]);
+    const b = renderLayers(10, 4, 2.0, [0, 3.7, 7.2]);
+    expect(a.layers).not.toEqual(b.layers);
   });
 });
