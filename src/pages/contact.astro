@@ -1,11 +1,13 @@
 ---
 import Page from '../layouts/Page.astro';
+import PageHeader from '../components/PageHeader.astro';
 
 const links = [
   { label: 'GitHub', url: 'https://github.com/lsalik2' },
 ];
 ---
-<Page title="Links" path="/links">
+<Page title="Contact" path="/contact">
+  <PageHeader heading="~/contact" description="cat ~/contact — how to reach me, socials included." />
   <div class="links-list">
     {links.map(link => (
       <a href={link.url} class="link-entry" target="_blank" rel="noopener noreferrer">
