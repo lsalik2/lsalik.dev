@@ -18,7 +18,7 @@ const { title } = Astro.props;
   <ClientRouter />
 </head>
 <body>
-  <div id="ascii-bg" aria-hidden="true"></div>
+  <div id="ascii-bg" transition:persist="ascii-bg" aria-hidden="true"></div>
   <div class="content-layer">
     <slot />
   </div>
