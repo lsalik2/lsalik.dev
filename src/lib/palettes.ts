@@ -1,4 +1,10 @@
-export const PALETTES = ['dark-terminal', 'amber-crt'] as const;
+export const PALETTES = [
+  'dark-terminal',
+  'amber-crt',
+  'green-phosphor',
+  'synthwave',
+  'paper',
+] as const;
 export type PaletteName = typeof PALETTES[number];
 
 export function nextPalette(current: PaletteName): PaletteName {
@@ -9,4 +15,7 @@ export function nextPalette(current: PaletteName): PaletteName {
 export const PALETTE_LABELS: Record<PaletteName, string> = {
   'dark-terminal': 'Dark Terminal',
   'amber-crt': 'Amber CRT',
+  'green-phosphor': 'Green Phosphor',
+  'synthwave': 'Synthwave',
+  'paper': 'Paper',
 };
