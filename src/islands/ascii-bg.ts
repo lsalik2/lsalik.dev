@@ -120,10 +120,30 @@ function initBackground(): void {
     return pre;
   });
 
+  function measureCharWidth(): number {
+    // Measure the real rendered width of a monospace glyph rather than
+    // guessing FONT_SIZE * 0.6. Under-guessing leaves a right-edge gap.
+    const probe = document.createElement('span');
+    probe.textContent = 'M'.repeat(80);
+    probe.style.cssText = [
+      'position:absolute',
+      'visibility:hidden',
+      'white-space:pre',
+      'font-family:monospace',
+      `font-size:${FONT_SIZE}px`,
+      `line-height:${LINE_HEIGHT}px`,
+    ].join(';');
+    document.body.appendChild(probe);
+    const w = probe.getBoundingClientRect().width / 80;
+    probe.remove();
+    return w > 0 ? w : FONT_SIZE * 0.6;
+  }
+
   function measure(): void {
-    const charW = FONT_SIZE * 0.6;
-    cols = Math.max(1, Math.ceil(window.innerWidth / charW));
-    rows = Math.max(1, Math.ceil(window.innerHeight / LINE_HEIGHT));
+    const charW = measureCharWidth();
+    // +1 cell overscan to absorb subpixel rounding at the right edge.
+    cols = Math.max(1, Math.ceil(window.innerWidth / charW) + 1);
+    rows = Math.max(1, Math.ceil(window.innerHeight / LINE_HEIGHT) + 1);
   }
 
   function buildDOM(): void {

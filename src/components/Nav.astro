@@ -18,9 +18,15 @@ const navLinks = [
 ---
 <nav class="nav">
   <div class="breadcrumb">
-    <a href="/" class="prompt-user">lsalik@dev</a><span class="prompt-sep">:</span><span class="prompt-path">~</span>{segments.map((seg, i) => {
+    <a href="/" class="prompt-user">lsalik@dev</a><span class="prompt-sep">:</span><span class="prompt-root">~</span>{segments.map((seg, i) => {
       const href = '/' + segments.slice(0, i + 1).join('/');
-      return <><span class="prompt-sep">/</span><a href={href} class="prompt-path">{seg}</a></>;
+      const isCurrent = i === segments.length - 1;
+      return <>
+        <span class="prompt-sep">/</span>
+        {isCurrent
+          ? <span class="prompt-path-current">{seg}</span>
+          : <a href={href} class="prompt-path">{seg}</a>}
+      </>;
     })}<span class="prompt-dollar">$</span><span class="cursor" aria-hidden="true"></span>
   </div>
   <div class="nav-links">
@@ -58,13 +64,21 @@ const navLinks = [
     color: var(--fg-muted);
   }
 
+  .prompt-root {
+    color: var(--fg);
+  }
+
   .prompt-path {
     color: var(--fg);
     text-decoration: none;
   }
 
-  .prompt-path:hover {
+  a.prompt-path:hover {
     color: var(--accent-bright);
+  }
+
+  .prompt-path-current {
+    color: var(--fg);
   }
 
   .prompt-dollar {

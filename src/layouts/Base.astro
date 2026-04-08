@@ -15,6 +15,16 @@ const { title } = Astro.props;
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="generator" content={Astro.generator} />
   <title>{title} — lsalik.dev</title>
+  {/* Apply the saved palette before first paint so there's no flash.
+      Must be an inline head script, not a module import. */}
+  <script is:inline>
+    (function () {
+      try {
+        var saved = localStorage.getItem('palette');
+        if (saved) document.documentElement.dataset.palette = saved;
+      } catch (_) {}
+    })();
+  </script>
   <ClientRouter />
 </head>
 <body>
