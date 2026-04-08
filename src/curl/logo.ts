@@ -1,64 +1,62 @@
-// SLK logo using Unicode half-block characters
-// Uses basic ANSI color codes so both terminal and browser (ansiToNodes) can render it.
+// SLK logo rendered at 8×17 pixel resolution, packed into 4 text rows using
+// half-block glyphs (▀ ▄ █) plus space. Two colored underline rows follow.
 //
-// Grid key:
-// G → ▄ (lower half block) in green
-// g → ▀ (upper half block) in green
-// B → ▄ (lower half block) in blue
-// b → ▀ (upper half block) in blue
-// A → ▄ (lower half block) in amber
-// _ → space (transparent)
+// Pixel mapping per cell (top, bottom):
+//   (0,0) -> ' '   (0,1) -> '▄'   (1,0) -> '▀'   (1,1) -> '█'
 
-const LOGO_LINES = [
-  '_GG__GGGG_GG_____GG__GG_',
-  'GG__GG____GG_____GG_GG__',
-  '_GGGG_____GG_____GGGG___',
-  '___gGG____GG_____GG_GG__',
-  'GGGG______GGGGGG_GG__GG_',
-  'BBBBBBBBBBBBBBBBBBBBBBBBB',
-  'AAAAAAAAAAAAAAAAAAAAAAAAA',
-];
-
-// Basic ANSI color codes (compatible with ansiToNodes parser)
 const GREEN = '\x1b[32m';
 const BLUE = '\x1b[34m';
 const AMBER = '\x1b[33m';
 const RST = '\x1b[0m';
 
-// Map grid character to its ANSI color and output character
-function charInfo(ch: string): { color: string; char: string } {
-  switch (ch) {
-    case 'G': return { color: GREEN, char: '\u2584' };
-    case 'g': return { color: GREEN, char: '\u2580' };
-    case 'B': return { color: BLUE, char: '\u2584' };
-    case 'b': return { color: BLUE, char: '\u2580' };
-    case 'A': return { color: AMBER, char: '\u2584' };
-    case '_': return { color: '', char: ' ' };
-    default: return { color: '', char: ch };
+const WIDTH = 17;
+
+// 8 pixel rows × 17 columns. '#' = on, '.' = off.
+// Layout: S (cols 0-4), gap (col 5), L (cols 6-10), gap (col 11), K (cols 12-16).
+const BITMAP: readonly string[] = [
+  '.####.#.....#...#',
+  '#.....#.....#..#.',
+  '#.....#.....#.#..',
+  '.###..#.....##...',
+  '....#.#.....##...',
+  '....#.#.....#.#..',
+  '#...#.#.....#..#.',
+  '.###..#####.#...#',
+];
+
+function pixel(row: number, col: number): boolean {
+  return BITMAP[row][col] === '#';
+}
+
+function packPair(top: boolean, bot: boolean): string {
+  if (top && bot) return '\u2588'; // █
+  if (top) return '\u2580'; // ▀
+  if (bot) return '\u2584'; // ▄
+  return ' ';
+}
+
+function renderLetterRows(): string[] {
+  // Pack pixel rows in pairs: (0,1), (2,3), (4,5), (6,7) -> 4 text rows.
+  const rows: string[] = [];
+  for (let textRow = 0; textRow < 4; textRow++) {
+    const topRow = textRow * 2;
+    const botRow = textRow * 2 + 1;
+    let line = '';
+    for (let col = 0; col < WIDTH; col++) {
+      line += packPair(pixel(topRow, col), pixel(botRow, col));
+    }
+    rows.push(`${GREEN}${line}${RST}`);
   }
+  return rows;
+}
+
+function renderUnderline(colorCode: string): string {
+  return `${colorCode}${'\u2584'.repeat(WIDTH)}${RST}`;
 }
 
 export function renderLogo(): string {
-  const result: string[] = [];
-
-  for (const line of LOGO_LINES) {
-    let out = '';
-    let activeColor = '';
-
-    for (let i = 0; i < line.length; i++) {
-      const { color, char } = charInfo(line[i]);
-
-      if (color !== activeColor) {
-        if (activeColor) out += RST;
-        if (color) out += color;
-        activeColor = color;
-      }
-      out += char;
-    }
-
-    if (activeColor) out += RST;
-    result.push(out);
-  }
-
-  return result.join('\n');
+  const letters = renderLetterRows();
+  const accentBar = renderUnderline(BLUE);
+  const amberBar = renderUnderline(AMBER);
+  return [...letters, accentBar, amberBar].join('\n');
 }
