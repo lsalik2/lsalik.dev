@@ -34,10 +34,12 @@ export function renderHome(): string {
   const description = dim('terminal-inspired personal website');
   const nav = [
     dim('navigate:'),
-    `  curl lsalik.dev/blog`,
+    `  curl lsalik.dev/about`,
     `  curl lsalik.dev/projects`,
+    `  curl lsalik.dev/blog`,
     `  curl lsalik.dev/resume`,
-    `  curl lsalik.dev/links`,
+    `  curl lsalik.dev/contact`,
+    `  curl lsalik.dev/sources`,
   ].join('\n');
   const source = dim('source: https://github.com/lsalik2/lsalik.dev');
 
@@ -93,8 +95,18 @@ export function renderResume(content: string): string {
   return [header, '', content].join('\n');
 }
 
-export function renderLinks(links: { label: string; url: string }[]): string {
-  const header = bold('~/links');
+export function renderContact(links: { label: string; url: string }[]): string {
+  const header = bold('~/contact');
   const linkLines = links.map(link => `  ${link.label}  ${link.url}`);
   return [header, '', ...linkLines].join('\n');
+}
+
+export function renderAbout(content: string): string {
+  const header = bold('~/about');
+  return [header, '', content].join('\n');
+}
+
+export function renderSources(content: string): string {
+  const header = bold('~/sources');
+  return [header, '', content].join('\n');
 }

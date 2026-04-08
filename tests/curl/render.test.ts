@@ -5,9 +5,15 @@ import {
   renderBlogPost,
   renderProjectsIndex,
   renderResume,
-  renderLinks,
+  renderContact,
+  renderAbout,
+  renderSources,
 } from '../../src/curl/render';
 import type { BlogPostSummary, BlogPostFull, ProjectSummary } from '../../src/curl/render';
+
+function stripAnsi(s: string): string {
+  return s.replace(/\x1b\[\d+m/g, '');
+}
 
 describe('renderHome', () => {
   it('contains ANSI escape codes', () => {
@@ -15,14 +21,24 @@ describe('renderHome', () => {
     expect(result).toContain('\x1b[');
   });
 
-  it('contains navigation hints', () => {
-    const result = renderHome();
-    expect(result).toContain('curl lsalik.dev/blog');
-  });
-
   it('contains lsalik.dev title', () => {
     const result = renderHome();
     expect(result).toContain('lsalik.dev');
+  });
+
+  it('lists all 6 nav paths in the curl output', () => {
+    const out = stripAnsi(renderHome());
+    expect(out).toContain('curl lsalik.dev/about');
+    expect(out).toContain('curl lsalik.dev/projects');
+    expect(out).toContain('curl lsalik.dev/blog');
+    expect(out).toContain('curl lsalik.dev/resume');
+    expect(out).toContain('curl lsalik.dev/contact');
+    expect(out).toContain('curl lsalik.dev/sources');
+  });
+
+  it('does not still advertise the old /links path', () => {
+    const out = stripAnsi(renderHome());
+    expect(out).not.toContain('curl lsalik.dev/links');
   });
 });
 
@@ -134,15 +150,32 @@ describe('renderResume', () => {
   });
 });
 
-describe('renderLinks', () => {
-  it('shows ~/links header', () => {
-    const result = renderLinks([{ label: 'GitHub', url: 'https://github.com/lsalik2' }]);
-    expect(result).toContain('~/links');
+describe('renderContact', () => {
+  it('emits the ~/contact heading', () => {
+    const out = stripAnsi(renderContact([{ label: 'GitHub', url: 'https://github.com/lsalik2' }]));
+    expect(out).toContain('~/contact');
+    expect(out).toContain('https://github.com/lsalik2');
   });
 
   it('includes link labels and urls', () => {
-    const result = renderLinks([{ label: 'GitHub', url: 'https://github.com/lsalik2' }]);
+    const result = renderContact([{ label: 'GitHub', url: 'https://github.com/lsalik2' }]);
     expect(result).toContain('GitHub');
     expect(result).toContain('https://github.com/lsalik2');
+  });
+});
+
+describe('renderAbout', () => {
+  it('emits the ~/about heading and body text', () => {
+    const out = stripAnsi(renderAbout('hi there'));
+    expect(out).toContain('~/about');
+    expect(out).toContain('hi there');
+  });
+});
+
+describe('renderSources', () => {
+  it('emits the ~/sources heading and body text', () => {
+    const out = stripAnsi(renderSources('the body'));
+    expect(out).toContain('~/sources');
+    expect(out).toContain('the body');
   });
 });
