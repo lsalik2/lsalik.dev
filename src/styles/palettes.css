@@ -24,3 +24,42 @@
   --border: #332800;
   --cursor: #ffb000;
 }
+
+:root[data-palette="green-phosphor"] {
+  --bg: #000800;
+  --bg-surface: #001400;
+  --fg: #33ff66;
+  --fg-muted: #1a9933;
+  --accent: #66ff99;
+  --accent-bright: #99ffbb;
+  --green: #33ff66;
+  --amber: #ccff66;
+  --border: #003300;
+  --cursor: #66ff99;
+}
+
+:root[data-palette="synthwave"] {
+  --bg: #1a0933;
+  --bg-surface: #2b1155;
+  --fg: #f9f8ff;
+  --fg-muted: #9d7dbe;
+  --accent: #ff2a6d;
+  --accent-bright: #ff5b8c;
+  --green: #05d9e8;
+  --amber: #f7b32b;
+  --border: #5e3c8a;
+  --cursor: #ff2a6d;
+}
+
+:root[data-palette="paper"] {
+  --bg: #f7f3eb;
+  --bg-surface: #ece4d0;
+  --fg: #2b2a28;
+  --fg-muted: #6b6a66;
+  --accent: #1b5e9e;
+  --accent-bright: #134a7f;
+  --green: #2a6b36;
+  --amber: #8a5a00;
+  --border: #c9bfa9;
+  --cursor: #2b2a28;
+}
