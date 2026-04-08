@@ -2,8 +2,6 @@
 import { getCollection } from 'astro:content';
 import Page from '../../layouts/Page.astro';
 
-export const prerender = true;
-
 const projects = await getCollection('projects');
 projects.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---

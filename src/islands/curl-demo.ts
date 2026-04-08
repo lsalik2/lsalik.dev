@@ -58,24 +58,21 @@ async function runCurlDemo(container: HTMLElement): Promise<void> {
   cursor.remove();
 
   // Add line break after command
-  const br = document.createElement('br');
-  container.appendChild(br);
+  container.appendChild(document.createElement('br'));
 
-  // Stream response character by character
-  let partial = '';
-  for (const ch of response) {
-    partial += ch;
+  // Create a container for the response lines
+  const responseContainer = document.createElement('span');
+  container.appendChild(responseContainer);
 
-    // Rebuild: command span + br + partial response nodes
-    container.textContent = '';
-    const newCmdSpan = document.createElement('span');
-    newCmdSpan.className = 'ansi-green';
-    newCmdSpan.textContent = COMMAND;
-    container.appendChild(newCmdSpan);
-    container.appendChild(document.createElement('br'));
-    container.appendChild(ansiToNodes(partial));
-
-    await delay(randomBetween(5, 15));
+  // Stream response line by line
+  const lines = response.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const lineNodes = ansiToNodes(lines[i]);
+    responseContainer.appendChild(lineNodes);
+    if (i < lines.length - 1) {
+      responseContainer.appendChild(document.createElement('br'));
+    }
+    await delay(125);
   }
 }
 

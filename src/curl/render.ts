@@ -56,7 +56,8 @@ export function renderBlogIndex(posts: BlogPostSummary[]): string {
     const title = bold(post.title);
     const tags = dim(`[${post.tags.join(', ')}]`);
     const description = post.description;
-    return `${date}  ${title}  ${tags}\n  ${description}`;
+    const url = cyan(`curl lsalik.dev/blog/${post.slug}`);
+    return `${date}  ${title}  ${tags}\n  ${description}\n  ${url}`;
   });
 
   return [header, '', ...postLines].join('\n');
@@ -80,7 +81,8 @@ export function renderProjectsIndex(projects: ProjectSummary[]): string {
     const stack = dim(project.stack.join(' · '));
     const status = amber(project.status);
     const repoLink = `${cyan('→')} ${project.repo}`;
-    return `${perms}  ${owner}  ${date}  ${title}\n  ${project.description}\n  ${stack}  ${status}\n  ${repoLink}`;
+    const url = cyan(`curl lsalik.dev/projects/${project.slug}`);
+    return `${perms}  ${owner}  ${date}  ${title}\n  ${project.description}\n  ${stack}  ${status}\n  ${repoLink}\n  ${url}`;
   });
 
   return [header, '', ...projectLines].join('\n');

@@ -8,15 +8,15 @@ const { path } = Astro.props;
 const segments = path === '/' ? [] : path.split('/').filter(Boolean);
 
 const navLinks = [
-  { href: '/projects', label: 'ls projects/' },
-  { href: '/blog', label: 'cat blog/' },
-  { href: '/resume', label: 'cat resume' },
-  { href: '/links', label: 'cat links' },
+  { href: '/projects', label: 'projects' },
+  { href: '/blog', label: 'blog' },
+  { href: '/resume', label: 'resume' },
+  { href: '/links', label: 'links' },
 ];
 ---
 <nav class="nav">
   <div class="breadcrumb">
-    <span class="prompt-user">guest@lsalik</span><span class="prompt-sep">:</span><a href="/" class="prompt-path">~</a>{segments.map((seg, i) => {
+    <a href="/" class="prompt-user">lsalik@dev</a><span class="prompt-sep">:</span><span class="prompt-path">~</span>{segments.map((seg, i) => {
       const href = '/' + segments.slice(0, i + 1).join('/');
       return <><span class="prompt-sep">/</span><a href={href} class="prompt-path">{seg}</a></>;
     })}<span class="prompt-dollar">$</span><span class="cursor" aria-hidden="true"></span>
@@ -45,6 +45,11 @@ const navLinks = [
 
   .prompt-user {
     color: var(--green);
+    text-decoration: none;
+  }
+
+  .prompt-user:hover {
+    color: var(--accent-bright);
   }
 
   .prompt-sep {

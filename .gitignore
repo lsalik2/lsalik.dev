@@ -10,3 +10,6 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Agentic instructions
+CLAUDE.md

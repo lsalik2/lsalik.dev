@@ -3,17 +3,10 @@ import { getCollection, render } from 'astro:content';
 import Page from '../../layouts/Page.astro';
 import TerminalFrame from '../../components/TerminalFrame.astro';
 
-export const prerender = true;
-
-export async function getStaticPaths() {
-  const projects = await getCollection('projects');
-  return projects.map(project => ({
-    params: { slug: project.id },
-    props: { project },
-  }));
-}
-
-const { project } = Astro.props;
+const slug = Astro.params.slug;
+const projects = await getCollection('projects');
+const project = projects.find(p => p.id === slug);
+if (!project) return Astro.redirect('/projects');
 const { Content } = await render(project);
 const dateStr = project.data.date.toISOString().slice(0, 10);
 const stackStr = project.data.stack.join(' · ');

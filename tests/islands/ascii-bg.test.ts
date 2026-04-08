@@ -10,7 +10,7 @@ import {
 } from '../../src/islands/ascii-bg';
 
 describe('brightnessToChar', () => {
-  const RAMP = ' .`-_:,;^=+/|)\\!?0oOQ#%@';
+  const RAMP = ' -_:,;^+/|\\?0oOQ#%@';
 
   it('returns space for zero brightness', () => {
     expect(brightnessToChar(0)).toBe(' ');
@@ -84,9 +84,7 @@ describe('stepParticles', () => {
     const particles: Particle[] = [
       { x: 100, y: 100, vx: 0, vy: 0 },
     ];
-    const attractor1 = { x: 50, y: 50 };
-    const attractor2 = { x: 150, y: 150 };
-    stepParticles(particles, attractor1, attractor2, 200, 150);
+    stepParticles(particles, 1.0, 200, 150);
     expect(particles[0].x).not.toBe(100);
     expect(particles[0].y).not.toBe(100);
   });
@@ -95,7 +93,7 @@ describe('stepParticles', () => {
     const particles: Particle[] = [
       { x: -100, y: -100, vx: -5, vy: -5 },
     ];
-    stepParticles(particles, { x: 0, y: 0 }, { x: 200, y: 150 }, 200, 150);
+    stepParticles(particles, 1.0, 200, 150);
     expect(particles[0].x).toBeGreaterThan(-50);
     expect(particles[0].y).toBeGreaterThan(-50);
   });

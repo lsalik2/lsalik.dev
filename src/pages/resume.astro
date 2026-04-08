@@ -2,7 +2,6 @@
 import Page from '../layouts/Page.astro';
 import TerminalFrame from '../components/TerminalFrame.astro';
 import '../styles/print.css';
-export const prerender = true;
 
 const resumeModule = await import('../data/resume.md');
 const ResumeContent = resumeModule.default;

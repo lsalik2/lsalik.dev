@@ -18,4 +18,10 @@ describe('renderLogo', () => {
     const lines = result.split('\n');
     expect(lines.length).toBeGreaterThanOrEqual(6);
   });
+
+  it('uses half-block Unicode characters', () => {
+    const result = renderLogo();
+    expect(result).toContain('\u2584'); // lower half block ▄
+    expect(result).toContain('\u2580'); // upper half block ▀
+  });
 });

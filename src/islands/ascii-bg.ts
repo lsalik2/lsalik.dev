@@ -1,4 +1,4 @@
-// ASCII Animated Background — particle simulation + DOM rendering
+// ASCII Animated Background — flow-based particle simulation with colored layers
 
 export interface Particle {
   x: number;
@@ -17,10 +17,11 @@ export interface FieldStamp {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const RAMP = ' .`-_:,;^=+/|)\\!?0oOQ#%@';
-const ATTRACTOR_FORCE_1 = 0.22;
-const ATTRACTOR_FORCE_2 = 0.05;
-const FIELD_DECAY = 0.82;
+const RAMP = ' -_:,;^+/|\\?0oOQ#%@';
+const FLOW_VELOCITY_BASE = 0.5;
+const FLOW_TURBULENCE = 1.8;
+const FLOW_TIME_SCALE = 0.15;
+const FIELD_DECAY = 0.96;
 const FIELD_OVERSAMPLE = 2;
 
 // ─── Pure / Exported Functions ────────────────────────────────────────────────
@@ -90,35 +91,44 @@ export function splatStamp(
 
 export function stepParticles(
   particles: Particle[],
-  a1: { x: number; y: number },
-  a2: { x: number; y: number },
+  t: number,
   canvasW: number,
   canvasH: number,
 ): void {
-  for (const p of particles) {
-    const dx1 = a1.x - p.x;
-    const dy1 = a1.y - p.y;
-    const dist1 = Math.sqrt(dx1 * dx1 + dy1 * dy1) + 1;
-    const dx2 = a2.x - p.x;
-    const dy2 = a2.y - p.y;
-    const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2) + 1;
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
 
-    p.vx += (dx1 / dist1) * ATTRACTOR_FORCE_1 + (dx2 / dist2) * ATTRACTOR_FORCE_2;
-    p.vy += (dy1 / dist1) * ATTRACTOR_FORCE_1 + (dy2 / dist2) * ATTRACTOR_FORCE_2;
+    const baseVx = FLOW_VELOCITY_BASE;
+    const baseVy = FLOW_VELOCITY_BASE * 0.2;
 
-    // Dampen velocity
-    p.vx *= 0.98;
-    p.vy *= 0.98;
+    const turbX = Math.sin(t * FLOW_TIME_SCALE * 0.9 + p.y * 0.05 + i * 0.001) * Math.cos(t * FLOW_TIME_SCALE * 0.7 - p.x * 0.01) * FLOW_TURBULENCE;
+    const turbY = Math.cos(t * FLOW_TIME_SCALE * 1.1 - p.x * 0.03 - i * 0.002) * Math.sin(t * FLOW_TIME_SCALE * 0.8 + p.y * 0.005) * FLOW_TURBULENCE * 0.6;
+
+    p.vx += (baseVx + turbX - p.vx) * 0.05;
+    p.vy += (baseVy + turbY - p.vy) * 0.05;
+
+    p.vx *= 0.99;
+    p.vy *= 0.99;
 
     p.x += p.vx;
     p.y += p.vy;
 
-    // Wrap around
-    if (p.x < -canvasW * 0.25) p.x += canvasW * 1.5;
-    if (p.x > canvasW * 1.25) p.x -= canvasW * 1.5;
-    if (p.y < -canvasH * 0.25) p.y += canvasH * 1.5;
-    if (p.y > canvasH * 1.25) p.y -= canvasH * 1.5;
+    if (p.x < -10) p.x += canvasW + 20;
+    if (p.x > canvasW + 10) p.x -= canvasW + 20;
+    if (p.y < -10) p.y += canvasH + 20;
+    if (p.y > canvasH + 10) p.y -= canvasH + 20;
   }
+}
+
+// ─── Layer Configuration ─────────────────────────────────────────────────────
+
+interface LayerState {
+  particles: Particle[];
+  field: Float32Array;
+  stamp: FieldStamp;
+  timeOffset: number;
+  // Pre-allocated row divs for this layer
+  rowEls: HTMLDivElement[];
 }
 
 // ─── DOM / Animation Side ─────────────────────────────────────────────────────
@@ -129,21 +139,23 @@ function initBackground(): void {
 
   const FONT_SIZE = 14;
   const LINE_HEIGHT = 16;
-  const PARTICLE_COUNT = 120;
-  const PARTICLE_STAMP_RADIUS = 14;
-  const ATTRACTOR_LARGE_RADIUS = 30;
-  const ATTRACTOR_SMALL_RADIUS = 12;
+  const PARTICLES_PER_LAYER = 150;
+  const PARTICLE_STAMP_RADIUS = 12;
+
+  const LAYER_CONFIGS = [
+    { color: 'var(--fg-muted)', timeOffset: 0, velocityScale: 1.0 },
+    { color: 'var(--accent)', timeOffset: 3.7, velocityScale: 0.7 },
+    { color: 'var(--green)', timeOffset: 7.2, velocityScale: 1.3 },
+  ];
 
   let cols = 0;
   let rows = 0;
   let fieldCols = 0;
   let fieldRows = 0;
-  let field: Float32Array = new Float32Array(0);
-  let rowEls: HTMLDivElement[] = [];
-  let particles: Particle[] = [];
-  let particleStamp: FieldStamp;
-  let largeAttractorStamp: FieldStamp;
-  let smallAttractorStamp: FieldStamp;
+  let layers: LayerState[] = [];
+  // Pre-allocated char buffers per layer per row (reused every frame)
+  // layerChars[layerIndex][rowIndex] is a char array of length cols
+  let layerChars: string[][][] = [];
 
   function measure(): void {
     const charW = FONT_SIZE * 0.6;
@@ -153,84 +165,117 @@ function initBackground(): void {
     fieldRows = rows * FIELD_OVERSAMPLE;
   }
 
-  function buildRows(): void {
+  function buildDOM(): void {
     container.textContent = '';
-    rowEls = [];
-    for (let r = 0; r < rows; r++) {
-      const div = document.createElement('div');
-      div.style.whiteSpace = 'pre';
-      div.style.fontFamily = 'monospace';
-      div.style.color = 'var(--fg-muted)';
-      div.style.lineHeight = LINE_HEIGHT + 'px';
-      div.style.fontSize = FONT_SIZE + 'px';
-      container.appendChild(div);
-      rowEls.push(div);
+    const rowStyle = `white-space:pre;font-family:monospace;line-height:${LINE_HEIGHT}px;font-size:${FONT_SIZE}px;`;
+
+    for (const layer of layers) {
+      // Each layer is an absolutely-positioned div covering the full area
+      const layerDiv = document.createElement('div');
+      layerDiv.style.cssText = 'position:absolute;inset:0;';
+
+      layer.rowEls = [];
+      for (let r = 0; r < rows; r++) {
+        const div = document.createElement('div');
+        div.style.cssText = rowStyle + `color:${layer.rowEls.length};`;
+        layerDiv.appendChild(div);
+        layer.rowEls.push(div);
+      }
+      container.appendChild(layerDiv);
     }
+
+    // Apply layer colors after creation
+    for (let li = 0; li < layers.length; li++) {
+      const color = LAYER_CONFIGS[li].color;
+      const layerDiv = container.children[li] as HTMLDivElement;
+      layerDiv.style.color = color;
+      // Row divs inherit color from parent
+      for (const rowEl of layers[li].rowEls) {
+        rowEl.style.cssText = rowStyle;
+      }
+    }
+
+    // Allocate char buffers
+    layerChars = LAYER_CONFIGS.map(() =>
+      Array.from({ length: rows }, () => new Array(cols).fill(' '))
+    );
   }
 
   function init(): void {
     measure();
-    field = createBrightnessField(fieldCols, fieldRows);
 
     const scaleX = fieldCols / cols;
     const scaleY = fieldRows / rows;
-    particleStamp = createFieldStamp(PARTICLE_STAMP_RADIUS, scaleX, scaleY);
-    largeAttractorStamp = createFieldStamp(ATTRACTOR_LARGE_RADIUS, scaleX, scaleY);
-    smallAttractorStamp = createFieldStamp(ATTRACTOR_SMALL_RADIUS, scaleX, scaleY);
+    const stamp = createFieldStamp(PARTICLE_STAMP_RADIUS, scaleX, scaleY);
 
-    // Scatter particles around center
-    const cx = fieldCols / 2;
-    const cy = fieldRows / 2;
-    particles = Array.from({ length: PARTICLE_COUNT }, () => ({
-      x: cx + (Math.random() - 0.5) * fieldCols * 0.8,
-      y: cy + (Math.random() - 0.5) * fieldRows * 0.8,
-      vx: (Math.random() - 0.5) * 2,
-      vy: (Math.random() - 0.5) * 2,
+    layers = LAYER_CONFIGS.map(cfg => ({
+      particles: Array.from({ length: PARTICLES_PER_LAYER }, () => ({
+        x: Math.random() * fieldCols,
+        y: Math.random() * fieldRows,
+        vx: (Math.random() - 0.5) * FLOW_VELOCITY_BASE * 2 * cfg.velocityScale,
+        vy: (Math.random() - 0.5) * FLOW_VELOCITY_BASE * 2 * cfg.velocityScale,
+      })),
+      field: createBrightnessField(fieldCols, fieldRows),
+      stamp,
+      timeOffset: cfg.timeOffset,
+      rowEls: [],
     }));
 
-    buildRows();
+    buildDOM();
   }
 
   function frame(now: number): void {
     const t = now / 1000;
+    const numLayers = layers.length;
 
-    // Sinusoidal attractor orbits in field-space
-    const a1 = {
-      x: fieldCols * (0.5 + 0.3 * Math.cos(t * 0.31)),
-      y: fieldRows * (0.5 + 0.3 * Math.sin(t * 0.23)),
-    };
-    const a2 = {
-      x: fieldCols * (0.5 + 0.25 * Math.cos(t * 0.17 + 1.2)),
-      y: fieldRows * (0.5 + 0.25 * Math.sin(t * 0.13 + 2.4)),
-    };
+    // Step and splat each layer
+    for (const layer of layers) {
+      stepParticles(layer.particles, t + layer.timeOffset, fieldCols, fieldRows);
 
-    stepParticles(particles, a1, a2, fieldCols, fieldRows);
-
-    // Decay field
-    for (let i = 0; i < field.length; i++) {
-      field[i] *= FIELD_DECAY;
-    }
-
-    // Splat particles
-    for (const p of particles) {
-      splatStamp(field, fieldCols, fieldRows, p.x, p.y, particleStamp);
-    }
-
-    // Splat attractors
-    splatStamp(field, fieldCols, fieldRows, a1.x, a1.y, largeAttractorStamp);
-    splatStamp(field, fieldCols, fieldRows, a2.x, a2.y, smallAttractorStamp);
-
-    // Render rows — downsample field to col x row
-    for (let r = 0; r < rows; r++) {
-      let line = '';
-      for (let c = 0; c < cols; c++) {
-        // Sample from oversampled field
-        const fx = Math.floor(c * FIELD_OVERSAMPLE);
-        const fy = Math.floor(r * FIELD_OVERSAMPLE);
-        const brightness = field[fy * fieldCols + fx];
-        line += brightnessToChar(brightness);
+      const f = layer.field;
+      for (let i = 0; i < f.length; i++) {
+        f[i] *= FIELD_DECAY;
       }
-      rowEls[r].textContent = line;
+
+      for (const p of layer.particles) {
+        splatStamp(f, fieldCols, fieldRows, p.x, p.y, layer.stamp);
+      }
+    }
+
+    // Render: for each cell, find the brightest layer.
+    // Fill pre-allocated char arrays, then join for textContent.
+    for (let r = 0; r < rows; r++) {
+      const fy = Math.floor(r * FIELD_OVERSAMPLE);
+      const fyOffset = fy * fieldCols;
+
+      for (let c = 0; c < cols; c++) {
+        const fx = Math.floor(c * FIELD_OVERSAMPLE);
+        const idx = fyOffset + fx;
+
+        let maxB = 0;
+        let maxL = 0;
+        for (let li = 0; li < numLayers; li++) {
+          const b = layers[li].field[idx];
+          if (b > maxB) {
+            maxB = b;
+            maxL = li;
+          }
+        }
+
+        const ch = brightnessToChar(maxB);
+
+        for (let li = 0; li < numLayers; li++) {
+          layerChars[li][r][c] = (li === maxL) ? ch : ' ';
+        }
+      }
+    }
+
+    // Apply to DOM — textContent only, zero DOM allocation
+    for (let li = 0; li < numLayers; li++) {
+      const els = layers[li].rowEls;
+      for (let r = 0; r < rows; r++) {
+        els[r].textContent = layerChars[li][r].join('');
+      }
     }
 
     requestAnimationFrame(frame);
@@ -246,8 +291,10 @@ function initBackground(): void {
 
   window.addEventListener('resize', () => {
     measure();
-    field = createBrightnessField(fieldCols, fieldRows);
-    buildRows();
+    for (const layer of layers) {
+      layer.field = createBrightnessField(fieldCols, fieldRows);
+    }
+    buildDOM();
   });
 
   start();

@@ -1,6 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { getCollection } from 'astro:content';
-import { renderHome, renderBlogIndex, renderBlogPost, renderProjectsIndex } from './curl/render';
+import { renderHome, renderBlogIndex, renderBlogPost, renderProjectsIndex, renderResume, renderLinks } from './curl/render';
+import { bold, dim } from './curl/ansi';
 
 const TERMINAL_AGENTS = ['curl/', 'wget/', 'httpie/', 'fetch/', 'libfetch/'];
 
@@ -11,7 +12,7 @@ function isTerminalClient(userAgent: string | null): boolean {
 }
 
 function textResponse(body: string): Response {
-  return new Response(body, {
+  return new Response(body.trimEnd() + '\n\n', {
     status: 200,
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
@@ -80,6 +81,29 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         url: project.data.url,
       }));
     return textResponse(renderProjectsIndex(projects));
+  }
+
+  const projectMatch = pathname.match(/^\/projects\/([^/]+)\/?$/);
+  if (projectMatch) {
+    const slug = projectMatch[1];
+    const entries = await getCollection('projects');
+    const entry = entries.find(p => p.id === slug);
+    if (entry) {
+      const content = (entry as any).body ?? entry.data.description;
+      return textResponse(
+        `${bold(entry.data.title)}\n${dim(entry.data.status)} · ${entry.data.stack.join(' · ')}\n\n${content}`
+      );
+    }
+  }
+
+  if (pathname === '/resume' || pathname === '/resume/') {
+    return textResponse(renderResume('Visit lsalik.dev/resume for full resume content.'));
+  }
+
+  if (pathname === '/links' || pathname === '/links/') {
+    return textResponse(renderLinks([
+      { label: 'GitHub', url: 'https://github.com/lsalik2' },
+    ]));
   }
 
   return next();
