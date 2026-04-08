@@ -5,6 +5,8 @@ import Page from '../layouts/Page.astro';
   <section class="hero">
     <h1 class="hero-title">lsalik.dev</h1>
     <p class="hero-desc">A terminal-inspired personal website.</p>
+    <p class="hero-line"><span class="hero-prompt">$</span> whoami — a corner of the internet for my notes, projects, and writing.</p>
+    <p class="hero-line"><span class="hero-prompt">$</span> tip — you can also <code>curl lsalik.dev</code> from any terminal and read the site in plaintext.</p>
   </section>
 
   <section class="curl-demo">
@@ -32,6 +34,24 @@ import Page from '../layouts/Page.astro';
   .hero-desc {
     color: var(--fg-muted);
     margin: 0;
+  }
+
+  .hero-line {
+    color: var(--fg-muted);
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+  }
+
+  .hero-prompt {
+    color: var(--green);
+    margin-right: 0.25rem;
+  }
+
+  .hero-line code {
+    font-family: inherit;
+    color: var(--accent);
+    background: none;
+    padding: 0;
   }
 
   .curl-demo {
