@@ -40,7 +40,8 @@ async function runCurlDemo(container: HTMLElement): Promise<void> {
   // Remove cursor
   cursor.remove();
 
-  // Add line break after command
+  // Add line breaks after command (blank line before response)
+  container.appendChild(document.createElement('br'));
   container.appendChild(document.createElement('br'));
 
   // Create a container for the response lines
