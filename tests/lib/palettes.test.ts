@@ -8,7 +8,7 @@ describe('PALETTES', () => {
       'amber-crt',
       'green-phosphor',
       'synthwave',
-      'paper',
+      'mocha',
     ]);
   });
 
@@ -32,7 +32,7 @@ describe('nextPalette', () => {
     expect(nextPalette('dark-terminal')).toBe('amber-crt');
     expect(nextPalette('amber-crt')).toBe('green-phosphor');
     expect(nextPalette('green-phosphor')).toBe('synthwave');
-    expect(nextPalette('synthwave')).toBe('paper');
-    expect(nextPalette('paper')).toBe('dark-terminal');
+    expect(nextPalette('synthwave')).toBe('mocha');
+    expect(nextPalette('mocha')).toBe('dark-terminal');
   });
 });

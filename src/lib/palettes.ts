@@ -3,7 +3,7 @@ export const PALETTES = [
   'amber-crt',
   'green-phosphor',
   'synthwave',
-  'paper',
+  'mocha',
 ] as const;
 export type PaletteName = typeof PALETTES[number];
 
@@ -17,5 +17,5 @@ export const PALETTE_LABELS: Record<PaletteName, string> = {
   'amber-crt': 'Amber CRT',
   'green-phosphor': 'Green Phosphor',
   'synthwave': 'Synthwave',
-  'paper': 'Paper',
+  'mocha': 'mocha',
 };
