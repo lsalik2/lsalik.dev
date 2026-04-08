@@ -1,22 +1,5 @@
-import { renderLogo } from '../curl/logo';
 import { ansiToNodes } from '../lib/ansi-to-dom';
-import { bold, dim } from '../curl/ansi';
-
-function buildResponse(): string {
-  const logo = renderLogo();
-  const title = bold('lsalik.dev');
-  const description = dim('terminal-inspired personal website');
-  const nav = [
-    dim('navigate:'),
-    `  curl lsalik.dev/blog`,
-    `  curl lsalik.dev/projects`,
-    `  curl lsalik.dev/resume`,
-    `  curl lsalik.dev/links`,
-  ].join('\n');
-  const source = dim('source: https://github.com/lsalik2/lsalik.dev');
-
-  return [logo, '', title, description, '', nav, '', source].join('\n');
-}
+import { renderHome } from '../curl/render';
 
 function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -28,7 +11,7 @@ function randomBetween(min: number, max: number): number {
 
 async function runCurlDemo(container: HTMLElement): Promise<void> {
   const COMMAND = '$ curl lsalik.dev';
-  const response = buildResponse();
+  const response = renderHome();
 
   // Wait 800ms before starting
   await delay(800);

@@ -26,6 +26,20 @@ describe('renderHome', () => {
     expect(result).toContain('lsalik.dev');
   });
 
+  // Drift guard: the homepage curl-demo island must stream the exact
+  // same bytes a real `curl lsalik.dev` terminal client receives.
+  // If these ever diverge, the dual-rendering contract is broken.
+  it('is the single source of truth for the homepage curl demo', async () => {
+    const demoSource = await import('node:fs').then(fs =>
+      fs.readFileSync('src/islands/curl-demo.ts', 'utf8'),
+    );
+    expect(demoSource).toContain("import { renderHome } from '../curl/render'");
+    expect(demoSource).toContain('renderHome()');
+    // No private nav list allowed in the island.
+    expect(demoSource).not.toContain("curl lsalik.dev/blog'");
+    expect(demoSource).not.toContain("curl lsalik.dev/links");
+  });
+
   it('lists all 6 nav paths in the curl output', () => {
     const out = stripAnsi(renderHome());
     expect(out).toContain('curl lsalik.dev/about');
