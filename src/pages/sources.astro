@@ -1,0 +1,50 @@
+---
+import Page from '../layouts/Page.astro';
+import PageHeader from '../components/PageHeader.astro';
+
+const sourcesModule = await import('../data/sources.md');
+const SourcesContent = sourcesModule.default;
+---
+<Page title="Sources" path="/sources">
+  <PageHeader heading="~/sources" description="cat ~/sources — sites that inspired this one, plus the site's own source." />
+  <div class="sources-content">
+    <SourcesContent />
+  </div>
+</Page>
+
+<style>
+  .sources-content :global(h1) {
+    color: var(--accent);
+    font-size: 1.1rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .sources-content :global(h2) {
+    color: var(--accent);
+    font-size: 0.95rem;
+    margin: 1.25rem 0 0.4rem;
+  }
+
+  .sources-content :global(h2)::before {
+    content: '## ';
+  }
+
+  .sources-content :global(p) {
+    margin: 0 0 0.6rem;
+  }
+
+  .sources-content :global(ul) {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.6rem;
+  }
+
+  .sources-content :global(ul li)::before {
+    content: '- ';
+    color: var(--fg-muted);
+  }
+
+  .sources-content :global(a) {
+    color: var(--accent);
+  }
+</style>
