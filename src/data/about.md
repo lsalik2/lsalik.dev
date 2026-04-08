@@ -1,4 +1,4 @@
-# whoami
+# about me
 
 Hi, my name is Luis Salik. I'm a software engineer specializing in machine learning, web development and data analysis. Welcome to my personal website.
 
