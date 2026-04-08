@@ -2,12 +2,13 @@
 import { getCollection } from 'astro:content';
 import Page from '../../layouts/Page.astro';
 import BlogCard from '../../components/BlogCard.astro';
+import PageHeader from '../../components/PageHeader.astro';
 
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 <Page title="Blog" path="/blog">
-  <h1 class="page-heading">~/blog</h1>
+  <PageHeader heading="~/blog" description="cd ~/blog — essays, notes, and the occasional rant." />
   {posts.map(post => (
     <BlogCard
       title={post.data.title}
@@ -20,9 +21,4 @@ posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 </Page>
 
 <style>
-  .page-heading {
-    color: var(--accent);
-    margin: 0 0 1.5rem;
-    font-size: 1.2rem;
-  }
 </style>

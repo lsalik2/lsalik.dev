@@ -1,12 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
 import Page from '../../layouts/Page.astro';
+import PageHeader from '../../components/PageHeader.astro';
 
 const projects = await getCollection('projects');
 projects.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 <Page title="Projects" path="/projects">
-  <h1 class="page-heading">~/projects</h1>
+  <PageHeader heading="~/projects" description="ls -la ~/projects — things I've built, public and otherwise." />
   <div class="ls-listing">
     {projects.map(project => {
       const dateStr = project.data.date.toISOString().slice(0, 10);
@@ -34,12 +35,6 @@ projects.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 </Page>
 
 <style>
-  .page-heading {
-    color: var(--accent);
-    margin: 0 0 1.5rem;
-    font-size: 1.2rem;
-  }
-
   .ls-listing {
     display: flex;
     flex-direction: column;

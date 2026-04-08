@@ -1,5 +1,6 @@
 ---
 import Page from '../layouts/Page.astro';
+import PageHeader from '../components/PageHeader.astro';
 import TerminalFrame from '../components/TerminalFrame.astro';
 import '../styles/print.css';
 
@@ -7,6 +8,7 @@ const resumeModule = await import('../data/resume.md');
 const ResumeContent = resumeModule.default;
 ---
 <Page title="Resume" path="/resume">
+  <PageHeader heading="~/resume" description="less ~/resume — CV. download the PDF if you need a paper copy." />
   <TerminalFrame title="cat ~/resume.md">
     <div class="resume-content">
       <ResumeContent />
