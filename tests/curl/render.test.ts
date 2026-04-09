@@ -7,6 +7,7 @@ import {
   renderResume,
   renderContact,
   renderAbout,
+  renderProjectPost,
   type ContactSection,
 } from '../../src/curl/render';
 import type { BlogPostSummary, BlogPostFull, ProjectSummary } from '../../src/curl/render';
@@ -200,6 +201,36 @@ describe('renderAbout', () => {
     const out = stripAnsi(renderAbout('hi there'));
     expect(out).toContain('~/about');
     expect(out).toContain('hi there');
+  });
+});
+
+describe('renderProjectPost', () => {
+  const project = {
+    title: 'My Project',
+    status: 'Alpha',
+    stack: ['Astro', 'TypeScript'],
+    content: 'Project README body.',
+  };
+
+  it('includes the project title', () => {
+    const out = stripAnsi(renderProjectPost(project));
+    expect(out).toContain('My Project');
+  });
+
+  it('includes the status', () => {
+    const out = stripAnsi(renderProjectPost(project));
+    expect(out).toContain('Alpha');
+  });
+
+  it('includes every stack entry', () => {
+    const out = stripAnsi(renderProjectPost(project));
+    expect(out).toContain('Astro');
+    expect(out).toContain('TypeScript');
+  });
+
+  it('includes the body content', () => {
+    const out = stripAnsi(renderProjectPost(project));
+    expect(out).toContain('Project README body.');
   });
 });
 

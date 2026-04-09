@@ -9,9 +9,9 @@ import {
   renderResume,
   renderContact,
   renderAbout,
+  renderProjectPost,
 } from './curl/render';
 import { CONTACT_SECTIONS } from './data/contact';
-import { bold, dim } from './curl/ansi';
 
 // Raw markdown bodies for the about and sources pages. Vite's ?raw query
 // gives us the file's text content directly, which is what the curl renderers
@@ -92,13 +92,13 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const slug = blogMatch[1];
     const entries = await getCollection('blog');
     const entry = entries.find(post => post.id === slug);
-    if (!entry) return isTerminalClient(ua) ? notFoundResponse(pathname) : next();
+    if (!entry) return notFoundResponse(pathname);
     return textResponse(
       renderBlogPost({
         title: entry.data.title,
         date: entry.data.date.toISOString().slice(0, 10),
         tags: entry.data.tags,
-        content: (entry as any).body ?? entry.data.description,
+        content: entry.body ?? entry.data.description,
       })
     );
   }
@@ -126,13 +126,16 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const slug = projectMatch[1];
     const entries = await getCollection('projects');
     const entry = entries.find(p => p.id === slug);
-    if (entry) {
-      const content = (entry as any).body ?? entry.data.description;
-      return textResponse(
-        `${bold(entry.data.title)}\n${dim(entry.data.status)} · ${entry.data.stack.join(' · ')}\n\n${content}`
-      );
-    }
-    return isTerminalClient(ua) ? notFoundResponse(pathname) : next();
+    if (!entry) return notFoundResponse(pathname);
+    const content = entry.body ?? entry.data.description;
+    return textResponse(
+      renderProjectPost({
+        title: entry.data.title,
+        status: entry.data.status,
+        stack: entry.data.stack,
+        content,
+      })
+    );
   }
 
   if (pathname === '/resume' || pathname === '/resume/') {
@@ -147,9 +150,5 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     return textResponse(renderAbout(aboutRaw));
   }
 
-  if (isTerminalClient(ua)) {
-    return notFoundResponse(pathname);
-  }
-
-  return next();
+  return notFoundResponse(pathname);
 });

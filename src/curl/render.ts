@@ -19,6 +19,13 @@ export interface BlogPostFull {
   content: string;
 }
 
+export interface ProjectPostFull {
+  title: string;
+  status: string;
+  stack: string[];
+  content: string;
+}
+
 export interface ProjectSummary {
   slug: string;
   title: string;
@@ -66,6 +73,15 @@ export function renderBlogPost(post: BlogPostFull): string {
   const meta = dim(`${post.date} · ${post.tags.join(', ')}`);
 
   return [title, meta, '', post.content].join('\n');
+}
+
+// Unlike renderBlogPost, the project title is not prefixed with `# ` — that
+// matches the shape of the prior inline project-post output in middleware.ts,
+// and keeps project READMEs visually distinct from blog posts in the terminal.
+export function renderProjectPost(project: ProjectPostFull): string {
+  const title = bold(project.title);
+  const meta = `${dim(project.status)} · ${project.stack.join(' · ')}`;
+  return [title, meta, '', project.content].join('\n');
 }
 
 export function renderProjectsIndex(projects: ProjectSummary[]): string {
