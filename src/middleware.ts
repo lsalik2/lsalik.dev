@@ -146,17 +146,19 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         heading: 'professional',
         links: [
           { label: 'GitHub', url: 'https://github.com/lsalik2' },
-          { label: 'Discord', url: 'https://discord.gg/dsUfTqmE4d' },
+          { label: 'LinkedIn', url: 'https://linkedin.com/in/luis-salik' },
+          { label: 'Discord User Link', url: 'https://discord.gg/6zdHqY7h' },
         ],
       },
       {
         heading: 'esports',
         links: [
-          { label: 'Twitch', url: 'https://twitch.tv/PLACEHOLDER' },
-          { label: 'Liquipedia', url: 'https://liquipedia.net/PLACEHOLDER' },
-          { label: 'X', url: 'https://x.com/PLACEHOLDER' },
-          { label: 'Steam', url: 'https://steamcommunity.com/id/PLACEHOLDER' },
-          { label: 'YouTube', url: 'https://youtube.com/@PLACEHOLDER' },
+          { label: 'Liquipedia', url: 'https://liquipedia.net/rocketleague/SLK' },
+          { label: 'X', url: 'https://x.com/slkrl_' },
+          { label: 'Twitch', url: 'https://twitch.tv/slkrl' },
+          { label: 'YouTube', url: 'https://youtube.com/@slk-rl' },
+          { label: 'Steam', url: 'https://steamcommunity.com/id/SlkRL' },
+          { label: 'Discord Server', url: 'https://discord.gg/dsUfTqmE4d' },
         ],
       },
     ];
