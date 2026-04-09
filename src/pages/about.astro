@@ -1,42 +1,14 @@
 ---
 import Page from '../layouts/Page.astro';
 import PageHeader from '../components/PageHeader.astro';
+import '../styles/prose.css';
 
 const aboutModule = await import('../data/about.md');
 const AboutContent = aboutModule.default;
 ---
 <Page title="About" path="/about">
   <PageHeader heading="~/about" description="cat about.md — who I am, what I build, what I'm into." />
-  <div class="about-content">
+  <div class="prose">
     <AboutContent />
   </div>
 </Page>
-
-<style>
-  .about-content :global(h1) {
-    color: var(--accent);
-    font-size: 1.1rem;
-    margin: 0 0 0.75rem;
-  }
-
-  .about-content :global(h2) {
-    color: var(--accent);
-    font-size: 0.95rem;
-    margin: 1.25rem 0 0.4rem;
-  }
-
-  .about-content :global(p) {
-    margin: 0 0 0.6rem;
-  }
-
-  .about-content :global(ul) {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 0.6rem;
-  }
-
-  .about-content :global(ul li)::before {
-    content: '- ';
-    color: var(--fg-muted);
-  }
-</style>
