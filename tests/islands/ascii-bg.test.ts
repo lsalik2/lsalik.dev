@@ -4,6 +4,8 @@ import {
   charForBrightness,
   renderLayers,
   RAMP,
+  LAYER_PHASES,
+  LAYER_COLORS,
 } from '../../src/islands/ascii-bg';
 
 describe('sample', () => {
@@ -71,5 +73,15 @@ describe('renderLayers', () => {
     const a = renderLayers(10, 4, 1.0, [0, 3.7, 7.2]);
     const b = renderLayers(10, 4, 2.0, [0, 3.7, 7.2]);
     expect(a.layers).not.toEqual(b.layers);
+  });
+});
+
+describe('layer constants', () => {
+  it('LAYER_PHASES and LAYER_COLORS have the same length', () => {
+    expect(LAYER_PHASES.length).toBe(LAYER_COLORS.length);
+  });
+
+  it('has at least one layer', () => {
+    expect(LAYER_PHASES.length).toBeGreaterThan(0);
   });
 });
