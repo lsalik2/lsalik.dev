@@ -1,0 +1,71 @@
+---
+import Page from '../layouts/Page.astro';
+import PageHeader from '../components/PageHeader.astro';
+
+const requestedPath = Astro.url.pathname.replace(/^\//, '') || '/';
+---
+<Page title="404" path="/404">
+  <PageHeader heading="404: not found" description="the path you requested doesn't exist." />
+  <div class="not-found">
+    <p class="error-line"><span class="prompt">$</span> ls <span class="path">{requestedPath}</span></p>
+    <p class="error-msg">ls: cannot access '{requestedPath}': No such file or directory</p>
+    <p class="nav-hint">navigate to:</p>
+    <ul class="nav-list">
+      <li><a href="/">~/</a></li>
+      <li><a href="/about">~/about</a></li>
+      <li><a href="/projects">~/projects</a></li>
+      <li><a href="/blog">~/blog</a></li>
+      <li><a href="/resume">~/resume</a></li>
+      <li><a href="/contact">~/contact</a></li>
+    </ul>
+  </div>
+</Page>
+
+<style>
+  .not-found {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+  }
+
+  .error-line {
+    color: var(--fg-muted);
+  }
+
+  .prompt {
+    color: var(--green);
+    margin-right: 0.4rem;
+  }
+
+  .path {
+    color: var(--accent);
+  }
+
+  .error-msg {
+    color: var(--ansi-red, #e06c75);
+    margin-bottom: 0.75rem;
+  }
+
+  .nav-hint {
+    color: var(--fg-muted);
+    font-size: 0.9rem;
+  }
+
+  .nav-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .nav-list li::before {
+    content: '  → ';
+    color: var(--green);
+  }
+
+  .nav-list a {
+    color: var(--accent);
+  }
+</style>

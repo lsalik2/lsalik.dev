@@ -13,6 +13,35 @@ async function runCurlDemo(container: HTMLElement): Promise<void> {
   const COMMAND = '$ curl lsalik.dev';
   const response = renderHome();
 
+  // Pre-measure the full content to set the container height before animation starts.
+  // This prevents the block from expanding as content streams in. We only GROW the
+  // min-height beyond the CSS baseline — never shrink — so wide viewports stay at
+  // the CSS default (no flash) while narrow viewports where content wraps get
+  // bumped up to fit.
+  const body = container.closest('.curl-demo-body') as HTMLElement | null;
+  if (body) {
+    const ghost = document.createElement('pre');
+    ghost.setAttribute('aria-hidden', 'true');
+    ghost.style.cssText =
+      'position:absolute;visibility:hidden;pointer-events:none;' +
+      'font:inherit;line-height:1;letter-spacing:0;white-space:pre-wrap;margin:0;' +
+      `width:${container.offsetWidth}px`;
+    ghost.textContent =
+      COMMAND + '\n\n' + response.replace(/\x1b\[\d+m/g, '');
+    document.body.appendChild(ghost);
+    const measured = ghost.offsetHeight;
+    document.body.removeChild(ghost);
+
+    const bodyStyle = getComputedStyle(body);
+    const paddingY =
+      parseFloat(bodyStyle.paddingTop) + parseFloat(bodyStyle.paddingBottom);
+    const baseline = parseFloat(bodyStyle.minHeight) || 0;
+    const needed = measured + paddingY;
+    if (needed > baseline) {
+      body.style.minHeight = needed + 'px';
+    }
+  }
+
   // Wait 800ms before starting
   await delay(800);
 

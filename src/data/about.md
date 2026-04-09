@@ -1,8 +1,10 @@
 # about me
 
-Hi, my name is Luis Salik (known online as SLK). I'm an aerospace and software engineer specializing in machine learning, web development and data analysis. You can find more about my educational and professional background in the ~/resume section.
+hi! my name is luis salik. i'm an aerospace and software engineer specializing in machine learning, control systems and manufacturing processes.
 
-I like to build things; mostly software, mostly in the open. A lot of it never sees the daylight, but if it shows up on this site, it's because it was worth publishing.
+i like to build things; mostly software, mostly in the open. a lot of it never sees the daylight, but if it's on this site, it's probably because it was worth publishing.
+
+if you're looking for my professional and educational background, please look at the dedicated `~/resume` section.
 
 ## interests
 
@@ -15,4 +17,4 @@ I like to build things; mostly software, mostly in the open. A lot of it never s
 
 ## elsewhere
 
-See `~/contact` for my socials and ways to reach me.
+see `~/contact` for my socials and ways to reach me.
