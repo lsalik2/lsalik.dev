@@ -1,8 +1,8 @@
 # lsalik.dev
 
-Personal portfolio and blog for Luis Salik (SLK). Built with Astro and deployed on Vercel.
+My personal portfolio website, with some decent blog functionality. Built with Astro and deployed on Vercel.
 
-The site has two rendering modes baked in: a styled browser UI and a plain-text terminal view. Visiting any route with `curl`, `wget`, or `httpie` returns ANSI-formatted plain text instead of HTML — the same content, different skin.
+The site has two rendering modes baked in: a styled browser UI and a plain-text terminal view. Visiting any route with `curl`, `wget`, or `httpie` returns ANSI-formatted plain text instead of HTML. Still the same content, just a different skin.
 
 ```
 curl lsalik.dev
@@ -10,12 +10,12 @@ curl lsalik.dev
 
 ## Tech stack
 
-- **[Astro 6](https://astro.build)** — SSR with `output: 'server'`
-- **TypeScript** — all islands and utilities
-- **[Vercel](https://vercel.com)** — hosting + edge middleware via `@astrojs/vercel`
-- **[Vitest](https://vitest.dev)** — unit/integration tests
+- **[Astro 6](https://astro.build)**: SSR with `output: 'server'`
+- **TypeScript**: all islands and utilities
+- **[Vercel](https://vercel.com)**: hosting + edge middleware via `@astrojs/vercel`
+- **[Vitest](https://vitest.dev)**: unit/integration tests
 
-No UI framework. No CSS preprocessor. No external component library.
+No UI framework, CSS preprocessor or external component library.
 
 ## Project structure
 
@@ -41,7 +41,7 @@ tests/            # Vitest test suite
 
 `src/middleware.ts` checks the `User-Agent` header on every request. Clients matching `curl/`, `wget/`, `httpie/`, `fetch/`, or `libfetch/` receive a `text/plain` response built by `src/curl/render.ts` using ANSI helpers from `src/curl/ansi.ts`. All other clients pass through to the normal Astro SSR pipeline.
 
-The homepage also ships a browser-side curl demo (`src/islands/curl-demo.ts`) that replays the terminal output inline, converting ANSI escape codes to DOM nodes via `src/lib/ansi-to-dom.ts` — no `innerHTML`, no sanitizer needed.
+The homepage also ships a browser-side curl demo (`src/islands/curl-demo.ts`) that replays the terminal output inline, converting ANSI escape codes to DOM nodes via `src/lib/ansi-to-dom.ts`. No `innerHTML` and no sanitizer needed.
 
 ## Content collections
 
@@ -49,7 +49,7 @@ Blog posts live in `src/content/blog/` and project entries in `src/content/proje
 
 **Blog:** `title`, `date`, `tags`, `description`, `draft` (default `false`)
 
-**Projects:** `title`, `date`, `stack`, `status`, `description`, `permissions` (default `drwxr-xr-x`), `url` (optional), `repo` (optional — omit for closed-source projects)
+**Projects:** `title`, `date`, `stack`, `status`, `description`, `permissions` (default `drwxr-xr-x`), `url` (optional), `repo` (optional)
 
 ## Getting started
 
@@ -76,3 +76,9 @@ Deploys automatically via Vercel on push to `main`. The Vercel adapter runs the 
 ## Copying / reuse
 
 Feel free to fork and adapt this for your own site. Attribution is appreciated but not required.
+
+## References
+
+**ysap.sh**: inspired the overall terminal vibe of the website, as well as the dual curl functionality and logo that shows up when curling the home page.
+
+**pretext library demos**: specifically the variable typographic ASCII demo, inspired the ASCII art background animation of the website.
