@@ -8,7 +8,7 @@ import {
   renderResume,
   renderContact,
   renderAbout,
-  renderSources,
+  type ContactSection,
 } from './curl/render';
 import { bold, dim } from './curl/ansi';
 
@@ -16,7 +16,6 @@ import { bold, dim } from './curl/ansi';
 // gives us the file's text content directly, which is what the curl renderers
 // want (no Astro markdown component rendering for the terminal output).
 import aboutRaw from './data/about.md?raw';
-import sourcesRaw from './data/sources.md?raw';
 
 const TERMINAL_AGENTS = ['curl/', 'wget/', 'httpie/', 'fetch/', 'libfetch/'];
 
@@ -33,6 +32,24 @@ function textResponse(body: string): Response {
       'Content-Type': 'text/plain; charset=utf-8',
       'Cache-Control': 'public, max-age=3600',
     },
+  });
+}
+
+function notFoundResponse(pathname: string): Response {
+  const body = [
+    `404: ${pathname} — not found`,
+    '',
+    'navigate:',
+    '  curl lsalik.dev',
+    '  curl lsalik.dev/about',
+    '  curl lsalik.dev/projects',
+    '  curl lsalik.dev/blog',
+    '  curl lsalik.dev/resume',
+    '  curl lsalik.dev/contact',
+  ].join('\n');
+  return new Response('\n' + body + '\n\n', {
+    status: 404,
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   });
 }
 
@@ -76,7 +93,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const slug = blogMatch[1];
     const entries = await getCollection('blog');
     const entry = entries.find(post => post.id === slug);
-    if (!entry) return next();
+    if (!entry) return isTerminalClient(ua) ? notFoundResponse(pathname) : next();
     return textResponse(
       renderBlogPost({
         title: entry.data.title,
@@ -116,6 +133,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         `${bold(entry.data.title)}\n${dim(entry.data.status)} · ${entry.data.stack.join(' · ')}\n\n${content}`
       );
     }
+    return isTerminalClient(ua) ? notFoundResponse(pathname) : next();
   }
 
   if (pathname === '/resume' || pathname === '/resume/') {
@@ -123,17 +141,34 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
   }
 
   if (pathname === '/contact' || pathname === '/contact/') {
-    return textResponse(renderContact([
-      { label: 'GitHub', url: 'https://github.com/lsalik2' },
-    ]));
+    const sections: ContactSection[] = [
+      {
+        heading: 'professional',
+        links: [
+          { label: 'GitHub', url: 'https://github.com/lsalik2' },
+          { label: 'Discord', url: 'https://discord.gg/dsUfTqmE4d' },
+        ],
+      },
+      {
+        heading: 'esports',
+        links: [
+          { label: 'Twitch', url: 'https://twitch.tv/PLACEHOLDER' },
+          { label: 'Liquipedia', url: 'https://liquipedia.net/PLACEHOLDER' },
+          { label: 'X', url: 'https://x.com/PLACEHOLDER' },
+          { label: 'Steam', url: 'https://steamcommunity.com/id/PLACEHOLDER' },
+          { label: 'YouTube', url: 'https://youtube.com/@PLACEHOLDER' },
+        ],
+      },
+    ];
+    return textResponse(renderContact(sections));
   }
 
   if (pathname === '/about' || pathname === '/about/') {
     return textResponse(renderAbout(aboutRaw));
   }
 
-  if (pathname === '/sources' || pathname === '/sources/') {
-    return textResponse(renderSources(sourcesRaw));
+  if (isTerminalClient(ua)) {
+    return notFoundResponse(pathname);
   }
 
   return next();

@@ -2,30 +2,67 @@
 import Page from '../layouts/Page.astro';
 import PageHeader from '../components/PageHeader.astro';
 
-const links = [
+const professionalLinks = [
   { label: 'GitHub', url: 'https://github.com/lsalik2' },
   { label: 'Discord', url: 'https://discord.gg/dsUfTqmE4d' },
+];
+
+const esportsLinks = [
+  { label: 'Twitch', url: 'https://twitch.tv/PLACEHOLDER' },
+  { label: 'Liquipedia', url: 'https://liquipedia.net/PLACEHOLDER' },
+  { label: 'X', url: 'https://x.com/PLACEHOLDER' },
+  { label: 'Steam', url: 'https://steamcommunity.com/id/PLACEHOLDER' },
+  { label: 'YouTube', url: 'https://youtube.com/@PLACEHOLDER' },
 ];
 ---
 <Page title="Contact" path="/contact">
   <PageHeader heading="~/contact" description="cat ~/contact — how to reach me, socials included." />
-  <div class="links-list">
-    {links.map(link => (
-      <a href={link.url} class="link-entry" target="_blank" rel="noopener noreferrer">
-        <span class="link-arrow">→</span>
-        <span class="link-url">{link.url.replace('https://', '')}</span>
-        <span class="link-label">{link.label}</span>
-      </a>
-    ))}
-  </div>
+
+  <section class="link-section">
+    <h2 class="section-heading">professional</h2>
+    <div class="links-list">
+      {professionalLinks.map(link => (
+        <a href={link.url} class="link-entry" target="_blank" rel="noopener noreferrer">
+          <span class="link-arrow">→</span>
+          <span class="link-url">{link.url.replace('https://', '')}</span>
+          <span class="link-label">{link.label}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="link-section">
+    <h2 class="section-heading">esports</h2>
+    <div class="links-list">
+      {esportsLinks.map(link => (
+        <a href={link.url} class="link-entry" target="_blank" rel="noopener noreferrer">
+          <span class="link-arrow">→</span>
+          <span class="link-url">{link.url.replace('https://', '')}</span>
+          <span class="link-label">{link.label}</span>
+        </a>
+      ))}
+    </div>
+  </section>
 </Page>
 
 <style>
+  .link-section {
+    margin-bottom: 2rem;
+  }
+
+  .section-heading {
+    color: var(--fg-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+    opacity: 0.7;
+  }
+
   .links-list {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    padding: 0.5rem 0;
   }
 
   .link-entry {

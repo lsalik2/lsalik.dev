@@ -39,7 +39,6 @@ export function renderHome(): string {
     `  curl lsalik.dev/blog`,
     `  curl lsalik.dev/resume`,
     `  curl lsalik.dev/contact`,
-    `  curl lsalik.dev/sources`,
   ].join('\n');
   const source = dim('source: https://github.com/lsalik2/lsalik.dev');
 
@@ -95,10 +94,19 @@ export function renderResume(content: string): string {
   return [header, '', content].join('\n');
 }
 
-export function renderContact(links: { label: string; url: string }[]): string {
+export interface ContactSection {
+  heading: string;
+  links: { label: string; url: string }[];
+}
+
+export function renderContact(sections: ContactSection[]): string {
   const header = bold('~/contact');
-  const linkLines = links.map(link => `  ${link.label}  ${link.url}`);
-  return [header, '', ...linkLines].join('\n');
+  const sectionLines = sections.flatMap(section => {
+    const sectionHeader = dim(`— ${section.heading} —`);
+    const links = section.links.map(link => `  ${link.label}  ${link.url}`);
+    return [sectionHeader, ...links];
+  });
+  return [header, '', ...sectionLines].join('\n');
 }
 
 export function renderAbout(content: string): string {
@@ -106,7 +114,3 @@ export function renderAbout(content: string): string {
   return [header, '', content].join('\n');
 }
 
-export function renderSources(content: string): string {
-  const header = bold('~/sources');
-  return [header, '', content].join('\n');
-}

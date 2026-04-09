@@ -18,6 +18,10 @@ const { title, path } = Astro.props;
     </header>
     <main class="page-main">
       <slot />
+      <footer class="page-footer">
+        <span class="footer-source-line">source: <a href="https://github.com/lsalik2/lsalik.dev" class="footer-link" target="_blank" rel="noopener noreferrer">github.com/lsalik2/lsalik.dev</a></span>
+        <span class="footer-copy">© Luis Salik · lsalik.dev</span>
+      </footer>
     </main>
   </div>
   <script src="../islands/palette-toggle.ts"></script>
@@ -42,5 +46,25 @@ const { title, path } = Astro.props;
     background-color: color-mix(in srgb, var(--bg) 90%, transparent);
     border-radius: 4px;
     padding: 1.5rem;
+  }
+
+  .page-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 2rem 0 1rem;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    opacity: 0.6;
+  }
+
+  .footer-link {
+    color: var(--fg-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .footer-link:hover {
+    color: var(--accent);
   }
 </style>

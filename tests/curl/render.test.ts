@@ -7,7 +7,7 @@ import {
   renderResume,
   renderContact,
   renderAbout,
-  renderSources,
+  type ContactSection,
 } from '../../src/curl/render';
 import type { BlogPostSummary, BlogPostFull, ProjectSummary } from '../../src/curl/render';
 
@@ -40,14 +40,14 @@ describe('renderHome', () => {
     expect(demoSource).not.toContain("curl lsalik.dev/links");
   });
 
-  it('lists all 6 nav paths in the curl output', () => {
+  it('lists all 5 nav paths in the curl output', () => {
     const out = stripAnsi(renderHome());
     expect(out).toContain('curl lsalik.dev/about');
     expect(out).toContain('curl lsalik.dev/projects');
     expect(out).toContain('curl lsalik.dev/blog');
     expect(out).toContain('curl lsalik.dev/resume');
     expect(out).toContain('curl lsalik.dev/contact');
-    expect(out).toContain('curl lsalik.dev/sources');
+    expect(out).not.toContain('curl lsalik.dev/sources');
   });
 
   it('does not still advertise the old /links path', () => {
@@ -165,16 +165,33 @@ describe('renderResume', () => {
 });
 
 describe('renderContact', () => {
+  const sections: ContactSection[] = [
+    {
+      heading: 'professional',
+      links: [{ label: 'GitHub', url: 'https://github.com/lsalik2' }],
+    },
+    {
+      heading: 'esports',
+      links: [{ label: 'Twitch', url: 'https://twitch.tv/test' }],
+    },
+  ];
+
   it('emits the ~/contact heading', () => {
-    const out = stripAnsi(renderContact([{ label: 'GitHub', url: 'https://github.com/lsalik2' }]));
+    const out = stripAnsi(renderContact(sections));
     expect(out).toContain('~/contact');
-    expect(out).toContain('https://github.com/lsalik2');
+  });
+
+  it('includes section headings', () => {
+    const out = stripAnsi(renderContact(sections));
+    expect(out).toContain('professional');
+    expect(out).toContain('esports');
   });
 
   it('includes link labels and urls', () => {
-    const result = renderContact([{ label: 'GitHub', url: 'https://github.com/lsalik2' }]);
-    expect(result).toContain('GitHub');
-    expect(result).toContain('https://github.com/lsalik2');
+    const out = stripAnsi(renderContact(sections));
+    expect(out).toContain('GitHub');
+    expect(out).toContain('https://github.com/lsalik2');
+    expect(out).toContain('Twitch');
   });
 });
 
@@ -186,10 +203,3 @@ describe('renderAbout', () => {
   });
 });
 
-describe('renderSources', () => {
-  it('emits the ~/sources heading and body text', () => {
-    const out = stripAnsi(renderSources('the body'));
-    expect(out).toContain('~/sources');
-    expect(out).toContain('the body');
-  });
-});

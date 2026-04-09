@@ -13,6 +13,23 @@ async function runCurlDemo(container: HTMLElement): Promise<void> {
   const COMMAND = '$ curl lsalik.dev';
   const response = renderHome();
 
+  // Pre-measure the full content to set the container height before animation starts.
+  // This prevents the block from expanding as content streams in.
+  const body = container.closest('.curl-demo-body') as HTMLElement | null;
+  if (body) {
+    const ghost = document.createElement('pre');
+    ghost.setAttribute('aria-hidden', 'true');
+    ghost.style.cssText =
+      'position:absolute;visibility:hidden;pointer-events:none;' +
+      'font:inherit;line-height:1;letter-spacing:0;white-space:pre-wrap;margin:0;' +
+      `width:${container.offsetWidth}px`;
+    ghost.textContent =
+      COMMAND + '\n\n' + response.replace(/\x1b\[\d+m/g, '');
+    document.body.appendChild(ghost);
+    body.style.minHeight = ghost.offsetHeight + 'px';
+    document.body.removeChild(ghost);
+  }
+
   // Wait 800ms before starting
   await delay(800);
 
