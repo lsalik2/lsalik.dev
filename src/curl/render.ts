@@ -1,6 +1,7 @@
 import { bold, dim, green, blue, amber, cyan } from './ansi';
 import { renderLogo } from './logo';
 import { NAV_LINKS } from '../lib/nav';
+import { stripMarkdownForTerminal } from './markdown';
 import type { ContactSection } from '../data/contact';
 export type { ContactSection };
 
@@ -119,6 +120,6 @@ export function renderContact(sections: readonly ContactSection[]): string {
 
 export function renderAbout(content: string): string {
   const header = bold('~/about');
-  return [header, '', content].join('\n');
+  return [header, '', stripMarkdownForTerminal(content)].join('\n');
 }
 
