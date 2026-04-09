@@ -1,5 +1,9 @@
 import { bold, dim, green, blue, amber, cyan } from './ansi';
 import { renderLogo } from './logo';
+import { NAV_LINKS } from '../lib/nav';
+import { stripMarkdownForTerminal } from './markdown';
+import type { ContactSection } from '../data/contact';
+export type { ContactSection };
 
 export interface BlogPostSummary {
   slug: string;
@@ -13,6 +17,13 @@ export interface BlogPostFull {
   title: string;
   date: string;
   tags: string[];
+  content: string;
+}
+
+export interface ProjectPostFull {
+  title: string;
+  status: string;
+  stack: string[];
   content: string;
 }
 
@@ -32,14 +43,8 @@ export function renderHome(): string {
   const logo = renderLogo();
   const title = bold('lsalik.dev');
   const description = dim('terminal-inspired personal website');
-  const nav = [
-    dim('navigate:'),
-    `  curl lsalik.dev/about`,
-    `  curl lsalik.dev/projects`,
-    `  curl lsalik.dev/blog`,
-    `  curl lsalik.dev/resume`,
-    `  curl lsalik.dev/contact`,
-  ].join('\n');
+  const navLines = NAV_LINKS.map(link => `  curl lsalik.dev${link.href}`);
+  const nav = [dim('navigate:'), ...navLines].join('\n');
   const source = dim('source: https://github.com/lsalik2/lsalik.dev');
 
   return [logo, '', title, description, '', nav, '', source].join('\n');
@@ -71,6 +76,15 @@ export function renderBlogPost(post: BlogPostFull): string {
   return [title, meta, '', post.content].join('\n');
 }
 
+// Unlike renderBlogPost, the project title is not prefixed with `# ` — that
+// matches the shape of the prior inline project-post output in middleware.ts,
+// and keeps project READMEs visually distinct from blog posts in the terminal.
+export function renderProjectPost(project: ProjectPostFull): string {
+  const title = bold(project.title);
+  const meta = `${dim(project.status)} · ${project.stack.join(' · ')}`;
+  return [title, meta, '', project.content].join('\n');
+}
+
 export function renderProjectsIndex(projects: ProjectSummary[]): string {
   const header = bold('~/projects');
 
@@ -94,12 +108,7 @@ export function renderResume(content: string): string {
   return [header, '', content].join('\n');
 }
 
-export interface ContactSection {
-  heading: string;
-  links: { label: string; url: string }[];
-}
-
-export function renderContact(sections: ContactSection[]): string {
+export function renderContact(sections: readonly ContactSection[]): string {
   const header = bold('~/contact');
   const sectionLines = sections.flatMap(section => {
     const sectionHeader = dim(`— ${section.heading} —`);
@@ -111,6 +120,6 @@ export function renderContact(sections: ContactSection[]): string {
 
 export function renderAbout(content: string): string {
   const header = bold('~/about');
-  return [header, '', content].join('\n');
+  return [header, '', stripMarkdownForTerminal(content)].join('\n');
 }
 

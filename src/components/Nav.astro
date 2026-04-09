@@ -1,4 +1,6 @@
 ---
+import { NAV_LINKS } from '../lib/nav';
+
 interface Props {
   path: string;
 }
@@ -6,14 +8,6 @@ interface Props {
 const { path } = Astro.props;
 
 const segments = path === '/' ? [] : path.split('/').filter(Boolean);
-
-const navLinks = [
-  { href: '/about', label: 'about' },
-  { href: '/projects', label: 'projects' },
-  { href: '/blog', label: 'blog' },
-  { href: '/resume', label: 'resume' },
-  { href: '/contact', label: 'contact' },
-];
 ---
 <nav class="nav">
   <div class="breadcrumb">
@@ -26,10 +20,10 @@ const navLinks = [
     })}<span class="prompt-dollar">$</span><span class="cursor" aria-hidden="true"></span>
   </div>
   <div class="nav-links">
-    {navLinks.map(link => (
+    {NAV_LINKS.map(link => (
       <a
         href={link.href}
-        class:list={['nav-link', { active: path.startsWith(link.href) }]}
+        class:list={['nav-link', { active: path === link.href || path.startsWith(link.href + '/') }]}
       >
         {link.label}
       </a>

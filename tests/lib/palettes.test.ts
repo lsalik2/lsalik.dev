@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { PALETTES, PALETTE_LABELS, nextPalette } from '../../src/lib/palettes';
+import { PALETTES, nextPalette } from '../../src/lib/palettes';
 
 describe('PALETTES', () => {
   it('contains all 5 expected palette ids in stable order', () => {
@@ -14,16 +14,6 @@ describe('PALETTES', () => {
 
   it('has no duplicates', () => {
     expect(new Set(PALETTES).size).toBe(PALETTES.length);
-  });
-});
-
-describe('PALETTE_LABELS', () => {
-  it('has a non-empty label for every palette', () => {
-    for (const id of PALETTES) {
-      const label = PALETTE_LABELS[id];
-      expect(typeof label).toBe('string');
-      expect(label.length).toBeGreaterThan(0);
-    }
   });
 });
 

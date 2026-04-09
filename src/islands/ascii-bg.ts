@@ -12,12 +12,18 @@ const TIME_Y = 0.4;
 const TIME_XY = 0.5;
 const TIME_XMY = 0.3;
 
-const LAYER_PHASES: readonly number[] = [0, 3.7, 7.2];
-const LAYER_COLORS: readonly string[] = [
+export const LAYER_PHASES: readonly number[] = [0, 3.7, 7.2];
+export const LAYER_COLORS: readonly string[] = [
   'var(--fg)',
   'var(--fg-muted)',
   'var(--accent)',
 ];
+
+if (LAYER_PHASES.length !== LAYER_COLORS.length) {
+  throw new Error(
+    `ascii-bg: LAYER_PHASES (${LAYER_PHASES.length}) and LAYER_COLORS (${LAYER_COLORS.length}) must have the same length`,
+  );
+}
 
 // ─── Pure / exported ─────────────────────────────────────────────────────────
 
@@ -102,6 +108,7 @@ function initBackground(): void {
 
   let cols = 0;
   let rows = 0;
+  let rafHandle: number | null = null;
 
   // Pre-build one <pre> per layer; reuse across frames.
   const layerPres: HTMLPreElement[] = LAYER_COLORS.map((color) => {
@@ -159,13 +166,17 @@ function initBackground(): void {
     for (let li = 0; li < layerPres.length; li++) {
       layerPres[li].textContent = layers[li];
     }
-    requestAnimationFrame(frame);
+    rafHandle = requestAnimationFrame(frame);
   }
 
   function start(): void {
+    if (rafHandle !== null) {
+      cancelAnimationFrame(rafHandle);
+      rafHandle = null;
+    }
     measure();
     buildDOM();
-    requestAnimationFrame(frame);
+    rafHandle = requestAnimationFrame(frame);
   }
 
   function handleResize(): void {
@@ -179,6 +190,10 @@ function initBackground(): void {
 if (typeof document !== 'undefined') {
   document.addEventListener('astro:page-load', () => {
     if (started) return;
+    // Don't mark as started until we've confirmed the container exists on
+    // this page. Otherwise a visitor landing on a future layout without
+    // `#ascii-bg` would permanently block init on subsequent navigations.
+    if (!document.getElementById('ascii-bg')) return;
     started = true;
     initBackground();
   });

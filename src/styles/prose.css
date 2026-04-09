@@ -1,0 +1,218 @@
+.prose {
+  line-height: 1.65;
+}
+
+/* Headings */
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  color: var(--accent);
+  font-weight: bold;
+  line-height: 1.3;
+}
+
+.prose h1 { font-size: 1.6rem; margin: 2rem 0 1rem; }
+.prose h2 { font-size: 1.35rem; margin: 1.75rem 0 0.85rem; }
+.prose h3 { font-size: 1.15rem; margin: 1.5rem 0 0.7rem; }
+.prose h4 { font-size: 1rem; margin: 1.25rem 0 0.5rem; }
+.prose h5 { font-size: 0.95rem; margin: 1.15rem 0 0.45rem; }
+.prose h6 { font-size: 0.9rem; margin: 1rem 0 0.4rem; color: var(--fg-muted); }
+
+.prose h1:first-child,
+.prose h2:first-child,
+.prose h3:first-child,
+.prose h4:first-child {
+  margin-top: 0;
+}
+
+/* Paragraphs */
+.prose p {
+  margin: 0 0 1rem;
+}
+
+/* Inline emphasis */
+.prose strong {
+  color: var(--fg);
+  font-weight: bold;
+}
+
+.prose em {
+  color: var(--fg);
+  font-style: italic;
+}
+
+.prose del {
+  color: var(--fg-muted);
+}
+
+/* Lists — reset global zeroing and give markers breathing room */
+.prose ul,
+.prose ol {
+  margin: 0 0 1rem;
+  padding-left: 2rem;
+}
+
+.prose ul { list-style: disc outside; }
+.prose ol { list-style: decimal outside; }
+
+.prose li {
+  margin-bottom: 0.5rem;
+}
+
+.prose li:last-child {
+  margin-bottom: 0;
+}
+
+.prose li > p {
+  margin-bottom: 0.5rem;
+}
+
+.prose li::marker {
+  color: var(--fg-muted);
+}
+
+/* Nested lists */
+.prose ul ul,
+.prose ul ol,
+.prose ol ul,
+.prose ol ol {
+  margin: 0.5rem 0 0;
+}
+
+/* GFM task lists */
+.prose ul.contains-task-list {
+  list-style: none;
+  padding-left: 0.5rem;
+}
+
+.prose .task-list-item {
+  padding-left: 0;
+}
+
+.prose .task-list-item input[type="checkbox"] {
+  margin-right: 0.5rem;
+  accent-color: var(--accent);
+  transform: translateY(1px);
+}
+
+/* Blockquote */
+.prose blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  color: var(--fg-muted);
+  background-color: color-mix(in srgb, var(--bg-surface) 60%, transparent);
+  border-radius: 0 3px 3px 0;
+}
+
+.prose blockquote p {
+  margin-bottom: 0.5rem;
+}
+
+.prose blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* Tables */
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  display: block;
+  overflow-x: auto;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.85rem;
+  text-align: left;
+}
+
+.prose th {
+  background-color: var(--bg-surface);
+  color: var(--accent);
+  font-weight: bold;
+}
+
+.prose tbody tr:nth-child(even) {
+  background-color: color-mix(in srgb, var(--bg-surface) 40%, transparent);
+}
+
+/* Horizontal rule */
+.prose hr {
+  border: none;
+  border-top: 1px dashed var(--border);
+  margin: 2rem 0;
+}
+
+/* Links */
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose a:hover {
+  color: var(--accent-bright);
+}
+
+/* Images */
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 3px;
+  margin: 1rem 0;
+  display: block;
+}
+
+/* Code */
+.prose code {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+  font-family: inherit;
+  font-size: 0.9em;
+  color: var(--accent);
+}
+
+.prose pre {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.prose pre code {
+  padding: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Footnotes (GFM) */
+.prose .footnotes {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+
+.prose .footnotes ol {
+  padding-left: 1.5rem;
+}
+
+.prose .footnotes li {
+  margin-bottom: 0.4rem;
+}
