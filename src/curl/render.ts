@@ -1,5 +1,6 @@
 import { bold, dim, green, blue, amber, cyan } from './ansi';
 import { renderLogo } from './logo';
+import { NAV_LINKS } from '../lib/nav';
 
 export interface BlogPostSummary {
   slug: string;
@@ -32,14 +33,8 @@ export function renderHome(): string {
   const logo = renderLogo();
   const title = bold('lsalik.dev');
   const description = dim('terminal-inspired personal website');
-  const nav = [
-    dim('navigate:'),
-    `  curl lsalik.dev/about`,
-    `  curl lsalik.dev/projects`,
-    `  curl lsalik.dev/blog`,
-    `  curl lsalik.dev/resume`,
-    `  curl lsalik.dev/contact`,
-  ].join('\n');
+  const navLines = NAV_LINKS.map(link => `  curl lsalik.dev${link.href}`);
+  const nav = [dim('navigate:'), ...navLines].join('\n');
   const source = dim('source: https://github.com/lsalik2/lsalik.dev');
 
   return [logo, '', title, description, '', nav, '', source].join('\n');

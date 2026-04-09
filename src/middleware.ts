@@ -1,5 +1,6 @@
 import { defineMiddleware } from 'astro:middleware';
 import { getCollection } from 'astro:content';
+import { NAV_LINKS } from './lib/nav';
 import {
   renderHome,
   renderBlogIndex,
@@ -36,18 +37,15 @@ function textResponse(body: string): Response {
 }
 
 function notFoundResponse(pathname: string): Response {
+  const navLines = NAV_LINKS.map(link => `  curl lsalik.dev${link.href}`);
   const body = [
     `404: ${pathname} — not found`,
     '',
     'navigate:',
     '  curl lsalik.dev',
-    '  curl lsalik.dev/about',
-    '  curl lsalik.dev/projects',
-    '  curl lsalik.dev/blog',
-    '  curl lsalik.dev/resume',
-    '  curl lsalik.dev/contact',
+    ...navLines,
   ].join('\n');
-  return new Response('\n' + body + '\n\n', {
+  return new Response('\n' + body + '\n', {
     status: 404,
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   });
