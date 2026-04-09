@@ -1,6 +1,8 @@
 import { bold, dim, green, blue, amber, cyan } from './ansi';
 import { renderLogo } from './logo';
 import { NAV_LINKS } from '../lib/nav';
+import type { ContactSection } from '../data/contact';
+export type { ContactSection };
 
 export interface BlogPostSummary {
   slug: string;
@@ -89,12 +91,7 @@ export function renderResume(content: string): string {
   return [header, '', content].join('\n');
 }
 
-export interface ContactSection {
-  heading: string;
-  links: { label: string; url: string }[];
-}
-
-export function renderContact(sections: ContactSection[]): string {
+export function renderContact(sections: readonly ContactSection[]): string {
   const header = bold('~/contact');
   const sectionLines = sections.flatMap(section => {
     const sectionHeader = dim(`— ${section.heading} —`);

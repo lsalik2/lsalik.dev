@@ -9,8 +9,8 @@ import {
   renderResume,
   renderContact,
   renderAbout,
-  type ContactSection,
 } from './curl/render';
+import { CONTACT_SECTIONS } from './data/contact';
 import { bold, dim } from './curl/ansi';
 
 // Raw markdown bodies for the about and sources pages. Vite's ?raw query
@@ -139,28 +139,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
   }
 
   if (pathname === '/contact' || pathname === '/contact/') {
-    const sections: ContactSection[] = [
-      {
-        heading: 'professional',
-        links: [
-          { label: 'GitHub', url: 'https://github.com/lsalik2' },
-          { label: 'LinkedIn', url: 'https://linkedin.com/in/luis-salik' },
-          { label: 'Discord User Link', url: 'https://discord.gg/6zdHqY7h' },
-        ],
-      },
-      {
-        heading: 'esports',
-        links: [
-          { label: 'Liquipedia', url: 'https://liquipedia.net/rocketleague/SLK' },
-          { label: 'X', url: 'https://x.com/slkrl_' },
-          { label: 'Twitch', url: 'https://twitch.tv/slkrl' },
-          { label: 'YouTube', url: 'https://youtube.com/@slk-rl' },
-          { label: 'Steam', url: 'https://steamcommunity.com/id/SlkRL' },
-          { label: 'Discord Server', url: 'https://discord.gg/dsUfTqmE4d' },
-        ],
-      },
-    ];
-    return textResponse(renderContact(sections));
+    return textResponse(renderContact(CONTACT_SECTIONS));
   }
 
   if (pathname === '/about' || pathname === '/about/') {
