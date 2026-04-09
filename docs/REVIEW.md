@@ -1,10 +1,6 @@
-# v1 Polish — Deferred Review Items
+# Deferred Review Items
 
-Items raised during the subagent-driven v1 polish review pass that were intentionally left out of the shipped scope. Keep as a backlog.
-
-## Infrastructure (pre-existing)
-
-- **`npm run build` fails with sharp / `node:crypto` edge-function bundling error.** Reproduces at the pre-v1-polish baseline (`ecbd28c`), so this is not a v1 regression. Sharp gets pulled into the Vercel edge function bundle and can't resolve Node builtins. Needs a separate infrastructure pass — probably excluding sharp from the edge bundle or moving image work to a build-time step. Dev server and tests are unaffected.
+Items raised during polish review pass that were intentionally left out of the shipped scope. Keep as a backlog.
 
 ## Code quality follow-ups
 

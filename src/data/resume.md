@@ -9,8 +9,8 @@ Based in Chicago, IL
 - Refactored website architecture and integrated Typesense for optimized search indexing, accelerating page load speeds by 40% and boosting organic SEO traffic by 25% over three months.
 
 *Software Engineer*, **Valor Esports** | December 2023 - December 2025
-- Designed and led high-performance coaching programs and interactive workshops, driving global client acquisition, with over 100 clients from North America, Europe, Oceania and the Middle East.
-- Integrated REST APIs to process 1000+ gameplay hours using Python on robust backend pipelines, leveraging Pandas and Numpy to produce extensive classification models on atheletes' playstyles.
+- Created and led high-performance coaching programs and interactive workshops, driving global client acquisition, with over 100 clients from North America, Europe, Oceania and the Middle East.
+- Integrated REST APIs to process 1000+ gameplay hours using Python on robust backend pipelines, leveraging Pandas and Numpy to produce extensive classification models on athletes' playstyles.
 - Designed 16+ metrics using data science frameworks (scikit-learn, XGBoost) for insights on player capabilities, improving performances by 40% over three months. 
 
 ## Education
