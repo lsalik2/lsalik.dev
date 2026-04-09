@@ -40,11 +40,9 @@ some_python_code = "With Python syntax highlighting!"
 print some_python_code
 ```
 
-| Tables        | Are           | Cool  |
-| ------------- |:-------------:| -----:|
-| col 3 is      | right-aligned | $1600 |
-| col 2 is      | centered      |   $12 |
-| zebra stripes | are neat      |    $1 |
+| Tables        | Are           | Cool   |
+| ------------- |:-------------:| -----: |
+| R3, C1        | R3, C2        | R3, C3 |
 
 Now for some [clickable links](https://lsalik.dev)!
 
@@ -59,7 +57,7 @@ How about some headings?
 
 ### Heading 3
 
-   Here's an indented paragraph. Nice.
+A horizontal block to separate section.
 
 ---
 
