@@ -17,6 +17,7 @@ import { bold, dim } from './curl/ansi';
 // gives us the file's text content directly, which is what the curl renderers
 // want (no Astro markdown component rendering for the terminal output).
 import aboutRaw from './data/about.md?raw';
+import resumeRaw from './data/resume.md?raw';
 
 const TERMINAL_AGENTS = ['curl/', 'wget/', 'httpie/', 'fetch/', 'libfetch/'];
 
@@ -135,7 +136,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
   }
 
   if (pathname === '/resume' || pathname === '/resume/') {
-    return textResponse(renderResume('Visit lsalik.dev/resume for full resume content.'));
+    return textResponse(renderResume(resumeRaw));
   }
 
   if (pathname === '/contact' || pathname === '/contact/') {
