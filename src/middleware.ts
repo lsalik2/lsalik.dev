@@ -26,7 +26,7 @@ function isTerminalClient(userAgent: string | null): boolean {
 }
 
 function textResponse(body: string): Response {
-  return new Response('\n' + body.trimEnd() + '\n\n', {
+  return new Response('\n' + body.trimEnd() + '\n', {
     status: 200,
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
