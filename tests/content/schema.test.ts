@@ -15,7 +15,7 @@ const projectSchema = z.object({
   stack: z.array(z.string()),
   status: z.string(),
   url: z.string().url().optional(),
-  repo: z.string().url(),
+  repo: z.string().url().optional(),
   description: z.string(),
   permissions: z.string().default('drwxr-xr-x'),
 });
@@ -77,6 +77,18 @@ describe('project schema', () => {
       stack: ['Python'],
       status: 'Live',
       repo: 'https://github.com/lsalik2/slkards',
+      description: 'Discord-based TCG bot.',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('allows omitting repo for closed-source projects', () => {
+    const result = projectSchema.safeParse({
+      title: 'slkards',
+      date: '2026-01-20',
+      stack: ['Python'],
+      status: 'Beta',
+      url: 'https://slkards.wiki',
       description: 'Discord-based TCG bot.',
     });
     expect(result.success).toBe(true);

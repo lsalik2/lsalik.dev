@@ -24,7 +24,7 @@ export interface ProjectSummary {
   status: string;
   description: string;
   permissions: string;
-  repo: string;
+  repo?: string;
   url?: string;
 }
 
@@ -81,7 +81,7 @@ export function renderProjectsIndex(projects: ProjectSummary[]): string {
     const title = blue(project.title);
     const stack = dim(project.stack.join(' · '));
     const status = amber(project.status);
-    const repoLink = `${cyan('→')} ${project.repo}`;
+    const repoLink = project.repo ? `${cyan('→')} ${project.repo}` : dim('→ closed source');
     const url = cyan(`curl lsalik.dev/projects/${project.slug}`);
     return `${perms}  ${owner}  ${date}  ${title}\n  ${project.description}\n  ${stack}  ${status}\n  ${repoLink}\n  ${url}`;
   });

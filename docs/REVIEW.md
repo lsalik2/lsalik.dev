@@ -4,17 +4,21 @@ Items raised during polish review pass that were intentionally left out of the s
 
 ## Code quality follow-ups
 
-- **Markdown-prose CSS duplication across three pages.** `src/pages/about.astro`, `src/pages/sources.astro`, and `src/pages/resume.astro` each carry ~30 lines of near-identical `:global(h1/h2/p/ul/ul li::before)` styling. The copies are not byte-identical (resume uses larger headings, sources adds an `a` rule, about omits it), so a future "fix h2 spacing" edit will silently apply to one and skip the others. Extract into a shared `.prose` class or a `MarkdownProse.astro` wrapper before any additional markdown-backed pages land.
+- **Markdown-prose CSS duplicated across four pages.** `src/pages/about.astro`, `src/pages/resume.astro`, `src/pages/blog/[...slug].astro`, and `src/pages/projects/[...slug].astro` each carry ~30–170 lines of near-identical `:global(...)` markdown styling. The blog and project slug pages are currently byte-identical in their markdown rules; `about.astro` and `resume.astro` still use the older, minimal style (no lists, no blockquotes, no tables). A future "fix h2 spacing" edit will silently apply to one copy and skip the others. Extract into a shared `.prose` class or a `MarkdownProse.astro` wrapper — start with the blog/project pair since they're already identical.
 
-- **`renderResume` terminal handler still returns a stub.** `src/middleware.ts` passes `'Visit lsalik.dev/resume for full resume content.'` to `renderResume`, but the parallel `/about` and `/sources` handlers now use `import … from './data/…md?raw'` and ship the real content. The asymmetry became visible in Phase 5. Fix: add `import resumeRaw from './data/resume.md?raw'` and pass it through — roughly 3 lines.
+- **`about.astro` and `resume.astro` markdown styles are incomplete.** Both pages still use a minimal style block with `::before` list markers and no blockquote, table, task-list, or footnote rules. They should be brought in line with the blog/project rendering once the above duplication is resolved.
+
+- **`renderResume` terminal handler still returns a stub.** `src/middleware.ts` passes `'Visit lsalik.dev/resume for full resume content.'` to `renderResume`, but the `/about` handler imports `aboutRaw` from `./data/about.md?raw` and ships the real content. The asymmetry is visible when curling `/resume`. Fix: add `import resumeRaw from './data/resume.md?raw'` and pass it through — roughly 3 lines.
 
 - **`PALETTE_LABELS` is exported but unused.** `src/lib/palettes.ts` ships a `PALETTE_LABELS` map that `src/islands/palette-toggle.ts` never reads; the toggle displays the raw palette id. Either delete the export or wire it into the toggle so the label renders as "Dark Terminal" instead of "dark-terminal".
 
-- **Nav list is declared in two places.** `src/components/Nav.astro` and `src/curl/render.ts` both hardcode the 6-path nav. Drift risk is low thanks to the existing `renderHome` + `curl-demo` drift test, but extracting a shared `NAV_LINKS` constant (e.g. `src/lib/nav.ts`) would make future nav edits a one-liner and eliminate one manual sync point.
+- **Nav list is declared in two places.** `src/components/Nav.astro` and `src/curl/render.ts` both hardcode the 5-path nav. Drift risk is low thanks to the existing `renderHome` + `curl-demo` drift test, but extracting a shared `NAV_LINKS` constant (e.g. `src/lib/nav.ts`) would make future nav edits a one-liner and eliminate one manual sync point.
 
-- **Contact-link list is also declared in two places.** `src/pages/contact.astro` and `src/middleware.ts` both inline the same `[{ label: 'GitHub', url: 'https://github.com/lsalik2' }]` literal. Extract to `src/data/contact.ts` (or similar) and import from both.
+- **Contact-link list is also declared in two places.** `src/pages/contact.astro` and `src/middleware.ts` both inline the same contact link arrays. Extract to `src/data/contact.ts` (or similar) and import from both.
 
 - **`Nav.astro` active state uses `path.startsWith(link.href)`.** Works today because no current path is a prefix of another, but `/about` would also match a hypothetical `/aboutfoo`. Safer: `path === link.href || path.startsWith(link.href + '/')`. Five-character change.
+
+- **`src/data/sources.md` is a leftover orphan.** The sources page and its middleware handler were removed, but `src/data/sources.md` was not deleted. Safe to remove.
 
 ## Background animation hardening
 
@@ -30,4 +34,4 @@ Items raised during polish review pass that were intentionally left out of the s
 
 - **`textResponse` double-newlines raw markdown bodies.** `src/middleware.ts` calls `body.trimEnd() + '\n\n'`, so `?raw`-sourced content ends with a trailing blank line in `curl lsalik.dev/about`. Cosmetic only.
 
-- **Curl-demo markdown syntax leaks through.** `aboutRaw`/`sourcesRaw` ship `#`, `##`, `-`, and `[text](url)` syntax literally in the terminal. Markdown is famously terminal-readable, but a small pass that turns `[text](url)` → `text (url)` would polish the curl output.
+- **Curl output for `about` leaks markdown syntax.** `aboutRaw` ships `#`, `##`, `-`, and `[text](url)` syntax literally in the terminal. Markdown is famously terminal-readable, but a small pass that turns `[text](url)` → `text (url)` would polish the curl output.

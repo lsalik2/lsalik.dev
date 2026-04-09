@@ -20,7 +20,7 @@ const projects = defineCollection({
     stack: z.array(z.string()),
     status: z.string(),
     url: z.string().url().optional(),
-    repo: z.string().url(),
+    repo: z.string().url().optional(),
     description: z.string(),
     permissions: z.string().default('drwxr-xr-x'),
   }),
