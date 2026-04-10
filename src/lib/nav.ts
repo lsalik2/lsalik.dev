@@ -4,9 +4,9 @@ export interface NavLink {
 }
 
 export const NAV_LINKS: readonly NavLink[] = [
-  { href: '/about', label: 'about' },
-  { href: '/projects', label: 'projects' },
-  { href: '/blog', label: 'blog' },
-  { href: '/resume', label: 'resume' },
-  { href: '/contact', label: 'contact' },
+  { href: '/', label: '~/' },
+  { href: '/projects', label: '~/projects' },
+  { href: '/blog', label: '~/blog' },
+  { href: '/resume', label: '~/resume' },
+  { href: '/contact', label: '~/contact' },
 ] as const;
