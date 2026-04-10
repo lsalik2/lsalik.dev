@@ -9,7 +9,7 @@ const resumeModule = await import('../data/resume.md');
 const ResumeContent = resumeModule.default;
 ---
 <Page title="Resume" path="/resume">
-  <PageHeader heading="~/resume" description="less ~/resume — my cv, with a download link at the bottom." />
+  <PageHeader heading="resume" description="my cv, with a download link at the bottom." />
   <TerminalFrame title="cat ~/resume.md">
     <div class="prose">
       <ResumeContent />

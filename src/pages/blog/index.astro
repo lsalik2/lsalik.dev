@@ -8,7 +8,7 @@ const posts = await getCollection('blog', ({ data }) => !data.draft);
 posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 <Page title="Blog" path="/blog">
-  <PageHeader heading="~/blog" description="cd ~/blog — essays, notes, and the occasional rant." />
+  <PageHeader heading="blog" description="essays, notes, and the occasional rant." />
   {posts.map(post => (
     <BlogCard
       title={post.data.title}
