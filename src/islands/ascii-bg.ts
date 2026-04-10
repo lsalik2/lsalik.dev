@@ -3,14 +3,31 @@
 
 export const RAMP = ' -_:,;^+/|\\?0oOQ#%@';
 
-const NOISE_X = 0.08;
-const NOISE_Y = 0.11;
-const NOISE_XY = 0.06;
-const NOISE_XMY = 0.09;
-const TIME_X = 0.6;
-const TIME_Y = 0.4;
-const TIME_XY = 0.5;
-const TIME_XMY = 0.3;
+interface AnimationPreset {
+  NOISE_X: number;
+  NOISE_Y: number;
+  NOISE_XY: number;
+  NOISE_XMY: number;
+  TIME_X: number;
+  TIME_Y: number;
+  TIME_XY: number;
+  TIME_XMY: number;
+}
+
+const PRESETS: AnimationPreset[] = [
+  // Original lsalik.dev
+  {
+    NOISE_X: 0.08, NOISE_Y: 0.11, NOISE_XY: 0.06, NOISE_XMY: 0.09,
+    TIME_X: 0.6, TIME_Y: 0.4, TIME_XY: 0.5, TIME_XMY: 0.3,
+  },
+  // Ryan's variant
+  {
+    NOISE_X: 0.12, NOISE_Y: 0.092, NOISE_XY: 0.051, NOISE_XMY: 0.063,
+    TIME_X: 0.42, TIME_Y: 0.61, TIME_XY: 0.35, TIME_XMY: 0.55,
+  },
+];
+
+const ACTIVE_PRESET = PRESETS[Math.floor(Math.random() * PRESETS.length)];
 
 export const LAYER_PHASES: readonly number[] = [0, 3.7, 7.2];
 export const LAYER_COLORS: readonly string[] = [
@@ -28,10 +45,11 @@ if (LAYER_PHASES.length !== LAYER_COLORS.length) {
 // ─── Pure / exported ─────────────────────────────────────────────────────────
 
 export function sample(x: number, y: number, t: number, phase: number): number {
-  const s1 = Math.sin(x * NOISE_X + t * TIME_X + phase);
-  const s2 = Math.sin(y * NOISE_Y - t * TIME_Y + phase * 1.3);
-  const s3 = Math.sin((x + y) * NOISE_XY + t * TIME_XY);
-  const s4 = Math.sin((x - y) * NOISE_XMY - t * TIME_XMY + phase * 0.7);
+  const p = ACTIVE_PRESET;
+  const s1 = Math.sin(x * p.NOISE_X + t * p.TIME_X + phase);
+  const s2 = Math.sin(y * p.NOISE_Y - t * p.TIME_Y + phase * 1.3);
+  const s3 = Math.sin((x + y) * p.NOISE_XY + t * p.TIME_XY);
+  const s4 = Math.sin((x - y) * p.NOISE_XMY - t * p.TIME_XMY + phase * 0.7);
   const raw = (s1 + s2 + s3 + s4) * 0.25 + 0.5;
   return raw < 0 ? 0 : raw > 1 ? 1 : raw;
 }
@@ -103,8 +121,8 @@ function initBackground(): void {
   const container = document.getElementById('ascii-bg');
   if (!container) return;
 
-  const FONT_SIZE = 14;
-  const LINE_HEIGHT = 16;
+  const FONT_SIZE = 11;
+  const LINE_HEIGHT = 13;
 
   let cols = 0;
   let rows = 0;
