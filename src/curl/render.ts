@@ -43,7 +43,7 @@ export function renderHome(): string {
   const logo = renderLogo();
   const title = bold('lsalik.dev');
   const description = dim('terminal-inspired personal website');
-  const navLines = NAV_LINKS.map(link => `  curl lsalik.dev${link.href}`);
+  const navLines = NAV_LINKS.map(link => `  curl -L lsalik.dev${link.href}`);
   const nav = [dim('navigate:'), ...navLines].join('\n');
   const source = dim('source: https://github.com/lsalik2/lsalik.dev');
 
@@ -62,7 +62,7 @@ export function renderBlogIndex(posts: BlogPostSummary[]): string {
     const title = bold(post.title);
     const tags = dim(`[${post.tags.join(', ')}]`);
     const description = post.description;
-    const url = cyan(`curl lsalik.dev/blog/${post.slug}`);
+    const url = cyan(`curl -L lsalik.dev/blog/${post.slug}`);
     return `${date}  ${title}  ${tags}\n  ${description}\n  ${url}`;
   });
 
@@ -96,7 +96,7 @@ export function renderProjectsIndex(projects: ProjectSummary[]): string {
     const stack = dim(project.stack.join(' · '));
     const status = amber(project.status);
     const repoLink = project.repo ? `${cyan('→')} ${project.repo}` : dim('→ closed source');
-    const url = cyan(`curl lsalik.dev/projects/${project.slug}`);
+    const url = cyan(`curl -L lsalik.dev/projects/${project.slug}`);
     return `${perms}  ${owner}  ${date}  ${title}\n  ${project.description}\n  ${stack}  ${status}\n  ${repoLink}\n  ${url}`;
   });
 

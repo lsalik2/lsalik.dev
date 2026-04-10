@@ -10,7 +10,7 @@ function randomBetween(min: number, max: number): number {
 }
 
 async function runCurlDemo(container: HTMLElement): Promise<void> {
-  const COMMAND = '$ curl lsalik.dev';
+  const COMMAND = '$ curl -L lsalik.dev';
   const response = renderHome();
 
   // Pre-measure the full content to set the container height before animation starts.

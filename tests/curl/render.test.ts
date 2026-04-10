@@ -28,7 +28,7 @@ describe('renderHome', () => {
   });
 
   // Drift guard: the homepage curl-demo island must stream the exact
-  // same bytes a real `curl lsalik.dev` terminal client receives.
+  // same bytes a real `curl -L lsalik.dev` terminal client receives.
   // If these ever diverge, the dual-rendering contract is broken.
   it('is the single source of truth for the homepage curl demo', async () => {
     const demoSource = await import('node:fs').then(fs =>
@@ -37,23 +37,23 @@ describe('renderHome', () => {
     expect(demoSource).toContain("import { renderHome } from '../curl/render'");
     expect(demoSource).toContain('renderHome()');
     // No private nav list allowed in the island.
-    expect(demoSource).not.toContain("curl lsalik.dev/blog'");
-    expect(demoSource).not.toContain("curl lsalik.dev/links");
+    expect(demoSource).not.toContain("curl -L lsalik.dev/blog'");
+    expect(demoSource).not.toContain("curl -L lsalik.dev/links");
   });
 
   it('lists all 5 nav paths in the curl output', () => {
     const out = stripAnsi(renderHome());
-    expect(out).toContain('curl lsalik.dev/about');
-    expect(out).toContain('curl lsalik.dev/projects');
-    expect(out).toContain('curl lsalik.dev/blog');
-    expect(out).toContain('curl lsalik.dev/resume');
-    expect(out).toContain('curl lsalik.dev/contact');
-    expect(out).not.toContain('curl lsalik.dev/sources');
+    expect(out).toContain('curl -L lsalik.dev/about');
+    expect(out).toContain('curl -L lsalik.dev/projects');
+    expect(out).toContain('curl -L lsalik.dev/blog');
+    expect(out).toContain('curl -L lsalik.dev/resume');
+    expect(out).toContain('curl -L lsalik.dev/contact');
+    expect(out).not.toContain('curl -L lsalik.dev/sources');
   });
 
   it('does not still advertise the old /links path', () => {
     const out = stripAnsi(renderHome());
-    expect(out).not.toContain('curl lsalik.dev/links');
+    expect(out).not.toContain('curl -L lsalik.dev/links');
   });
 });
 

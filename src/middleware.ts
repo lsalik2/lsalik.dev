@@ -102,12 +102,12 @@ function sanitizePathnameForTerminal(pathname: string): string {
 
 function notFoundResponse(pathname: string): Response {
   const safePath = sanitizePathnameForTerminal(pathname);
-  const navLines = NAV_LINKS.map(link => `  curl lsalik.dev${link.href}`);
+  const navLines = NAV_LINKS.map(link => `  curl -L lsalik.dev${link.href}`);
   const body = [
     `404: ${safePath} — not found`,
     '',
     'navigate:',
-    '  curl lsalik.dev',
+    '  curl -L lsalik.dev',
     ...navLines,
   ].join('\n');
   return withHeaders(
