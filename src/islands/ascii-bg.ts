@@ -15,15 +15,25 @@ interface AnimationPreset {
 }
 
 const PRESETS: AnimationPreset[] = [
-  // Original lsalik.dev
+  // Drift — slow, wide waves with smooth organic motion
   {
     NOISE_X: 0.08, NOISE_Y: 0.11, NOISE_XY: 0.06, NOISE_XMY: 0.09,
     TIME_X: 0.6, TIME_Y: 0.4, TIME_XY: 0.5, TIME_XMY: 0.3,
   },
-  // Ryan's variant
+  // Static — tight high-frequency grain, barely moving
   {
-    NOISE_X: 0.12, NOISE_Y: 0.092, NOISE_XY: 0.051, NOISE_XMY: 0.063,
-    TIME_X: 0.42, TIME_Y: 0.61, TIME_XY: 0.35, TIME_XMY: 0.55,
+    NOISE_X: 0.35, NOISE_Y: 0.28, NOISE_XY: 0.22, NOISE_XMY: 0.18,
+    TIME_X: 0.08, TIME_Y: 0.06, TIME_XY: 0.05, TIME_XMY: 0.04,
+  },
+  // Cascade — fast diagonal rain-like streaks
+  {
+    NOISE_X: 0.04, NOISE_Y: 0.22, NOISE_XY: 0.18, NOISE_XMY: 0.03,
+    TIME_X: 1.4, TIME_Y: 0.15, TIME_XY: 1.1, TIME_XMY: 0.1,
+  },
+  // Pulse — low-frequency throb with slow breathing motion
+  {
+    NOISE_X: 0.03, NOISE_Y: 0.04, NOISE_XY: 0.025, NOISE_XMY: 0.035,
+    TIME_X: 0.25, TIME_Y: 0.3, TIME_XY: 0.2, TIME_XMY: 0.15,
   },
 ];
 
