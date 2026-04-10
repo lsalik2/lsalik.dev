@@ -90,9 +90,26 @@ async function runCurlDemo(container: HTMLElement): Promise<void> {
 }
 
 function init(): void {
+  const teaser = document.getElementById('curl-teaser');
+  const wrapper = document.getElementById('curl-demo-wrapper');
   const container = document.getElementById('curl-demo-output');
-  if (!container) return;
-  runCurlDemo(container);
+  if (!teaser || !wrapper || !container) return;
+
+  let started = false;
+  teaser.addEventListener('click', () => {
+    const isExpanded = wrapper.classList.contains('expanded');
+    if (isExpanded) {
+      wrapper.classList.remove('expanded');
+      teaser.setAttribute('aria-expanded', 'false');
+    } else {
+      wrapper.classList.add('expanded');
+      teaser.setAttribute('aria-expanded', 'true');
+      if (!started) {
+        started = true;
+        runCurlDemo(container);
+      }
+    }
+  });
 }
 
 if (typeof document !== 'undefined') {

@@ -5,63 +5,70 @@ import PageHeader from '../../components/PageHeader.astro';
 
 const projects = await getCollection('projects');
 projects.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+function formatDateRange(start: Date, end?: Date): string {
+  const startYear = start.getFullYear().toString();
+  if (!end) return `${startYear} - present`;
+  const endYear = end.getFullYear().toString();
+  return startYear === endYear ? startYear : `${startYear} - ${endYear}`;
+}
 ---
 <Page title="Projects" path="/projects">
-  <PageHeader heading="~/projects" description="ls -la ~/projects — things I've built, public and otherwise." />
-  <div class="ls-listing">
-    {projects.map(project => {
-      const dateStr = project.data.date.toISOString().slice(0, 10);
-      const stackStr = project.data.stack.join(' · ');
-      return (
-        <a href={`/projects/${project.id}`} class="project-entry">
-          <div class="entry-header">
-            <span class="permissions">{project.data.permissions}</span>
-            <span class="owner">slk</span>
-            <span class="date">{dateStr}</span>
-            <span class="name">{project.data.title}/</span>
+  <PageHeader heading="projects" description="things I've built, public and otherwise." />
+  <div class="project-list">
+    {projects.map(project => (
+      <a href={`/projects/${project.id}`} class="project-card">
+        <div class="project-titlebar">
+          <span class="permissions">{project.data.permissions}</span>
+          {' '}
+          <span class="owner">slk</span>
+        </div>
+        <div class="project-body">
+          <div class="project-header">
+            <span class="project-name">{project.data.title}</span>
+            <span class="project-dates">{formatDateRange(project.data.date, project.data.endDate)}</span>
           </div>
-          <div class="entry-body">
-            <div class="description">{project.data.description}</div>
-            <div class="stack">Stack: {stackStr}</div>
-            <div class="status">Status: {project.data.status}</div>
-            {project.data.repo && (
-              <div class="repo">→ {project.data.repo.replace('https://', '')}</div>
-            )}
+          <p class="project-desc">{project.data.description}</p>
+          <div class="project-status">status: {project.data.status}</div>
+          <div class="project-tags">
+            {project.data.stack.map(tag => (
+              <span class="tag">#{tag}</span>
+            ))}
           </div>
-        </a>
-      );
-    })}
+        </div>
+      </a>
+    ))}
   </div>
 </Page>
 
 <style>
-  .ls-listing {
+  .project-list {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem;
   }
 
-  .project-entry {
+  .project-card {
     display: block;
     text-decoration: none;
     color: inherit;
     border: 1px solid var(--border);
     border-radius: 4px;
-    padding: 0.75rem;
-    transition: border-color 0.15s ease, background-color 0.15s ease;
+    overflow: hidden;
+    transition: border-color 0.15s, background-color 0.15s;
   }
 
-  .project-entry:hover {
+  .project-card:hover {
     border-color: var(--accent);
     background-color: var(--bg-surface);
   }
 
-  .entry-header {
-    display: flex;
-    gap: 1rem;
-    align-items: baseline;
-    margin-bottom: 0.4rem;
-    font-size: 0.9rem;
+  .project-titlebar {
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0.3rem 0.875rem;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
   }
 
   .permissions {
@@ -72,36 +79,53 @@ projects.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
     color: var(--green);
   }
 
-  .date {
-    color: var(--fg-muted);
+  .project-body {
+    padding: 1rem 1.25rem;
+    background-color: var(--bg);
   }
 
-  .name {
-    color: var(--accent);
-    font-weight: 600;
-  }
-
-  .entry-body {
-    padding-left: 2rem;
+  .project-header {
     display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    font-size: 0.85rem;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.5rem;
+    gap: 1rem;
   }
 
-  .description {
-    color: var(--fg);
-  }
-
-  .stack {
-    color: var(--fg-muted);
-  }
-
-  .status {
-    color: var(--amber);
-  }
-
-  .repo {
+  .project-name {
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-weight: 600;
     color: var(--accent);
+    font-size: 1rem;
+  }
+
+  .project-dates {
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .project-desc {
+    font-size: 0.9rem;
+    color: var(--fg);
+    margin: 0 0 0.5rem;
+    line-height: 1.5;
+  }
+
+  .project-status {
+    font-size: 0.85rem;
+    color: var(--amber);
+    margin-bottom: 0.5rem;
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6ch;
+  }
+
+  .tag {
+    color: var(--ansi-cyan);
+    font-size: 0.8rem;
   }
 </style>

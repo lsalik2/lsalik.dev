@@ -23,7 +23,7 @@ const segments = path === '/' ? [] : path.split('/').filter(Boolean);
     {NAV_LINKS.map(link => (
       <a
         href={link.href}
-        class:list={['nav-link', { active: path === link.href || path.startsWith(link.href + '/') }]}
+        class:list={['nav-link', { active: link.href === '/' ? path === '/' : (path === link.href || path.startsWith(link.href + '/')) }]}
       >
         {link.label}
       </a>
@@ -78,7 +78,7 @@ const segments = path === '/' ? [] : path.split('/').filter(Boolean);
 
   .cursor {
     display: inline-block;
-    width: 0.6ch;
+    width: 0.8ch;
     height: 1.1em;
     background-color: var(--cursor);
     margin-left: 0.25ch;

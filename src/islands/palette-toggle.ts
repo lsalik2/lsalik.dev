@@ -1,4 +1,4 @@
-import { PALETTES, nextPalette, type PaletteName } from '../lib/palettes';
+import { PALETTES, type PaletteName } from '../lib/palettes';
 
 const STORAGE_KEY = 'palette';
 const DEFAULT_PALETTE: PaletteName = 'dark-terminal';
@@ -18,12 +18,11 @@ function applyPalette(name: PaletteName): void {
   try {
     localStorage.setItem(STORAGE_KEY, name);
   } catch (_) {}
-  const label = document.getElementById('palette-label');
-  if (label) label.textContent = name;
+  document.querySelectorAll('.palette-dot').forEach(dot => {
+    dot.classList.toggle('active', (dot as HTMLElement).dataset.palette === name);
+  });
 }
 
-// Before ClientRouter swaps the new document in, copy our palette onto it
-// so there's no flash of the default theme between pages.
 document.addEventListener('astro:before-swap', (event) => {
   const ev = event as Event & { newDocument: Document };
   const saved = readStoredPalette();
@@ -31,16 +30,16 @@ document.addEventListener('astro:before-swap', (event) => {
 });
 
 document.addEventListener('astro:page-load', () => {
-  const btn = document.getElementById('palette-toggle-btn');
-  if (!btn) return;
+  const dots = document.querySelectorAll('.palette-dot');
+  if (!dots.length) return;
 
-  // Label the current palette (html data-palette is already set by the
-  // inline head script or the before-swap handler).
   const current = readStoredPalette();
   applyPalette(current);
 
-  btn.addEventListener('click', () => {
-    const next = nextPalette(readStoredPalette());
-    applyPalette(next);
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      const palette = (dot as HTMLElement).dataset.palette as PaletteName;
+      if (palette) applyPalette(palette);
+    });
   });
 });

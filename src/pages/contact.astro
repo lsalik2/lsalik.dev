@@ -1,77 +1,50 @@
 ---
 import Page from '../layouts/Page.astro';
 import PageHeader from '../components/PageHeader.astro';
+import TerminalFrame from '../components/TerminalFrame.astro';
 import { CONTACT_SECTIONS } from '../data/contact';
-
-const sectionSubtitles: Record<string, string> = {
-  professional: 'professional; feel free to DM me on any platforms below! ',
-  esports: "esports; i'm also a professional rocket league player!",
-};
 ---
 <Page title="Contact" path="/contact">
-  <PageHeader heading="~/contact" description="cat ~/contact — how to reach me, socials included." />
+  <PageHeader heading="contact" description="how to reach me, socials included." />
 
   {CONTACT_SECTIONS.map(section => (
-    <section class="link-section">
-      <h2 class="section-heading">{sectionSubtitles[section.heading] ?? section.heading}</h2>
-      <div class="links-list">
+    <TerminalFrame title={section.heading}>
+      <dl class="contact-grid">
         {section.links.map(link => (
-          <a href={link.url} class="link-entry" target="_blank" rel="noopener noreferrer">
-            <span class="link-arrow">→</span>
-            <span class="link-url">{link.url.replace('https://', '')}</span>
-            <span class="link-label">{link.label}</span>
-          </a>
+          <>
+            <dt>{link.label.toLowerCase()}</dt>
+            <dd><a href={link.url} target="_blank" rel="noopener noreferrer">{link.url.replace('https://', '')}</a></dd>
+          </>
         ))}
-      </div>
-    </section>
+      </dl>
+    </TerminalFrame>
   ))}
 </Page>
 
 <style>
-  .link-section {
-    margin-bottom: 2rem;
+  .contact-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.4rem 2rem;
+    font-size: 0.9rem;
   }
 
-  .section-heading {
+  .contact-grid dt {
     color: var(--fg-muted);
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 0.75rem;
-    opacity: 0.7;
   }
 
-  .links-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  .contact-grid dd {
+    color: var(--fg);
   }
 
-  .link-entry {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    text-decoration: none;
-    color: inherit;
-    padding: 0.4rem 0;
-    transition: opacity 0.15s;
-  }
-
-  .link-entry:hover {
-    opacity: 0.8;
-  }
-
-  .link-arrow {
-    color: var(--green);
-    flex-shrink: 0;
-  }
-
-  .link-url {
+  .contact-grid a {
     color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
   }
 
-  .link-label {
-    color: var(--fg-muted);
-    font-size: 0.85rem;
+  .contact-grid a:hover {
+    color: var(--accent-bright);
+    text-decoration-color: var(--accent-bright);
   }
 </style>

@@ -15,6 +15,7 @@
   --ansi-amber: #e5c07b;
   --ansi-blue: #61afef;
   --ansi-cyan: #56b6c2;
+  --palette-dot: #58a6ff;
 }
 
 :root[data-palette="amber-crt"] {
@@ -33,6 +34,7 @@
   --ansi-amber: #ffb000;
   --ansi-blue: #ffd27a;
   --ansi-cyan: #ffdb99;
+  --palette-dot: #ffb000;
 }
 
 :root[data-palette="green-phosphor"] {
@@ -51,6 +53,7 @@
   --ansi-amber: #ccff66;
   --ansi-blue: #66ff99;
   --ansi-cyan: #99ffcc;
+  --palette-dot: #33ff66;
 }
 
 :root[data-palette="synthwave"] {
@@ -69,6 +72,7 @@
   --ansi-amber: #f7b32b;
   --ansi-blue: #7a5cff;
   --ansi-cyan: #05d9e8;
+  --palette-dot: #ff2a6d;
 }
 
 :root[data-palette="mocha"] {
@@ -87,4 +91,5 @@
   --ansi-amber: #c48f56;
   --ansi-blue: #6b82a8;
   --ansi-cyan: #6b969e;
+  --palette-dot: #d48d6a;
 }

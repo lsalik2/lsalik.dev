@@ -1,16 +1,70 @@
 ---
 import Page from '../layouts/Page.astro';
+import TerminalFrame from '../components/TerminalFrame.astro';
 ---
 <Page title="Home" path="/">
   <section class="hero">
-    <h1 class="hero-title">lsalik.dev</h1>
-    <p class="hero-desc">aerospace and software engineer</p>
-    <p class="hero-line"><span class="hero-prompt">$</span> tip: you can also <code>curl -L lsalik.dev</code> from any terminal!</p>
+    <h1 class="hero-title"><span class="accent">lsalik</span>.dev</h1>
+    <p class="tagline">aerospace & software engineer</p>
   </section>
 
-  <section class="curl-demo">
-    <div class="curl-demo-frame">
-      <div class="curl-demo-titlebar">~ — bash — 80x24</div>
+  <TerminalFrame title="whoami">
+    <dl class="whoami-grid">
+      <dt>name</dt>
+      <dd>Luis Salik</dd>
+      <dt>current role</dt>
+      <dd>data integration engineer</dd>
+      <dt>focus</dt>
+      <dd>ML &middot; data science &middot; manufacturing processes</dd>
+      <dt>github</dt>
+      <dd><a href="https://github.com/lsalik2">lsalik2</a></dd>
+      <dt>linkedin</dt>
+      <dd><a href="https://linkedin.com/in/luis-salik">luis-salik</a></dd>
+    </dl>
+  </TerminalFrame>
+
+  <TerminalFrame title="./about">
+    <p class="about-text">
+      hi! i'm luis salik. i'm an <span class="accent">aerospace</span> and
+      <span class="accent">software engineer</span> specializing in
+      machine learning, control systems, data science, and
+      manufacturing processes. i like to build things; mostly software, mostly
+      in the open. if it's on this website, then it was worth publishing.
+    </p>
+  </TerminalFrame>
+
+  <TerminalFrame title="./interests">
+    <ul class="interests-list">
+      <li><span class="bullet">&rsaquo;</span> autonomous control systems</li>
+      <li><span class="bullet">&rsaquo;</span> operating systems and low-level programming</li>
+      <li><span class="bullet">&rsaquo;</span> machine learning and its applications</li>
+      <li><span class="bullet">&rsaquo;</span> game design and development</li>
+      <li><span class="bullet">&rsaquo;</span> small, owned infrastructure</li>
+      <li><span class="bullet">&rsaquo;</span> anything that runs offline</li>
+    </ul>
+  </TerminalFrame>
+
+  <TerminalFrame title="./resume">
+    <a href="/resume.pdf" class="resume-download" download>
+      &rarr; download resume.pdf
+    </a>
+  </TerminalFrame>
+
+  <nav class="quick-links">
+    <a href="/projects">&rarr; projects</a>
+    <a href="/blog">&rarr; blog</a>
+    <a href="/contact">&rarr; contact</a>
+  </nav>
+
+  <section class="curl-easter-egg">
+    <button class="curl-teaser" id="curl-teaser" type="button" aria-expanded="false">
+      <div class="curl-teaser-titlebar">~ &mdash; bash &mdash; 80x24</div>
+      <div class="curl-teaser-body">
+        <span class="curl-prompt">$</span> curl -L lsalik.dev<span class="curl-cursor" aria-hidden="true"></span>
+        <span class="curl-hint">click to run</span>
+      </div>
+    </button>
+    <div class="curl-demo-wrapper" id="curl-demo-wrapper">
       <div class="curl-demo-body">
         <pre id="curl-demo-output"></pre>
       </div>
@@ -21,58 +75,185 @@ import Page from '../layouts/Page.astro';
 
 <style>
   .hero {
-    padding: 1.5rem 0 1rem;
+    padding: 1.5rem 0 1.25rem;
   }
 
   .hero-title {
-    font-size: 1.5rem;
-    color: var(--accent);
-    margin: 0 0 0.5rem;
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-size: 1.8rem;
+    color: var(--fg);
+    margin: 0 0 0.35rem;
+    font-weight: 600;
   }
 
-  .hero-desc {
+  .accent {
+    color: var(--accent);
+  }
+
+  .tagline {
+    font-size: 0.95rem;
     color: var(--fg-muted);
     margin: 0;
   }
 
-  .hero-line {
-    color: var(--fg-muted);
-    margin: 0.35rem 0 0;
+  .whoami-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.3rem 2rem;
     font-size: 0.9rem;
   }
 
-  .hero-prompt {
+  .whoami-grid dt {
+    color: var(--fg-muted);
+  }
+
+  .whoami-grid dd {
+    color: var(--fg);
+  }
+
+  .status-open {
     color: var(--green);
-    margin-right: 0.25rem;
   }
 
-  .hero-line code {
-    font-family: inherit;
+  .about-text {
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+
+  .about-text .accent {
     color: var(--accent);
-    background: none;
+  }
+
+  .interests-list {
+    list-style: none;
     padding: 0;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
   }
 
-  .curl-demo {
-    padding: 1rem 0;
+  .bullet {
+    color: var(--accent);
+    margin-right: 0.5ch;
   }
 
-  .curl-demo-frame {
-    border: 1px solid var(--border, #444);
-    border-radius: 6px;
+  .resume-summary {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .resume-download {
+    display: inline-block;
+    font-size: 0.9rem;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .resume-download:hover {
+    color: var(--accent-bright);
+  }
+
+  .quick-links {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.5rem;
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+  }
+
+  .quick-links a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .quick-links a:hover {
+    color: var(--accent-bright);
+  }
+
+  .curl-easter-egg {
+    margin-top: 1rem;
+  }
+
+  .curl-teaser {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0;
+    color: var(--fg-muted);
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: border-color 0.15s;
     overflow: hidden;
   }
 
-  .curl-demo-titlebar {
+  .curl-teaser:hover {
+    border-color: var(--accent);
+  }
+
+  .curl-teaser-titlebar {
     background-color: var(--bg-surface);
-    color: var(--fg-muted);
-    padding: 0.35rem 0.75rem;
+    padding: 0.3rem 0.875rem;
     font-size: 0.8rem;
-    border-bottom: 1px solid var(--border, #444);
+    color: var(--fg-muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .curl-teaser-body {
+    background-color: var(--bg);
+    padding: 0.6rem 1rem;
+  }
+
+  .curl-prompt {
+    color: var(--green);
+    margin-right: 0.25ch;
+  }
+
+  .curl-cursor {
+    display: inline-block;
+    width: 0.8ch;
+    height: 1.1em;
+    background-color: var(--cursor);
+    margin-left: 0.25ch;
+    vertical-align: text-bottom;
+    animation: cursor-blink 1s step-end infinite;
+  }
+
+  @keyframes cursor-blink {
+    50% { opacity: 0; }
+  }
+
+  .curl-hint {
+    float: right;
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    opacity: 0.5;
+  }
+
+  .curl-teaser:hover .curl-hint {
+    opacity: 0.8;
+    color: var(--accent);
+  }
+
+  .curl-demo-wrapper {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+
+  .curl-demo-wrapper.expanded {
+    max-height: 600px;
   }
 
   .curl-demo-body {
     background-color: var(--bg);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
     min-height: 380px;
     padding: 0.75rem 1rem;
   }

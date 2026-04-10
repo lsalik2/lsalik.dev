@@ -1,14 +1,17 @@
 ---
 import Page from '../layouts/Page.astro';
 import PageHeader from '../components/PageHeader.astro';
+import TerminalFrame from '../components/TerminalFrame.astro';
 import '../styles/prose.css';
 
 const aboutModule = await import('../data/about.md');
 const AboutContent = aboutModule.default;
 ---
 <Page title="About" path="/about">
-  <PageHeader heading="~/about" description="cat about.md — who I am, what I build, what I'm into." />
-  <div class="prose">
-    <AboutContent />
-  </div>
+  <PageHeader heading="about" description="who I am, what I build, what I'm into." />
+  <TerminalFrame title="cat about.md">
+    <div class="prose">
+      <AboutContent />
+    </div>
+  </TerminalFrame>
 </Page>
