@@ -21,6 +21,7 @@ const { title, path } = Astro.props;
       <footer class="page-footer">
         <span class="footer-source-line">source: <a href="https://github.com/lsalik2/lsalik.dev" class="footer-link" target="_blank" rel="noopener noreferrer">github.com/lsalik2/lsalik.dev</a></span>
         <span class="footer-copy">© Luis Salik · lsalik.dev</span>
+        <span class="footer-privacy">no cookies, no analytics, no tracking. theme preference stored locally in your browser. hosted on Vercel, which briefly processes visitor IPs for routing and DDoS protection.</span>
       </footer>
     </main>
   </div>
@@ -66,5 +67,12 @@ const { title, path } = Astro.props;
 
   .footer-link:hover {
     color: var(--accent);
+  }
+
+  .footer-privacy {
+    margin-top: 0.4rem;
+    font-size: 0.7rem;
+    opacity: 0.75;
+    max-width: 60ch;
   }
 </style>

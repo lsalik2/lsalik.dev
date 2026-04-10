@@ -105,7 +105,7 @@ export function renderProjectsIndex(projects: ProjectSummary[]): string {
 
 export function renderResume(content: string): string {
   const header = bold('~/resume');
-  return [header, '', content].join('\n');
+  return [header, '', stripMarkdownForTerminal(content)].join('\n');
 }
 
 export function renderContact(sections: readonly ContactSection[]): string {

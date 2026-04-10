@@ -21,20 +21,70 @@ import resumeRaw from './data/resume.md?raw';
 
 const TERMINAL_AGENTS = ['curl/', 'wget/', 'httpie/', 'fetch/', 'libfetch/'];
 
+// Security headers applied to every response that leaves this middleware.
+// CSP allows 'unsafe-inline' for script/style because Base.astro ships an
+// inline palette-restore head script and Astro emits inline component styles.
+// Everything else is same-origin; there are no third-party assets.
+const SECURITY_HEADERS: Record<string, string> = {
+  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+  'Content-Security-Policy': [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data:",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+  ].join('; '),
+};
+
+// Cache directives. s-maxage controls Vercel's edge cache; max-age=0 on HTML
+// keeps browsers revalidating so you never see a stale version locally after
+// a deploy. stale-while-revalidate lets the edge serve a stale copy
+// instantly while warming a fresh one in the background.
+const HTML_CACHE = 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400';
+const CURL_CACHE = 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400';
+const NOT_FOUND_CACHE = 'public, max-age=60, s-maxage=300';
+
 function isTerminalClient(userAgent: string | null): boolean {
   if (!userAgent) return false;
   const ua = userAgent.toLowerCase();
   return TERMINAL_AGENTS.some(agent => ua.includes(agent));
 }
 
-function textResponse(body: string): Response {
-  return new Response('\n' + body.trimEnd() + '\n', {
-    status: 200,
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600',
-    },
+// Clone a response with additional/overridden headers. Upstream Response
+// objects (e.g. from Astro's `next()`) can have immutable header bags in
+// edge runtimes, so we always rebuild the Headers.
+function withHeaders(response: Response, extra: Record<string, string>): Response {
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(extra)) {
+    headers.set(key, value);
+  }
+  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+    if (!headers.has(key)) headers.set(key, value);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
   });
+}
+
+function textResponse(body: string): Response {
+  return withHeaders(
+    new Response('\n' + body.trimEnd() + '\n', {
+      status: 200,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    }),
+    { 'Cache-Control': CURL_CACHE },
+  );
 }
 
 function notFoundResponse(pathname: string): Response {
@@ -46,10 +96,13 @@ function notFoundResponse(pathname: string): Response {
     '  curl lsalik.dev',
     ...navLines,
   ].join('\n');
-  return new Response('\n' + body + '\n', {
-    status: 404,
-    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-  });
+  return withHeaders(
+    new Response('\n' + body + '\n', {
+      status: 404,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    }),
+    { 'Cache-Control': NOT_FOUND_CACHE },
+  );
 }
 
 export const onRequest = defineMiddleware(async ({ request }, next) => {
@@ -58,14 +111,30 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
 
   // /links → /contact redirect (applies to both browser and curl traffic).
   if (pathname === '/links' || pathname === '/links/') {
-    return new Response(null, {
-      status: 308,
-      headers: { Location: '/contact' },
-    });
+    return withHeaders(
+      new Response(null, {
+        status: 308,
+        headers: { Location: '/contact' },
+      }),
+      { 'Cache-Control': 'public, max-age=3600, s-maxage=86400' },
+    );
   }
 
   if (!isTerminalClient(ua)) {
-    return next();
+    const response = await next();
+    // Only cache successful HTML pages. 3xx/4xx/5xx responses and the
+    // astro:content image endpoint shouldn't be edge-cached blindly.
+    const isHtml = response.headers
+      .get('content-type')
+      ?.toLowerCase()
+      .includes('text/html');
+    const extra: Record<string, string> = {};
+    if (response.status === 200 && isHtml) {
+      extra['Cache-Control'] = HTML_CACHE;
+    } else if (response.status === 404) {
+      extra['Cache-Control'] = NOT_FOUND_CACHE;
+    }
+    return withHeaders(response, extra);
   }
 
   if (pathname === '/' || pathname === '') {
