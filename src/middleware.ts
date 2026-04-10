@@ -49,9 +49,9 @@ const SECURITY_HEADERS: Record<string, string> = {
 // keeps browsers revalidating so you never see a stale version locally after
 // a deploy. stale-while-revalidate lets the edge serve a stale copy
 // instantly while warming a fresh one in the background.
-const HTML_CACHE = 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400';
-const CURL_CACHE = 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400';
-const NOT_FOUND_CACHE = 'public, max-age=60, s-maxage=300';
+const HTML_CACHE = 'public, max-age=0, must-revalidate';
+const CURL_CACHE = 'public, max-age=3600, must-revalidate';
+const NOT_FOUND_CACHE = 'public, max-age=60, must-revalidate';
 
 function isTerminalClient(userAgent: string | null): boolean {
   if (!userAgent) return false;

@@ -10,6 +10,6 @@ export default defineConfig({
     service: passthroughImageService(),
   },
   adapter: vercel({
-    edgeMiddleware: true,
+    // edgeMiddleware: true,
   }),
 });
