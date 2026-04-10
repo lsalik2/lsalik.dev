@@ -2,8 +2,6 @@
 import Base from './Base.astro';
 import Nav from '../components/Nav.astro';
 import PaletteToggle from '../components/PaletteToggle.astro';
-import { NAV_LINKS } from '../lib/nav';
-
 interface Props {
   title: string;
   path: string;
@@ -21,16 +19,8 @@ const { title, path } = Astro.props;
       <slot />
     </main>
     <footer class="page-footer">
-      <nav class="footer-nav">
-        {NAV_LINKS.map(link => (
-          <a href={link.href} class="footer-nav-link">{link.label}</a>
-        ))}
-      </nav>
-      <div class="footer-meta">
-        <span class="footer-source-line">source: <a href="https://github.com/lsalik2/lsalik.dev" class="footer-link" target="_blank" rel="noopener noreferrer">github.com/lsalik2/lsalik.dev</a></span>
-        <span class="footer-copy">&copy; Luis Salik &middot; lsalik.dev</span>
-        <span class="footer-privacy">no cookies, no analytics, no tracking. theme preference stored locally in your browser. hosted on Vercel, which briefly processes visitor IPs for routing and DDoS protection.</span>
-      </div>
+      <span class="footer-copy">&copy; Luis Salik &middot; lsalik.dev &middot; no cookies &middot; no analytics &middot; no tracking</span>
+      <span class="footer-source">source: <a href="https://github.com/lsalik2/lsalik.dev" class="footer-link" target="_blank" rel="noopener noreferrer">github.com/lsalik2/lsalik.dev</a></span>
     </footer>
   </div>
   <script src="../islands/palette-toggle.ts"></script>
@@ -62,27 +52,6 @@ const { title, path } = Astro.props;
     padding-top: 1rem;
     border-top: 1px solid var(--border);
     padding-bottom: 1.5rem;
-  }
-
-  .footer-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5ch;
-    margin-bottom: 1rem;
-    font-size: 0.85rem;
-  }
-
-  .footer-nav-link {
-    color: var(--fg-muted);
-    text-decoration: none;
-  }
-
-  .footer-nav-link:hover {
-    color: var(--accent-bright);
-    text-decoration: underline;
-  }
-
-  .footer-meta {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
@@ -99,12 +68,5 @@ const { title, path } = Astro.props;
 
   .footer-link:hover {
     color: var(--accent);
-  }
-
-  .footer-privacy {
-    margin-top: 0.4rem;
-    font-size: 0.7rem;
-    opacity: 0.75;
-    max-width: 60ch;
   }
 </style>

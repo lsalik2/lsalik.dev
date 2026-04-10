@@ -27,7 +27,17 @@ const PRESETS: AnimationPreset[] = [
   },
 ];
 
-const ACTIVE_PRESET = PRESETS[Math.floor(Math.random() * PRESETS.length)];
+// Pick a different preset than last time so the background visibly changes.
+function pickPreset(): AnimationPreset {
+  let lastIndex = -1;
+  try { lastIndex = parseInt(localStorage.getItem('ascii-bg-preset') ?? '-1', 10); } catch (_) {}
+  let index: number;
+  do { index = Math.floor(Math.random() * PRESETS.length); } while (index === lastIndex && PRESETS.length > 1);
+  try { localStorage.setItem('ascii-bg-preset', index.toString()); } catch (_) {}
+  return PRESETS[index];
+}
+
+let ACTIVE_PRESET = PRESETS[0];
 
 export const LAYER_PHASES: readonly number[] = [0, 3.7, 7.2];
 export const LAYER_COLORS: readonly string[] = [
@@ -120,6 +130,8 @@ let started = false;
 function initBackground(): void {
   const container = document.getElementById('ascii-bg');
   if (!container) return;
+
+  ACTIVE_PRESET = pickPreset();
 
   const FONT_SIZE = 11;
   const LINE_HEIGHT = 13;

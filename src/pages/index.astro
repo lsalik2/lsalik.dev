@@ -5,19 +5,17 @@ import TerminalFrame from '../components/TerminalFrame.astro';
 <Page title="Home" path="/">
   <section class="hero">
     <h1 class="hero-title"><span class="accent">lsalik</span>.dev</h1>
-    <p class="tagline">aerospace and software engineer</p>
+    <p class="tagline">aerospace & software engineer</p>
   </section>
 
   <TerminalFrame title="whoami">
     <dl class="whoami-grid">
       <dt>name</dt>
       <dd>Luis Salik</dd>
-      <dt>role</dt>
-      <dd>aerospace & software engineer</dd>
+      <dt>current role</dt>
+      <dd>data integration engineer</dd>
       <dt>focus</dt>
-      <dd>ML &middot; control systems &middot; manufacturing</dd>
-      <dt>status</dt>
-      <dd class="status-open">open to opportunities</dd>
+      <dd>ML &middot; data science &middot; manufacturing processes</dd>
       <dt>github</dt>
       <dd><a href="https://github.com/lsalik2">lsalik2</a></dd>
       <dt>linkedin</dt>
@@ -29,9 +27,9 @@ import TerminalFrame from '../components/TerminalFrame.astro';
     <p class="about-text">
       hi! i'm luis salik. i'm an <span class="accent">aerospace</span> and
       <span class="accent">software engineer</span> specializing in
-      <span class="accent">machine learning</span>, control systems, and
+      machine learning, control systems, data science, and
       manufacturing processes. i like to build things; mostly software, mostly
-      in the open.
+      in the open. if it's on this website, then it was worth publishing.
     </p>
   </TerminalFrame>
 
@@ -47,10 +45,6 @@ import TerminalFrame from '../components/TerminalFrame.astro';
   </TerminalFrame>
 
   <TerminalFrame title="./resume">
-    <p class="resume-summary">
-      for my full professional and educational background, check out
-      <a href="/resume">~/resume</a>.
-    </p>
     <a href="/resume.pdf" class="resume-download" download>
       &rarr; download resume.pdf
     </a>
@@ -64,14 +58,15 @@ import TerminalFrame from '../components/TerminalFrame.astro';
 
   <section class="curl-easter-egg">
     <button class="curl-teaser" id="curl-teaser" type="button" aria-expanded="false">
-      <span class="curl-prompt">$</span> curl -L lsalik.dev
+      <div class="curl-teaser-titlebar">~ &mdash; bash &mdash; 80x24</div>
+      <div class="curl-teaser-body">
+        <span class="curl-prompt">$</span> curl -L lsalik.dev<span class="curl-cursor" aria-hidden="true"></span>
+        <span class="curl-hint">click to run</span>
+      </div>
     </button>
     <div class="curl-demo-wrapper" id="curl-demo-wrapper">
-      <div class="curl-demo-frame">
-        <div class="curl-demo-titlebar">~ &mdash; bash &mdash; 80x24</div>
-        <div class="curl-demo-body">
-          <pre id="curl-demo-output"></pre>
-        </div>
+      <div class="curl-demo-body">
+        <pre id="curl-demo-output"></pre>
       </div>
     </div>
   </section>
@@ -184,25 +179,64 @@ import TerminalFrame from '../components/TerminalFrame.astro';
     display: block;
     width: 100%;
     text-align: left;
-    background: var(--bg-surface);
+    background: none;
     border: 1px solid var(--border);
     border-radius: 4px;
-    padding: 0.5rem 1rem;
+    padding: 0;
     color: var(--fg-muted);
     font-family: inherit;
     font-size: 0.85rem;
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
+    transition: border-color 0.15s;
+    overflow: hidden;
   }
 
   .curl-teaser:hover {
     border-color: var(--accent);
-    color: var(--fg);
+  }
+
+  .curl-teaser-titlebar {
+    background-color: var(--bg-surface);
+    padding: 0.3rem 0.875rem;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .curl-teaser-body {
+    background-color: var(--bg);
+    padding: 0.6rem 1rem;
   }
 
   .curl-prompt {
     color: var(--green);
     margin-right: 0.25ch;
+  }
+
+  .curl-cursor {
+    display: inline-block;
+    width: 0.8ch;
+    height: 1.1em;
+    background-color: var(--cursor);
+    margin-left: 0.25ch;
+    vertical-align: text-bottom;
+    animation: cursor-blink 1s step-end infinite;
+  }
+
+  @keyframes cursor-blink {
+    50% { opacity: 0; }
+  }
+
+  .curl-hint {
+    float: right;
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    opacity: 0.5;
+  }
+
+  .curl-teaser:hover .curl-hint {
+    opacity: 0.8;
+    color: var(--accent);
   }
 
   .curl-demo-wrapper {
@@ -215,23 +249,11 @@ import TerminalFrame from '../components/TerminalFrame.astro';
     max-height: 600px;
   }
 
-  .curl-demo-frame {
+  .curl-demo-body {
+    background-color: var(--bg);
     border: 1px solid var(--border);
     border-top: none;
     border-radius: 0 0 4px 4px;
-    overflow: hidden;
-  }
-
-  .curl-demo-titlebar {
-    background-color: var(--bg-surface);
-    color: var(--fg-muted);
-    padding: 0.35rem 0.75rem;
-    font-size: 0.8rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .curl-demo-body {
-    background-color: var(--bg);
     min-height: 380px;
     padding: 0.75rem 1rem;
   }
