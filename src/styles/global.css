@@ -26,6 +26,10 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+h1, h2, h3 {
+  font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+}
+
 body {
   min-height: 100vh;
 }
