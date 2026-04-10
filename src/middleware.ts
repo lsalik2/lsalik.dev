@@ -45,13 +45,15 @@ const SECURITY_HEADERS: Record<string, string> = {
   ].join('; '),
 };
 
-// Cache directives. s-maxage controls Vercel's edge cache; max-age=0 on HTML
-// keeps browsers revalidating so you never see a stale version locally after
-// a deploy. stale-while-revalidate lets the edge serve a stale copy
-// instantly while warming a fresh one in the background.
-const HTML_CACHE = 'public, max-age=0, must-revalidate';
-const CURL_CACHE = 'public, max-age=3600, must-revalidate';
-const NOT_FOUND_CACHE = 'public, max-age=60, must-revalidate';
+// Cache directives. We must prevent Vercel from caching responses on the edge
+// because we return fundamentally different content (HTML vs Plain Text) on the
+// same URL depending on the User-Agent. Vercel's edge cache does not support
+// Vary: User-Agent, so if we allow edge caching, browsers will get terminal text
+// or terminals will get HTML.
+const CACHE_CONTROL = 'private, no-cache, no-store, must-revalidate';
+const HTML_CACHE = CACHE_CONTROL;
+const CURL_CACHE = CACHE_CONTROL;
+const NOT_FOUND_CACHE = CACHE_CONTROL;
 
 function isTerminalClient(userAgent: string | null): boolean {
   if (!userAgent) return false;
