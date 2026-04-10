@@ -36,7 +36,7 @@ const tagsStr = tags.join(', ');
     border: 1px solid var(--border);
     border-radius: 4px;
     overflow: hidden;
-    transition: border-color 0.15s ease;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
   }
 
   .blog-card:hover .card-frame {
@@ -59,12 +59,17 @@ const tagsStr = tags.join(', ');
     border-bottom-color: var(--accent);
   }
 
+  .blog-card:hover .card-body {
+    background-color: var(--bg-surface);
+  }
+
   .card-body {
     padding: 1rem;
     background-color: var(--bg);
   }
 
   .card-title {
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
     margin: 0 0 0.4rem;
     color: var(--accent);
     font-weight: 600;
