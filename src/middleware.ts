@@ -87,10 +87,22 @@ function textResponse(body: string): Response {
   );
 }
 
+// Sanitize a pathname before echoing it into a terminal response body.
+// Strips ASCII control characters (including ESC 0x1b, which drives ANSI
+// escape sequences) so a crafted URL can't inject cursor moves, screen
+// clears, or terminal emulator exploits into the 404 output. Also caps the
+// length so a huge path can't flood the response.
+function sanitizePathnameForTerminal(pathname: string): string {
+  // eslint-disable-next-line no-control-regex
+  const stripped = pathname.replace(/[\x00-\x1f\x7f]/g, '?');
+  return stripped.length > 120 ? stripped.slice(0, 117) + '...' : stripped;
+}
+
 function notFoundResponse(pathname: string): Response {
+  const safePath = sanitizePathnameForTerminal(pathname);
   const navLines = NAV_LINKS.map(link => `  curl lsalik.dev${link.href}`);
   const body = [
-    `404: ${pathname} — not found`,
+    `404: ${safePath} — not found`,
     '',
     'navigate:',
     '  curl lsalik.dev',

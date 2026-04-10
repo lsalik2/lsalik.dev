@@ -73,6 +73,30 @@ Requires Node 18+. No environment variables needed for local development.
 
 Deploys automatically via Vercel on push to `main`. The Vercel adapter runs the Astro server as an edge function. Sharp image processing is intentionally disabled (`passthroughImageService`) because it pulls in Node built-ins incompatible with the edge runtime.
 
+## Future plans
+
+Here's some future additions I plan to add:
+- curl rendering improvements: curl outputs are raw markdown. eventually planning to beautify this.
+- improve contact links: thinking of maybe swapping the link/label positioning or something of the sort
+- blog pagination: will add this once i have too many blogs, same with projects
+- animation switcher: allows for users to switch to different animation presets
+- add logo/images: specifically on the top corners of page-main
+- blog searching/filtering: no way to look for specific titles or tags in blogs
+- rss/atom feed: plus a plain-text version for terminal clients
+- curl lsalik.dev/ssh easter egg: not sure what the easter egg should be, maybe some ascii art of my cats?
+- curl lsalik.dev/resume rendered as a nicely boxed ANSI CV
+- blog reading time: estimate in frontmatter
+- previous/next at bottom of blog posts: self-explanatory
+- blog code-block copy buttons: self-explanatory
+- live projects github stats: stars, last commit, etc.
+- more palette themese cause why not (solarized, gruvbox, nord)
+- keyboard shortcuts: g h, g b, / to focus search (vim-style)
+- man lsalik page: fake manpage layout
+- ASCII background reacting subtly to cursor/scroll: self-explanatory
+- OG image generation per post: Satori or similar, build-time so edge-safe
+- sitemap.xml + robots.txt cause I forgot
+- /uses page: structure it as faux neofetch output when curled: OS, shell, editor, WM, terminal, font, etc.
+
 ## Copying / reuse
 
 Feel free to fork and adapt this for your own site. Attribution is appreciated but not required.
