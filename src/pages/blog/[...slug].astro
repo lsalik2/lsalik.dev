@@ -2,29 +2,118 @@
 import { getCollection, render } from 'astro:content';
 import Page from '../../layouts/Page.astro';
 import TerminalFrame from '../../components/TerminalFrame.astro';
+import { readingTime } from '../../lib/reading-time';
 import '../../styles/prose.css';
 
 const slug = Astro.params.slug;
-const posts = await getCollection('blog', ({ data }) => !data.draft);
-const post = posts.find(p => p.id === slug);
-if (!post) return Astro.redirect('/blog');
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const posts = allPosts.sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+const idx = posts.findIndex(p => p.id === slug);
+if (idx === -1) return Astro.redirect('/blog');
+const post = posts[idx];
 const { Content } = await render(post);
 const dateStr = post.data.date.toISOString().slice(0, 10);
 const tagsStr = post.data.tags.join(', ');
+const minutes = readingTime(post.body ?? '');
+// Descending sort: lower index = newer post. "next" points forward in time.
+const next = posts[idx - 1];
+const prev = posts[idx + 1];
 ---
 <Page title={post.data.title} path="/blog">
   <TerminalFrame title={`cat ~/blog/${post.id}.md`}>
-    <p class="post-meta">{dateStr} · {tagsStr}</p>
+    <p class="feed-link">
+      <a href="/rss.xml" type="application/rss+xml">[rss feed]</a>
+    </p>
+    <p class="post-meta">{dateStr} · {tagsStr} · {minutes} min read</p>
     <div class="prose">
       <Content />
     </div>
+    {(prev || next) && (
+      <nav class="post-nav" aria-label="Adjacent posts">
+        {prev ? (
+          <a class="post-nav-prev" href={`/blog/${prev.id}/`}>
+            <span class="post-nav-arrow">←</span>
+            <span class="post-nav-label">prev</span>
+            <span class="post-nav-title">{prev.data.title}</span>
+          </a>
+        ) : <span />}
+        {next ? (
+          <a class="post-nav-next" href={`/blog/${next.id}/`}>
+            <span class="post-nav-label">next</span>
+            <span class="post-nav-title">{next.data.title}</span>
+            <span class="post-nav-arrow">→</span>
+          </a>
+        ) : <span />}
+      </nav>
+    )}
   </TerminalFrame>
 </Page>
 
+<script>
+  import '../../islands/code-copy';
+</script>
+
 <style>
+  .feed-link {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .feed-link a {
+    color: var(--amber);
+    text-decoration: none;
+  }
+
+  .feed-link a:hover {
+    color: var(--accent-bright);
+  }
+
   .post-meta {
     font-size: 0.85rem;
     color: var(--fg-muted);
     margin: 0 0 1.5rem;
+  }
+
+  .post-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border);
+    font-size: 0.9rem;
+  }
+
+  .post-nav a {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: baseline;
+    color: var(--accent);
+    text-decoration: none;
+    max-width: 48%;
+  }
+
+  .post-nav a:hover {
+    color: var(--accent-bright);
+  }
+
+  .post-nav-label {
+    color: var(--fg-muted);
+    text-transform: lowercase;
+  }
+
+  .post-nav-title {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .post-nav-next {
+    margin-left: auto;
+    text-align: right;
   }
 </style>

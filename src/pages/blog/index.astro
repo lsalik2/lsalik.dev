@@ -9,6 +9,9 @@ posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 <Page title="Blog" path="/blog">
   <PageHeader heading="blog" description="essays, notes, and the occasional rant." />
+  <p class="feed-link">
+    <a href="/rss.xml" type="application/rss+xml">[rss feed]</a>
+  </p>
   {posts.map(post => (
     <BlogCard
       title={post.data.title}
@@ -21,4 +24,17 @@ posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 </Page>
 
 <style>
+  .feed-link {
+    margin: -0.75rem 0 1.25rem;
+    font-size: 0.85rem;
+  }
+
+  .feed-link a {
+    color: var(--amber);
+    text-decoration: none;
+  }
+
+  .feed-link a:hover {
+    color: var(--accent-bright);
+  }
 </style>

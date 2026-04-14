@@ -1,7 +1,6 @@
 import { bold, dim, green, blue, amber, cyan } from './ansi';
 import { renderLogo } from './logo';
 import { NAV_LINKS } from '../lib/nav';
-import { stripMarkdownForTerminal } from './markdown';
 import type { ContactSection } from '../data/contact';
 export type { ContactSection };
 
@@ -13,11 +12,19 @@ export interface BlogPostSummary {
   description: string;
 }
 
+export interface BlogPostNeighbor {
+  slug: string;
+  title: string;
+}
+
 export interface BlogPostFull {
   title: string;
   date: string;
   tags: string[];
   content: string;
+  readingMinutes: number;
+  prev?: BlogPostNeighbor;
+  next?: BlogPostNeighbor;
 }
 
 export interface ProjectPostFull {
@@ -71,9 +78,48 @@ export function renderBlogIndex(posts: BlogPostSummary[]): string {
 
 export function renderBlogPost(post: BlogPostFull): string {
   const title = bold(`# ${post.title}`);
-  const meta = dim(`${post.date} · ${post.tags.join(', ')}`);
+  const meta = dim(
+    `${post.date} · ${post.tags.join(', ')} · ${post.readingMinutes} min read`,
+  );
 
-  return [title, meta, '', post.content].join('\n');
+  const parts: string[] = [title, meta, '', post.content];
+
+  if (post.prev || post.next) {
+    parts.push('', dim('—'.repeat(40)));
+    if (post.prev) {
+      parts.push(
+        `${dim('← prev:')} ${post.prev.title}  ${cyan(`curl -L lsalik.dev/blog/${post.prev.slug}`)}`,
+      );
+    }
+    if (post.next) {
+      parts.push(
+        `${dim('→ next:')} ${post.next.title}  ${cyan(`curl -L lsalik.dev/blog/${post.next.slug}`)}`,
+      );
+    }
+  }
+
+  return parts.join('\n');
+}
+
+export function renderRSS(posts: BlogPostSummary[]): string {
+  const header = bold('~/rss');
+  const sub = dim('lsalik.dev — blog feed');
+
+  if (posts.length === 0) {
+    return [header, sub, '', 'No posts yet.'].join('\n');
+  }
+
+  const postLines = posts.map(post => {
+    const date = dim(post.date);
+    const title = bold(post.title);
+    const description = post.description;
+    const url = cyan(`curl -L lsalik.dev/blog/${post.slug}`);
+    return `${date}  ${title}\n  ${description}\n  ${url}`;
+  });
+
+  const footer = dim('(xml: curl -L lsalik.dev/rss.xml from a browser UA)');
+
+  return [header, sub, '', ...postLines, '', footer].join('\n');
 }
 
 // Unlike renderBlogPost, the project title is not prefixed with `# ` — that
@@ -103,11 +149,6 @@ export function renderProjectsIndex(projects: ProjectSummary[]): string {
   return [header, '', ...projectLines].join('\n');
 }
 
-export function renderResume(content: string): string {
-  const header = bold('~/resume');
-  return [header, '', stripMarkdownForTerminal(content)].join('\n');
-}
-
 export function renderContact(sections: readonly ContactSection[]): string {
   const header = bold('~/contact');
   const sectionLines = sections.flatMap(section => {
@@ -116,10 +157,5 @@ export function renderContact(sections: readonly ContactSection[]): string {
     return [sectionHeader, ...links];
   });
   return [header, '', ...sectionLines].join('\n');
-}
-
-export function renderAbout(content: string): string {
-  const header = bold('~/about');
-  return [header, '', stripMarkdownForTerminal(content)].join('\n');
 }
 
