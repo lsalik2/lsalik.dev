@@ -8,14 +8,12 @@ const requestedPath = Astro.url.pathname.replace(/^\//, '') || '/';
   <PageHeader heading="404: not found" description="the path you requested doesn't exist." />
   <div class="not-found">
     <p class="error-line"><span class="prompt">$</span> ls <span class="path">{requestedPath}</span></p>
-    <p class="error-msg">ls: cannot access '{requestedPath}': No such file or directory</p>
+    <p class="error-msg">cannot access '{requestedPath}': No such file or directory</p>
     <p class="nav-hint">navigate to:</p>
     <ul class="nav-list">
       <li><a href="/">~/</a></li>
-      <li><a href="/about">~/about</a></li>
       <li><a href="/projects">~/projects</a></li>
       <li><a href="/blog">~/blog</a></li>
-      <li><a href="/resume">~/resume</a></li>
       <li><a href="/contact">~/contact</a></li>
     </ul>
   </div>
