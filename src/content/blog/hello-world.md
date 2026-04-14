@@ -1,6 +1,6 @@
 ---
-title: "Hello, World"
-date: 2026-04-07
+title: "Hello, World!"
+date: 2026-04-09
 tags: [meta, webdev]
 description: "First post on lsalik.dev for testing purposes."
 draft: false
@@ -47,7 +47,7 @@ print some_python_code
 Now for some [clickable links](https://lsalik.dev)!
 
 Let's try some images:
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+![lsalik.dev logo](https://github.com/lsalik2/lsalik.dev/blob/main/public/favicon.svg "lsalik.dev logo")
 
 How about some headings?
 

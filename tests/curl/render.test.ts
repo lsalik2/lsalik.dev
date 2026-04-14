@@ -4,9 +4,7 @@ import {
   renderBlogIndex,
   renderBlogPost,
   renderProjectsIndex,
-  renderResume,
   renderContact,
-  renderAbout,
   renderProjectPost,
   type ContactSection,
 } from '../../src/curl/render';
@@ -41,14 +39,15 @@ describe('renderHome', () => {
     expect(demoSource).not.toContain("curl -L lsalik.dev/links");
   });
 
-  it('lists all 5 nav paths in the curl output', () => {
+  it('lists the current nav paths in the curl output', () => {
     const out = stripAnsi(renderHome());
-    expect(out).toContain('curl -L lsalik.dev/about');
+    expect(out).toContain('curl -L lsalik.dev/');
     expect(out).toContain('curl -L lsalik.dev/projects');
     expect(out).toContain('curl -L lsalik.dev/blog');
-    expect(out).toContain('curl -L lsalik.dev/resume');
     expect(out).toContain('curl -L lsalik.dev/contact');
     expect(out).not.toContain('curl -L lsalik.dev/sources');
+    expect(out).not.toContain('curl -L lsalik.dev/about');
+    expect(out).not.toContain('curl -L lsalik.dev/resume');
   });
 
   it('does not still advertise the old /links path', () => {
@@ -100,6 +99,7 @@ describe('renderBlogPost', () => {
     date: '2026-04-01',
     tags: ['dev'],
     content: 'This is the content of the post.',
+    readingMinutes: 1,
   };
 
   it('includes the post title', () => {
@@ -153,18 +153,6 @@ describe('renderProjectsIndex', () => {
   });
 });
 
-describe('renderResume', () => {
-  it('shows ~/resume header', () => {
-    const result = renderResume('Resume content here.');
-    expect(result).toContain('~/resume');
-  });
-
-  it('includes the content', () => {
-    const result = renderResume('Resume content here.');
-    expect(result).toContain('Resume content here.');
-  });
-});
-
 describe('renderContact', () => {
   const sections: ContactSection[] = [
     {
@@ -193,14 +181,6 @@ describe('renderContact', () => {
     expect(out).toContain('GitHub');
     expect(out).toContain('https://github.com/lsalik2');
     expect(out).toContain('Twitch');
-  });
-});
-
-describe('renderAbout', () => {
-  it('emits the ~/about heading and body text', () => {
-    const out = stripAnsi(renderAbout('hi there'));
-    expect(out).toContain('~/about');
-    expect(out).toContain('hi there');
   });
 });
 

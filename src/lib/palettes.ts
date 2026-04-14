@@ -4,5 +4,8 @@ export const PALETTES = [
   'green-phosphor',
   'synthwave',
   'mocha',
+  'solarized',
+  'gruvbox',
+  'nord',
 ] as const;
 export type PaletteName = typeof PALETTES[number];

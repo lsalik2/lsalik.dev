@@ -6,18 +6,12 @@ import {
   renderBlogIndex,
   renderBlogPost,
   renderProjectsIndex,
-  renderResume,
   renderContact,
-  renderAbout,
   renderProjectPost,
+  renderRSS,
 } from './curl/render';
+import { readingTime } from './lib/reading-time';
 import { CONTACT_SECTIONS } from './data/contact';
-
-// Raw markdown bodies for the about and sources pages. Vite's ?raw query
-// gives us the file's text content directly, which is what the curl renderers
-// want (no Astro markdown component rendering for the terminal output).
-import aboutRaw from './data/about.md?raw';
-import resumeRaw from './data/resume.md?raw';
 
 const TERMINAL_AGENTS = ['curl/', 'wget/', 'httpie/', 'fetch/', 'libfetch/'];
 
@@ -80,8 +74,10 @@ function withHeaders(response: Response, extra: Record<string, string>): Respons
 }
 
 function textResponse(body: string): Response {
+  // Wrap the body in blank lines on both ends so the curl output is visually
+  // separated from the user's shell prompt above and below.
   return withHeaders(
-    new Response('\n' + body.trimEnd() + '\n', {
+    new Response('\n' + body.trimEnd() + '\n\n', {
       status: 200,
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     }),
@@ -111,7 +107,7 @@ function notFoundResponse(pathname: string): Response {
     ...navLines,
   ].join('\n');
   return withHeaders(
-    new Response('\n' + body + '\n', {
+    new Response('\n' + body + '\n\n', {
       status: 404,
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     }),
@@ -122,6 +118,14 @@ function notFoundResponse(pathname: string): Response {
 export const onRequest = defineMiddleware(async ({ request }, next) => {
   const ua = request.headers.get('user-agent');
   const { pathname } = new URL(request.url);
+
+  // Feed / crawler endpoints — served as-is to every client (curl included),
+  // since RSS readers and search engines may send non-browser User-Agents
+  // but still need the real XML/text rather than the terminal renderer.
+  if (pathname === '/sitemap.xml' || pathname === '/robots.txt') {
+    const response = await next();
+    return withHeaders(response, {});
+  }
 
   // /links → /contact redirect (applies to both browser and curl traffic).
   if (pathname === '/links' || pathname === '/links/') {
@@ -170,18 +174,44 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     return textResponse(renderBlogIndex(posts));
   }
 
+  if (pathname === '/rss.xml' || pathname === '/rss' || pathname === '/rss/') {
+    const entries = await getCollection('blog');
+    const posts = entries
+      .filter(post => !post.data.draft)
+      .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+      .map(post => ({
+        slug: post.id,
+        title: post.data.title,
+        date: post.data.date.toISOString().slice(0, 10),
+        tags: post.data.tags,
+        description: post.data.description,
+      }));
+    return textResponse(renderRSS(posts));
+  }
+
   const blogMatch = pathname.match(/^\/blog\/([^/]+)\/?$/);
   if (blogMatch) {
     const slug = blogMatch[1];
     const entries = await getCollection('blog');
-    const entry = entries.find(post => post.id === slug);
-    if (!entry) return notFoundResponse(pathname);
+    const published = entries
+      .filter(post => !post.data.draft)
+      .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+    const idx = published.findIndex(post => post.id === slug);
+    if (idx === -1) return notFoundResponse(pathname);
+    const entry = published[idx];
+    // Descending sort: lower index = newer. `next` = newer (idx - 1),
+    // `prev` = older (idx + 1).
+    const newer = published[idx - 1];
+    const older = published[idx + 1];
     return textResponse(
       renderBlogPost({
         title: entry.data.title,
         date: entry.data.date.toISOString().slice(0, 10),
         tags: entry.data.tags,
         content: entry.body ?? entry.data.description,
+        readingMinutes: readingTime(entry.body ?? ''),
+        prev: older ? { slug: older.id, title: older.data.title } : undefined,
+        next: newer ? { slug: newer.id, title: newer.data.title } : undefined,
       })
     );
   }
@@ -221,16 +251,8 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     );
   }
 
-  if (pathname === '/resume' || pathname === '/resume/') {
-    return textResponse(renderResume(resumeRaw));
-  }
-
   if (pathname === '/contact' || pathname === '/contact/') {
     return textResponse(renderContact(CONTACT_SECTIONS));
-  }
-
-  if (pathname === '/about' || pathname === '/about/') {
-    return textResponse(renderAbout(aboutRaw));
   }
 
   return notFoundResponse(pathname);
