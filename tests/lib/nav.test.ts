@@ -18,8 +18,8 @@ describe('NAV_LINKS', () => {
     }
   });
 
-  it('contains the five expected top-level paths', () => {
+  it('contains the expected top-level paths in stable order', () => {
     const hrefs = NAV_LINKS.map(l => l.href);
-    expect(hrefs).toEqual(['/about', '/projects', '/blog', '/resume', '/contact']);
+    expect(hrefs).toEqual(['/', '/projects', '/blog', '/contact']);
   });
 });
