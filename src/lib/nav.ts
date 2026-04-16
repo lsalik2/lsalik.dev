@@ -9,4 +9,5 @@ export const NAV_LINKS: readonly NavLink[] = [
   { href: '/blog', label: '~/blog' },
 
   { href: '/contact', label: '~/contact' },
+  { href: '/resume', label: '~/resume' },
 ] as const;

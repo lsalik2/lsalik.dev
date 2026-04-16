@@ -6,13 +6,12 @@ import {
   renderProjectsIndex,
   renderContact,
   renderProjectPost,
+  renderResume,
   type ContactSection,
 } from '../../src/curl/render';
 import type { BlogPostSummary, BlogPostFull, ProjectSummary } from '../../src/curl/render';
-
-function stripAnsi(s: string): string {
-  return s.replace(/\x1b\[\d+m/g, '');
-}
+import { stripAnsi } from '../../src/curl/ansi';
+import { RESUME } from '../../src/data/resume';
 
 describe('renderHome', () => {
   it('contains ANSI escape codes', () => {
@@ -47,7 +46,7 @@ describe('renderHome', () => {
     expect(out).toContain('curl -L lsalik.dev/contact');
     expect(out).not.toContain('curl -L lsalik.dev/sources');
     expect(out).not.toContain('curl -L lsalik.dev/about');
-    expect(out).not.toContain('curl -L lsalik.dev/resume');
+    expect(out).toContain('curl -L lsalik.dev/resume');
   });
 
   it('does not still advertise the old /links path', () => {
@@ -181,6 +180,14 @@ describe('renderContact', () => {
     expect(out).toContain('GitHub');
     expect(out).toContain('https://github.com/lsalik2');
     expect(out).toContain('Twitch');
+  });
+});
+
+describe('renderResume', () => {
+  it('renders the resume with box-drawing characters', () => {
+    const result = renderResume(RESUME);
+    expect(result).toMatch(/[┌┐└┘│─]/);
+    expect(stripAnsi(result)).toContain('Luis Salik');
   });
 });
 

@@ -80,19 +80,13 @@ Here's some future additions I plan to add:
 - blog pagination: will add this once i have too many blogs, same with projects
 - add logo/images: specifically on the top corners of page-main
 - blog searching/filtering: no way to look for specific titles or tags in blogs
-- rss/atom feed: plus a plain-text version for terminal clients
 - curl -L lsalik.dev/ssh easter egg: not sure what the easter egg should be, maybe some ascii art of my cats?
 - curl -L lsalik.dev/resume rendered as a nicely boxed ANSI CV
-- blog reading time: estimate in frontmatter
-- previous/next at bottom of blog posts: self-explanatory
-- blog code-block copy buttons: self-explanatory
 - live projects github stats: stars, last commit, etc.
-- more palette themes cause why not (solarized, gruvbox, nord)
 - keyboard shortcuts: g h, g b, / to focus search (vim-style)
 - man lsalik page: fake manpage layout
 - ASCII background reacting subtly to cursor/scroll: self-explanatory
 - OG image generation per post: Satori or similar, build-time so edge-safe
-- sitemap.xml + robots.txt cause I forgot
 - /uses page: structure it as faux neofetch output when curled: OS, shell, editor, WM, terminal, font, etc.
 - add different animations: self-explanatory
 

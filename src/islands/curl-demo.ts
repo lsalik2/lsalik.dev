@@ -27,7 +27,7 @@ async function runCurlDemo(container: HTMLElement): Promise<void> {
       'font:inherit;line-height:1;letter-spacing:0;white-space:pre-wrap;margin:0;' +
       `width:${container.offsetWidth}px`;
     ghost.textContent =
-      COMMAND + '\n\n' + response.replace(/\x1b\[\d+m/g, '');
+      COMMAND + '\n\n' + response.replace(/\x1b\[[\d;]*m/g, '');
     document.body.appendChild(ghost);
     const measured = ghost.offsetHeight;
     document.body.removeChild(ghost);

@@ -1,7 +1,9 @@
-import { bold, dim, green, blue, amber, cyan } from './ansi';
+import { bold, dim, green, blue, amber, cyan, red, accentGreen, accentMagenta, bodyWarm, titleBright, borderDim } from './ansi';
 import { renderLogo } from './logo';
 import { NAV_LINKS } from '../lib/nav';
+import { box, hr, sectionHeader, twoCol, PAGE_WIDTH } from './box';
 import type { ContactSection } from '../data/contact';
+import type { Resume } from '../data/resume';
 export type { ContactSection };
 
 export interface BlogPostSummary {
@@ -48,44 +50,47 @@ export interface ProjectSummary {
 
 export function renderHome(): string {
   const logo = renderLogo();
-  const title = bold('lsalik.dev');
+  const title = bold(titleBright('lsalik.dev'));
   const description = dim('terminal-inspired personal website');
-  const navLines = NAV_LINKS.map(link => `  curl -L lsalik.dev${link.href}`);
-  const nav = [dim('navigate:'), ...navLines].join('\n');
+
+  const headerBox = box([...logo.split('\n'), '', title, description], { title: 'lsalik.dev' });
+
+  const navLines = NAV_LINKS.map(link => `  ${cyan('curl -L lsalik.dev' + link.href)}`);
+  const navBox = box([dim('navigate:'), ...navLines], { title: 'nav' });
+
   const source = dim('source: https://github.com/lsalik2/lsalik.dev');
 
-  return [logo, '', title, description, '', nav, '', source].join('\n');
+  return [headerBox, '', navBox, '', source].join('\n');
 }
 
 export function renderBlogIndex(posts: BlogPostSummary[]): string {
-  const header = bold('~/blog');
+  const header = sectionHeader('~/blog');
 
   if (posts.length === 0) {
-    return [header, '', 'No posts yet.'].join('\n');
+    return [header, '', box(['No posts yet.'])].join('\n');
   }
 
-  const postLines = posts.map(post => {
-    const date = dim(post.date);
-    const title = bold(post.title);
+  const postBoxes = posts.map(post => {
+    const topLine = twoCol(bold(post.title), dim(post.date), PAGE_WIDTH - 4);
     const tags = dim(`[${post.tags.join(', ')}]`);
-    const description = post.description;
     const url = cyan(`curl -L lsalik.dev/blog/${post.slug}`);
-    return `${date}  ${title}  ${tags}\n  ${description}\n  ${url}`;
+    return box([topLine, post.description, tags, url]);
   });
 
-  return [header, '', ...postLines].join('\n');
+  return [header, '', ...postBoxes].join('\n');
 }
 
 export function renderBlogPost(post: BlogPostFull): string {
-  const title = bold(`# ${post.title}`);
+  const topLine = twoCol(bold(post.title), dim(post.date), PAGE_WIDTH - 4);
   const meta = dim(
-    `${post.date} · ${post.tags.join(', ')} · ${post.readingMinutes} min read`,
+    `${post.tags.join(', ')} · ${post.readingMinutes} min read`,
   );
+  const headerBox = box([topLine, meta], { title: post.title });
 
-  const parts: string[] = [title, meta, '', post.content];
+  const parts: string[] = [headerBox, '', post.content];
 
   if (post.prev || post.next) {
-    parts.push('', dim('—'.repeat(40)));
+    parts.push('', hr());
     if (post.prev) {
       parts.push(
         `${dim('← prev:')} ${post.prev.title}  ${cyan(`curl -L lsalik.dev/blog/${post.prev.slug}`)}`,
@@ -102,60 +107,107 @@ export function renderBlogPost(post: BlogPostFull): string {
 }
 
 export function renderRSS(posts: BlogPostSummary[]): string {
-  const header = bold('~/rss');
+  const header = sectionHeader('~/rss');
   const sub = dim('lsalik.dev — blog feed');
 
   if (posts.length === 0) {
-    return [header, sub, '', 'No posts yet.'].join('\n');
+    return [header, sub, '', box(['No posts yet.'])].join('\n');
   }
 
-  const postLines = posts.map(post => {
-    const date = dim(post.date);
-    const title = bold(post.title);
-    const description = post.description;
+  const postBoxes = posts.map(post => {
+    const topLine = twoCol(bold(post.title), dim(post.date), PAGE_WIDTH - 4);
     const url = cyan(`curl -L lsalik.dev/blog/${post.slug}`);
-    return `${date}  ${title}\n  ${description}\n  ${url}`;
+    return box([topLine, post.description, url]);
   });
 
   const footer = dim('(xml: curl -L lsalik.dev/rss.xml from a browser UA)');
 
-  return [header, sub, '', ...postLines, '', footer].join('\n');
+  return [header, sub, '', ...postBoxes, '', hr(), footer].join('\n');
 }
 
-// Unlike renderBlogPost, the project title is not prefixed with `# ` — that
-// matches the shape of the prior inline project-post output in middleware.ts,
-// and keeps project READMEs visually distinct from blog posts in the terminal.
 export function renderProjectPost(project: ProjectPostFull): string {
-  const title = bold(project.title);
   const meta = `${dim(project.status)} · ${project.stack.join(' · ')}`;
-  return [title, meta, '', project.content].join('\n');
+  const headerBox = box([bold(project.title), meta], { title: project.title });
+  return [headerBox, '', project.content].join('\n');
 }
 
 export function renderProjectsIndex(projects: ProjectSummary[]): string {
-  const header = bold('~/projects');
+  const header = sectionHeader('~/projects');
 
-  const projectLines = projects.map(project => {
-    const perms = dim(project.permissions);
-    const owner = green('slk');
-    const date = dim(project.date);
-    const title = blue(project.title);
+  const projectBoxes = projects.map(project => {
+    const topLine = twoCol(
+      bold(blue(project.title)) + '  ' + dim(project.permissions),
+      amber(project.status),
+      PAGE_WIDTH - 4,
+    );
     const stack = dim(project.stack.join(' · '));
-    const status = amber(project.status);
     const repoLink = project.repo ? `${cyan('→')} ${project.repo}` : dim('→ closed source');
     const url = cyan(`curl -L lsalik.dev/projects/${project.slug}`);
-    return `${perms}  ${owner}  ${date}  ${title}\n  ${project.description}\n  ${stack}  ${status}\n  ${repoLink}\n  ${url}`;
+    return box([topLine, project.description, stack, repoLink, url]);
   });
 
-  return [header, '', ...projectLines].join('\n');
+  return [header, '', ...projectBoxes].join('\n');
 }
 
 export function renderContact(sections: readonly ContactSection[]): string {
-  const header = bold('~/contact');
-  const sectionLines = sections.flatMap(section => {
-    const sectionHeader = dim(`— ${section.heading} —`);
-    const links = section.links.map(link => `  ${link.label}  ${link.url}`);
-    return [sectionHeader, ...links];
+  const header = sectionHeader('~/contact');
+
+  const sectionBoxes = sections.map(section => {
+    const links = section.links.map(link => `  ${link.label}  ${cyan(link.url)}`);
+    return box(links, { title: section.heading });
   });
-  return [header, '', ...sectionLines].join('\n');
+
+  return [header, '', ...sectionBoxes].join('\n');
 }
 
+export function renderResume(resume: Resume): string {
+  const inner = PAGE_WIDTH - 4;
+
+  const nameLines = [
+    bold(titleBright(resume.name)),
+    bodyWarm(`${resume.location}  |  ${resume.links.map(l => cyan(l.url)).join('  |  ')}`),
+  ];
+  const headerBox = box(nameLines, { title: '~/resume' });
+
+  const expHeader = sectionHeader('WORK EXPERIENCE');
+  const expBoxes = resume.experience.map(job => {
+    const topLine = twoCol(
+      bold(job.title) + ', ' + accentMagenta(job.company) + dim(' — ' + job.location),
+      bold(job.dates),
+      inner,
+    );
+    const bullets = job.bullets.map(b => `  ${accentGreen('●')} ${bodyWarm(b)}`);
+    return box([topLine, '', ...bullets]);
+  });
+
+  const eduHeader = sectionHeader('EDUCATION');
+  const eduBoxes = resume.education.map(edu => {
+    const topLine = bold(edu.degree) + ', ' + accentMagenta(edu.school);
+    const bullets = edu.bullets.map(b => `  ${accentGreen('●')} ${bodyWarm(b)}`);
+    return box([topLine, '', ...bullets]);
+  });
+
+  const skillsHeader = sectionHeader('SKILLS & LANGUAGES');
+  const skillLines = resume.skills.map(cat =>
+    `${bold(cat.label + ':')} ${bodyWarm(cat.items.join(', '))}`,
+  );
+  const skillsBox = box(skillLines);
+
+  const footer = dim(`pdf: curl -LO lsalik.dev/resume.pdf`);
+
+  return [
+    headerBox,
+    '',
+    expHeader,
+    ...expBoxes,
+    '',
+    eduHeader,
+    ...eduBoxes,
+    '',
+    skillsHeader,
+    skillsBox,
+    '',
+    hr(),
+    footer,
+  ].join('\n');
+}
