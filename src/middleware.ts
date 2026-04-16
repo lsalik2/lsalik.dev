@@ -9,35 +9,16 @@ import {
   renderContact,
   renderProjectPost,
   renderRSS,
+  renderResume,
 } from './curl/render';
 import { readingTime } from './lib/reading-time';
 import { CONTACT_SECTIONS } from './data/contact';
+import { RESUME } from './data/resume';
+import { red } from './curl/ansi';
+import { box } from './curl/box';
+import { SECURITY_HEADERS } from './lib/security-headers';
 
 const TERMINAL_AGENTS = ['curl/', 'wget/', 'httpie/', 'fetch/', 'libfetch/'];
-
-// Security headers applied to every response that leaves this middleware.
-// CSP allows 'unsafe-inline' for script/style because Base.astro ships an
-// inline palette-restore head script and Astro emits inline component styles.
-// Everything else is same-origin; there are no third-party assets.
-const SECURITY_HEADERS: Record<string, string> = {
-  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
-  'Content-Security-Policy': [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data:",
-    "font-src 'self'",
-    "connect-src 'self'",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "frame-ancestors 'none'",
-    "form-action 'self'",
-  ].join('; '),
-};
 
 // Cache directives. We must prevent Vercel from caching responses on the edge
 // because we return fundamentally different content (HTML vs Plain Text) on the
@@ -99,13 +80,16 @@ function sanitizePathnameForTerminal(pathname: string): string {
 function notFoundResponse(pathname: string): Response {
   const safePath = sanitizePathnameForTerminal(pathname);
   const navLines = NAV_LINKS.map(link => `  curl -L lsalik.dev${link.href}`);
-  const body = [
-    `404: ${safePath} — not found`,
-    '',
-    'navigate:',
-    '  curl -L lsalik.dev',
-    ...navLines,
-  ].join('\n');
+  const body = box(
+    [
+      red(`404: ${safePath} — not found`),
+      '',
+      'navigate:',
+      '  curl -L lsalik.dev',
+      ...navLines,
+    ],
+    { title: '404' },
+  );
   return withHeaders(
     new Response('\n' + body + '\n\n', {
       status: 404,
@@ -253,6 +237,10 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
 
   if (pathname === '/contact' || pathname === '/contact/') {
     return textResponse(renderContact(CONTACT_SECTIONS));
+  }
+
+  if (pathname === '/resume' || pathname === '/resume/') {
+    return textResponse(renderResume(RESUME));
   }
 
   return notFoundResponse(pathname);
