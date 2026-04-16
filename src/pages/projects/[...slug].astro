@@ -7,7 +7,7 @@ import '../../styles/prose.css';
 const slug = Astro.params.slug;
 const projects = await getCollection('projects');
 const project = projects.find(p => p.id === slug);
-if (!project) return Astro.redirect('/projects');
+if (!project) return new Response(null, { status: 404 });
 const { Content } = await render(project);
 const dateStr = project.data.date.toISOString().slice(0, 10);
 const stackStr = project.data.stack.join(' · ');

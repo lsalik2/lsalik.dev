@@ -19,6 +19,48 @@ describe('SECURITY_HEADERS', () => {
   });
 });
 
+// sanitizePathnameForTerminal is not exported; replicate its logic here to
+// test the extended control-char stripping without importing astro: modules.
+function sanitizePathnameForTerminal(pathname: string): string {
+  // eslint-disable-next-line no-control-regex
+  const stripped = pathname.replace(/[\x00-\x1f\x7f-\x9f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/g, '?');
+  return stripped.length > 120 ? stripped.slice(0, 117) + '...' : stripped;
+}
+
+describe('sanitizePathnameForTerminal', () => {
+  it('replaces ASCII control characters (ESC, NUL, etc.)', () => {
+    // \x1b is the only control char here; '[2J' are normal ASCII so not replaced.
+    expect(sanitizePathnameForTerminal('/foo\x1b[2Jbar')).toBe('/foo?[2Jbar');
+  });
+
+  it('replaces NUL byte', () => {
+    expect(sanitizePathnameForTerminal('/foo\x00bar')).toBe('/foo?bar');
+  });
+
+  it('replaces C1 control characters (0x80-0x9F)', () => {
+    expect(sanitizePathnameForTerminal('/foo\x85bar')).toBe('/foo?bar');
+  });
+
+  it('replaces U+202E RIGHT-TO-LEFT OVERRIDE (BiDi override)', () => {
+    expect(sanitizePathnameForTerminal('/foo\u202ebar')).toBe('/foo?bar');
+  });
+
+  it('replaces zero-width space U+200B', () => {
+    expect(sanitizePathnameForTerminal('/foo\u200bbar')).toBe('/foo?bar');
+  });
+
+  it('does not alter safe ASCII paths', () => {
+    expect(sanitizePathnameForTerminal('/blog/my-post-2024')).toBe('/blog/my-post-2024');
+  });
+
+  it('truncates paths longer than 120 characters', () => {
+    const long = '/' + 'a'.repeat(125);
+    const result = sanitizePathnameForTerminal(long);
+    expect(result.endsWith('...')).toBe(true);
+    expect(result.length).toBeLessThanOrEqual(120);
+  });
+});
+
 describe('isTerminalClient UA anchoring (TERMINAL_UA_RE)', () => {
   it('matches curl at the start of the UA string', () => {
     expect(TERMINAL_UA_RE.test('curl/8.4.0')).toBe(true);

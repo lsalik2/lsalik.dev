@@ -74,8 +74,11 @@ function textResponse(body: string): Response {
 // clears, or terminal emulator exploits into the 404 output. Also caps the
 // length so a huge path can't flood the response.
 function sanitizePathnameForTerminal(pathname: string): string {
+  // Strip ASCII controls (C0 + DEL), C1 controls (0x80-0x9F), zero-width
+  // and directional override codepoints (BiDi) that could mask injected
+  // content in terminal output.
   // eslint-disable-next-line no-control-regex
-  const stripped = pathname.replace(/[\x00-\x1f\x7f]/g, '?');
+  const stripped = pathname.replace(/[\x00-\x1f\x7f-\x9f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/g, '?');
   return stripped.length > 120 ? stripped.slice(0, 117) + '...' : stripped;
 }
 
