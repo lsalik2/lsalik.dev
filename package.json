@@ -14,10 +14,10 @@
     "astro": "^6.1.4"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": "22.x"
   },
+  "//overrides": "path-to-regexp: CVE-2024-45296 ReDoS — @vercel/routing-utils@5.3.3 pulls path-to-regexp@6.1.0; override forces >=6.3.0 which contains the fix. Remove when @vercel/routing-utils updates its dep.",
   "overrides": {
-    "_comment_path-to-regexp": "CVE-2024-45296 ReDoS — @vercel/routing-utils@5.3.3 pulls path-to-regexp@6.1.0; override forces >=6.3.0 which contains the fix",
     "path-to-regexp": "^6.3.0"
   },
   "devDependencies": {
