@@ -2,7 +2,7 @@
 title: "Flipper Animation Switcher"
 date: 2026-02-18
 stack: [C]
-status: "Stable"
+status: "Released"
 url: "https://lab.flipper.net/apps/animation_switcher"
 repo: "https://github.com/lsalik2/FlipperAnimationSwitcher"
 description: "A Flipper Zero application for creating, managing, and switching which background animations play on your Flipper."

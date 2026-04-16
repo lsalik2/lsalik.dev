@@ -20,11 +20,6 @@ const PRESETS: AnimationPreset[] = [
     NOISE_X: 0.08, NOISE_Y: 0.11, NOISE_XY: 0.06, NOISE_XMY: 0.09,
     TIME_X: 0.6, TIME_Y: 0.4, TIME_XY: 0.5, TIME_XMY: 0.3,
   },
-  // Static — tight high-frequency grain, barely moving
-  {
-    NOISE_X: 0.35, NOISE_Y: 0.28, NOISE_XY: 0.22, NOISE_XMY: 0.18,
-    TIME_X: 0.08, TIME_Y: 0.06, TIME_XY: 0.05, TIME_XMY: 0.04,
-  },
   // Cascade — fast diagonal rain-like streaks
   {
     NOISE_X: 0.04, NOISE_Y: 0.22, NOISE_XY: 0.18, NOISE_XMY: 0.03,
