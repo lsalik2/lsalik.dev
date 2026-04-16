@@ -53,7 +53,7 @@ export function renderHome(): string {
   const title = bold(titleBright('lsalik.dev'));
   const description = dim('terminal-inspired personal website');
 
-  const headerBox = box([...logo.split('\n'), '', title, description], { title: 'lsalik.dev' });
+  const headerBox = box(['', ...logo.split('\n'), '', title, description], { title: 'lsalik.dev' });
 
   const navLines = NAV_LINKS.map(link => `  ${cyan('curl -L lsalik.dev' + link.href)}`);
   const navBox = box([dim('navigate:'), ...navLines], { title: 'nav' });

@@ -76,12 +76,10 @@ Deploys automatically via Vercel on push to `main`. The Vercel adapter runs the 
 ## Future plans
 
 Here's some future additions I plan to add:
-- curl rendering improvements: curl outputs are raw markdown. eventually planning to beautify this.
 - blog pagination: will add this once i have too many blogs, same with projects
 - add logo/images: specifically on the top corners of page-main
 - blog searching/filtering: no way to look for specific titles or tags in blogs
 - curl -L lsalik.dev/ssh easter egg: not sure what the easter egg should be, maybe some ascii art of my cats?
-- curl -L lsalik.dev/resume rendered as a nicely boxed ANSI CV
 - live projects github stats: stars, last commit, etc.
 - keyboard shortcuts: g h, g b, / to focus search (vim-style)
 - man lsalik page: fake manpage layout
