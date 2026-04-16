@@ -14,11 +14,14 @@ import {
 import { readingTime } from './lib/reading-time';
 import { CONTACT_SECTIONS } from './data/contact';
 import { RESUME } from './data/resume';
-import { red } from './curl/ansi';
+import { red, stripDangerousEscapes } from './curl/ansi';
 import { box } from './curl/box';
 import { SECURITY_HEADERS } from './lib/security-headers';
 
-const TERMINAL_AGENTS = ['curl/', 'wget/', 'httpie/', 'fetch/', 'libfetch/'];
+// Matches terminal/CLI HTTP clients by their product token at the start of the
+// User-Agent string. Anchoring to ^ prevents a crafted UA like
+// "Mozilla/5.0 (compatible; curl/8.0)" from matching.
+const TERMINAL_UA_RE = /^(curl|wget|httpie|fetch|libfetch)\//i;
 
 // Cache directives. We must prevent Vercel from caching responses on the edge
 // because we return fundamentally different content (HTML vs Plain Text) on the
@@ -32,8 +35,7 @@ const NOT_FOUND_CACHE = CACHE_CONTROL;
 
 function isTerminalClient(userAgent: string | null): boolean {
   if (!userAgent) return false;
-  const ua = userAgent.toLowerCase();
-  return TERMINAL_AGENTS.some(agent => ua.includes(agent));
+  return TERMINAL_UA_RE.test(userAgent.trim());
 }
 
 // Clone a response with additional/overridden headers. Upstream Response
@@ -153,7 +155,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         title: post.data.title,
         date: post.data.date.toISOString().slice(0, 10),
         tags: post.data.tags,
-        description: post.data.description,
+        description: stripDangerousEscapes(post.data.description),
       }));
     return textResponse(renderBlogIndex(posts));
   }
@@ -168,7 +170,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         title: post.data.title,
         date: post.data.date.toISOString().slice(0, 10),
         tags: post.data.tags,
-        description: post.data.description,
+        description: stripDangerousEscapes(post.data.description),
       }));
     return textResponse(renderRSS(posts));
   }
@@ -192,7 +194,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         title: entry.data.title,
         date: entry.data.date.toISOString().slice(0, 10),
         tags: entry.data.tags,
-        content: entry.body ?? entry.data.description,
+        content: stripDangerousEscapes(entry.body ?? entry.data.description),
         readingMinutes: readingTime(entry.body ?? ''),
         prev: older ? { slug: older.id, title: older.data.title } : undefined,
         next: newer ? { slug: newer.id, title: newer.data.title } : undefined,
@@ -210,7 +212,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         date: project.data.date.toISOString().slice(0, 10),
         stack: project.data.stack,
         status: project.data.status,
-        description: project.data.description,
+        description: stripDangerousEscapes(project.data.description),
         permissions: project.data.permissions,
         repo: project.data.repo,
         url: project.data.url,
@@ -224,7 +226,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const entries = await getCollection('projects');
     const entry = entries.find(p => p.id === slug);
     if (!entry) return notFoundResponse(pathname);
-    const content = entry.body ?? entry.data.description;
+    const content = stripDangerousEscapes(entry.body ?? entry.data.description);
     return textResponse(
       renderProjectPost({
         title: entry.data.title,

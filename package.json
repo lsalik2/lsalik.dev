@@ -14,7 +14,8 @@
     "astro": "^6.1.4"
   },
   "overrides": {
-   "path-to-regexp": "^6.3.0"
+    "_comment_path-to-regexp": "CVE-2024-45296 ReDoS — @vercel/routing-utils@5.3.3 pulls path-to-regexp@6.1.0; override forces >=6.3.0 which contains the fix",
+    "path-to-regexp": "^6.3.0"
   },
   "devDependencies": {
     "vitest": "^4.1.3"
