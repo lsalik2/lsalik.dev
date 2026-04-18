@@ -2,7 +2,7 @@
 title: "A production security pass"
 date: 2026-04-16
 tags: [security, meta, webdev]
-description: "Self-hosted fonts, Vary: User-Agent, anchored UA matching, ANSI stripping, hashed CSP, real 404s, and a few smaller hardening items before shipping."
+description: "Self-hosted fonts, anchored UA matching, ANSI stripping, hashed CSP, and a few smaller hardening items before shipping."
 draft: false
 ---
 
@@ -14,13 +14,13 @@ Before flipping the switch to prod I ran a two-pass review over the site: an exp
 
 `Base.astro` was loading Roboto Mono from `fonts.googleapis.com` and `fonts.gstatic.com`, but the CSP emitted by the middleware was `style-src 'self' 'unsafe-inline'; font-src 'self'`. Neither Google origin was whitelisted, which meant any CSP-enforcing browser (all of them) would block the stylesheet and fall back to whatever local `monospace` resolved to. That's the whole visual identity of the site gone.
 
-I had two options: whitelist the Google origins in CSP, or self-host. Self-hosting is the stronger answer — one fewer third-party request, no cross-origin hop, CSP stays tight. I pulled all six woff2 subsets that the Google stylesheet was serving, dropped them under `public/fonts/roboto-mono/`, and added the `@font-face` block to `global.css` with matching `unicode-range` values for each subset so the browser only downloads what it actually needs. The `<link>` tags to the Google origins are gone from `Base.astro`. CSP didn't have to change at all.
+I had two options: whitelist the Google origins in CSP, or self-host. Self-hosting is the stronger answer obviously, one fewer third-party request, no cross-origin hop, CSP stays tight. I pulled all six woff2 subsets that the Google stylesheet was serving, dropped them under `public/fonts/roboto-mono/`, and added the `@font-face` block to `global.css` with matching `unicode-range` values for each subset so the browser only downloads what it actually needs. The `<link>` tags to the Google origins are gone from `Base.astro`. CSP didn't have to change at all.
 
 ## No `Vary: User-Agent` anywhere
 
 The whole site hinges on a UA-sniffing middleware: `curl lsalik.dev` gets ANSI; a browser gets HTML. That's the entire value prop of the curl feature. But no response was emitting `Vary: User-Agent`. Any proxy that honors `Vary` but doesn't honor `Cache-Control: no-store` (corporate proxies, shared squids, a future CDN tier change) could happily serve HTML to a curl client or a terminal blob to a browser. Vercel's edge cache doesn't honor `Vary: User-Agent` today, but relying on that is fragile.
 
-I moved `SECURITY_HEADERS` out of `middleware.ts` and into `src/lib/security-headers.ts` — plain module, no Astro-runtime dependency, so it's unit-testable. `Vary: User-Agent` is now the first entry, applied via `withHeaders()` to every response: curl output, HTML output, 404s, the sitemap/robots short-circuits, and the `/links` redirect. There's a new `tests/middleware.test.ts` that asserts both UAs get the header.
+I moved `SECURITY_HEADERS` out of `middleware.ts` and into `src/lib/security-headers.ts`. A plain module, no Astro-runtime dependency, so it's unit-testable. `Vary: User-Agent` is now the first entry, applied via `withHeaders()` to every response: curl output, HTML output, 404s, the sitemap/robots short-circuits, and the `/links` redirect. There's a new `tests/middleware.test.ts` that asserts both UAs get the header.
 
 # High-severity fixes
 
@@ -57,7 +57,7 @@ That helper is applied at the boundary in `middleware.ts` before content enters 
 
 ## Auditing the `path-to-regexp` override
 
-`package.json` had a forced override pinning `path-to-regexp` to `^6.3.0`, presumably for CVE-2024-45296 (a ReDoS). I wanted to know if it was still necessary or just stale config rotting in the tree. `npm ls path-to-regexp` showed `@vercel/routing-utils@5.3.3` still requesting `path-to-regexp@6.1.0` — which is the vulnerable version. So the override is load-bearing. I kept it and added a code comment citing the CVE and the dep that pulls in the unpatched version, so the next maintainer knows exactly when it can come out.
+`package.json` had a forced override pinning `path-to-regexp` to `^6.3.0`, due to CVE-2024-45296 (a ReDoS). I wanted to know if it was still necessary or just stale config rotting in the tree. `npm ls path-to-regexp` showed `@vercel/routing-utils@5.3.3` still requesting `path-to-regexp@6.1.0`, which is the vulnerable version. So the override is load-bearing. I kept it and added a code comment citing the CVE and the dep that pulls in the unpatched version, so a code agent or an open-source contributor knows exactly when it can come out.
 
 # Medium hardening
 
@@ -79,17 +79,6 @@ Added `"engines": { "node": ">=20.0.0" }` to `package.json`. Vercel's default No
 
 # Low-severity cleanup
 
-**Unicode controls in 404 paths.** The pathname sanitizer stripped `[\x00-\x1f\x7f]` — which kills ESC, great — but left C1 controls (`\x80-\x9f`), BiDi overrides (`U+202A-\u202E`, `U+2066-\u2069`), and zero-width spaces alone. A path like `/ɛvil\u202e...` would render right-to-left in the 404 box. Cosmetic, not exploitable without ESC, but one regex change fixed it.
+**Unicode controls in 404 paths.** The pathname sanitizer stripped `[\x00-\x1f\x7f]`, which kills ESC, great and all but left C1 controls (`\x80-\x9f`), BiDi overrides (`U+202A-\u202E`, `U+2066-\u2069`), and zero-width spaces alone. A path like `/ɛvil\u202e...` would render right-to-left in the 404 box. Cosmetic, not exploitable without ESC, but one regex change fixed it.
 
 **Real 404s for missing slugs.** Both `blog/[...slug].astro` and `projects/[...slug].astro` were redirecting to their index page on a miss. That's observability-hostile: search engines index and follow the redirect, and legitimately-gone URLs don't signal gone. Both now return `new Response(null, { status: 404 })`.
-
-# What it looks like on disk
-
-Four commits, in order:
-
-1. `sec: self-host Roboto Mono fonts and add Vary: User-Agent` (C1 + C2)
-2. `sec: anchor UA match, strip ANSI from content bodies, audit path-to-regexp` (H1 + H2 + H3)
-3. `sec: hash-pin inline script CSP and pin node engine` (M1 + M2)
-4. `fix: sanitize unicode control chars in pathname and return real 404 on missing slugs` (L1 + L2)
-
-140 tests passing across 12 files. The site is in a good shape to ship.
