@@ -20,7 +20,6 @@
   --ansi-body-warm: #ffd7af;
   --ansi-accent-magenta: #ff87af;
   --ansi-accent-green: #87ff87;
-  --palette-dot: #58a6ff;
 }
 
 :root[data-palette="amber-crt"] {
@@ -44,7 +43,6 @@
   --ansi-body-warm: #ffcc66;
   --ansi-accent-magenta: #ff9966;
   --ansi-accent-green: #b8d65c;
-  --palette-dot: #ffb000;
 }
 
 :root[data-palette="green-phosphor"] {
@@ -68,7 +66,6 @@
   --ansi-body-warm: #99ffbb;
   --ansi-accent-magenta: #66ff99;
   --ansi-accent-green: #33ff66;
-  --palette-dot: #33ff66;
 }
 
 :root[data-palette="synthwave"] {
@@ -92,7 +89,6 @@
   --ansi-body-warm: #f9f8ff;
   --ansi-accent-magenta: #ff5b8c;
   --ansi-accent-green: #3bff88;
-  --palette-dot: #ff2a6d;
 }
 
 :root[data-palette="mocha"] {
@@ -116,7 +112,6 @@
   --ansi-body-warm: #e5d5c5;
   --ansi-accent-magenta: #c25e5e;
   --ansi-accent-green: #7b8c5c;
-  --palette-dot: #d48d6a;
 }
 
 :root[data-palette="solarized"] {
@@ -140,7 +135,6 @@
   --ansi-body-warm: #93a1a1;
   --ansi-accent-magenta: #d33682;
   --ansi-accent-green: #859900;
-  --palette-dot: #268bd2;
 }
 
 :root[data-palette="gruvbox"] {
@@ -164,7 +158,6 @@
   --ansi-body-warm: #ebdbb2;
   --ansi-accent-magenta: #d3869b;
   --ansi-accent-green: #b8bb26;
-  --palette-dot: #fabd2f;
 }
 
 :root[data-palette="nord"] {
@@ -188,5 +181,4 @@
   --ansi-body-warm: #d8dee9;
   --ansi-accent-magenta: #b48ead;
   --ansi-accent-green: #a3be8c;
-  --palette-dot: #88c0d0;
 }

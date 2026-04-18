@@ -1,21 +1,54 @@
 import { describe, it, expect } from 'vitest';
-import { SECURITY_HEADERS } from '../src/lib/security-headers';
+import { BASE_SECURITY_HEADERS, buildCsp, inlineScriptHashes } from '../src/lib/security-headers';
 
 // TERMINAL_UA_RE is not exported; replicate it here to unit-test the anchoring
 // logic without importing astro: virtual-module code.
 const TERMINAL_UA_RE = /^(curl|wget|httpie|fetch|libfetch)\//i;
 
-describe('SECURITY_HEADERS', () => {
+describe('BASE_SECURITY_HEADERS', () => {
   it('includes Vary: User-Agent', () => {
-    expect(SECURITY_HEADERS['Vary']).toBe('User-Agent');
+    expect(BASE_SECURITY_HEADERS['Vary']).toBe('User-Agent');
   });
 
-  it('is applied to every response via withHeaders (header present on SECURITY_HEADERS)', () => {
-    // SECURITY_HEADERS is merged into every response via withHeaders().
-    // Asserting its presence here covers curl responses, browser responses,
-    // 308 redirects, sitemap/robots short-circuits, and 404s.
-    const keys = Object.keys(SECURITY_HEADERS);
+  it('is applied to every response via withHeaders (header present on BASE_SECURITY_HEADERS)', () => {
+    const keys = Object.keys(BASE_SECURITY_HEADERS);
     expect(keys).toContain('Vary');
+  });
+});
+
+describe('buildCsp', () => {
+  it('always allows same-origin scripts via self', () => {
+    expect(buildCsp([])).toMatch(/script-src 'self'/);
+  });
+
+  it('appends every supplied inline-script hash to script-src', () => {
+    const csp = buildCsp(["'sha256-abc='", "'sha256-def='"]);
+    expect(csp).toContain("script-src 'self' 'sha256-abc=' 'sha256-def='");
+  });
+
+  it('keeps style-src unsafe-inline for Astro component styles', () => {
+    expect(buildCsp([])).toContain("style-src 'self' 'unsafe-inline'");
+  });
+});
+
+describe('inlineScriptHashes', () => {
+  it('returns a hash per inline <script> block', async () => {
+    const html = `<html><head><script>var a=1;</script></head><body><script type="module">console.log("x");</script></body></html>`;
+    const hashes = await inlineScriptHashes(html);
+    expect(hashes).toHaveLength(2);
+    for (const h of hashes) expect(h).toMatch(/^'sha256-[A-Za-z0-9+/=]+='$/);
+  });
+
+  it('ignores <script src=...> external scripts', async () => {
+    const html = `<script src="/foo.js"></script><script>alert(1);</script>`;
+    const hashes = await inlineScriptHashes(html);
+    expect(hashes).toHaveLength(1);
+  });
+
+  it('deduplicates identical inline scripts', async () => {
+    const html = `<script>x()</script><script>x()</script>`;
+    const hashes = await inlineScriptHashes(html);
+    expect(hashes).toHaveLength(1);
   });
 });
 
