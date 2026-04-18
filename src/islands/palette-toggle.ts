@@ -18,9 +18,8 @@ function applyPalette(name: PaletteName): void {
   try {
     localStorage.setItem(STORAGE_KEY, name);
   } catch (_) {}
-  document.querySelectorAll('.palette-dot').forEach(dot => {
-    dot.classList.toggle('active', (dot as HTMLElement).dataset.palette === name);
-  });
+  const select = document.getElementById('palette-select') as HTMLSelectElement | null;
+  if (select && select.value !== name) select.value = name;
 }
 
 document.addEventListener('astro:before-swap', (event) => {
@@ -30,16 +29,15 @@ document.addEventListener('astro:before-swap', (event) => {
 });
 
 document.addEventListener('astro:page-load', () => {
-  const dots = document.querySelectorAll('.palette-dot');
-  if (!dots.length) return;
+  const select = document.getElementById('palette-select') as HTMLSelectElement | null;
+  if (!select) return;
 
-  const current = readStoredPalette();
-  applyPalette(current);
+  applyPalette(readStoredPalette());
 
-  dots.forEach(dot => {
-    dot.addEventListener('click', () => {
-      const palette = (dot as HTMLElement).dataset.palette as PaletteName;
-      if (palette) applyPalette(palette);
-    });
+  select.addEventListener('change', () => {
+    const value = select.value;
+    if ((PALETTES as readonly string[]).includes(value)) {
+      applyPalette(value as PaletteName);
+    }
   });
 });

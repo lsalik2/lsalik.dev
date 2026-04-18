@@ -1,54 +1,82 @@
 ---
 import { PALETTES } from '../lib/palettes';
 
-const DOT_COLORS: Record<string, string> = {
-  'dark-terminal': '#58a6ff',
-  'amber-crt': '#ffb000',
-  'green-phosphor': '#33ff66',
-  'synthwave': '#ff2a6d',
-  'mocha': '#d48d6a',
-  'solarized': '#268bd2',
-  'gruvbox': '#fabd2f',
-  'nord': '#88c0d0',
+const PALETTE_LABELS: Record<string, string> = {
+  'dark-terminal': 'dark terminal',
+  'amber-crt': 'amber crt',
+  'green-phosphor': 'green phosphor',
+  'synthwave': 'synthwave',
+  'mocha': 'mocha',
+  'solarized': 'solarized',
+  'gruvbox': 'gruvbox',
+  'nord': 'nord',
 };
 ---
-<div class="palette-dots" role="radiogroup" aria-label="Color palette">
-  {PALETTES.map(id => (
-    <button
-      class="palette-dot"
-      data-palette={id}
-      type="button"
-      aria-label={`Switch to ${id} palette`}
-      style={`--dot-color: ${DOT_COLORS[id] ?? '#888'}`}
-    />
-  ))}
-</div>
+<label class="palette-picker">
+  <span class="palette-prompt">$ palette --set</span>
+  <span class="palette-select-wrap">
+    <select id="palette-select" class="palette-select" aria-label="Color palette">
+      {PALETTES.map(id => (
+        <option value={id}>{PALETTE_LABELS[id] ?? id}</option>
+      ))}
+    </select>
+  </span>
+</label>
 
 <style>
-  .palette-dots {
-    display: flex;
-    gap: 5px;
+  .palette-picker {
+    display: inline-flex;
     align-items: center;
+    gap: 0.5ch;
     padding-top: 0.35rem;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
   }
 
-  .palette-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: none;
-    background-color: var(--dot-color);
+  .palette-prompt {
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  .palette-select-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .palette-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--fg);
+    font: inherit;
+    padding: 0.15rem 1.75ch 0.15rem 0.6ch;
     cursor: pointer;
-    transition: transform 0.15s;
-    padding: 0;
+    transition: border-color 0.15s, color 0.15s;
   }
 
-  .palette-dot:hover {
-    transform: scale(1.3);
+  .palette-select:hover,
+  .palette-select:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+    outline: none;
   }
 
-  .palette-dot.active {
-    outline: 2px solid var(--fg-muted);
-    outline-offset: 2px;
+  .palette-select-wrap::after {
+    content: "▾";
+    position: absolute;
+    right: 0.5ch;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--fg-muted);
+    pointer-events: none;
+    font-size: 0.75em;
+  }
+
+  .palette-select option {
+    background-color: var(--bg);
+    color: var(--fg);
   }
 </style>

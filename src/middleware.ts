@@ -16,7 +16,7 @@ import { CONTACT_SECTIONS } from './data/contact';
 import { RESUME } from './data/resume';
 import { red, stripDangerousEscapes } from './curl/ansi';
 import { box } from './curl/box';
-import { SECURITY_HEADERS } from './lib/security-headers';
+import { BASE_SECURITY_HEADERS, buildCsp, inlineScriptHashes } from './lib/security-headers';
 
 // Matches terminal/CLI HTTP clients by their product token at the start of the
 // User-Agent string. Anchoring to ^ prevents a crafted UA like
@@ -41,19 +41,33 @@ function isTerminalClient(userAgent: string | null): boolean {
 // Clone a response with additional/overridden headers. Upstream Response
 // objects (e.g. from Astro's `next()`) can have immutable header bags in
 // edge runtimes, so we always rebuild the Headers.
-function withHeaders(response: Response, extra: Record<string, string>): Response {
+function withHeaders(response: Response, extra: Record<string, string>, body?: BodyInit | null): Response {
   const headers = new Headers(response.headers);
   for (const [key, value] of Object.entries(extra)) {
     headers.set(key, value);
   }
-  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+  for (const [key, value] of Object.entries(BASE_SECURITY_HEADERS)) {
     if (!headers.has(key)) headers.set(key, value);
   }
-  return new Response(response.body, {
+  if (!headers.has('Content-Security-Policy')) {
+    headers.set('Content-Security-Policy', buildCsp([]));
+  }
+  return new Response(body === undefined ? response.body : body, {
     status: response.status,
     statusText: response.statusText,
     headers,
   });
+}
+
+// For HTML responses, compute SHA-256 hashes of every inline <script> in the
+// body and emit a CSP that whitelists exactly those hashes. Astro inlines
+// hoisted scripts with content that changes across builds, so a static CSP
+// hash list goes stale and blocks the scripts.
+async function withHtmlHeaders(response: Response, extra: Record<string, string>): Promise<Response> {
+  const html = await response.text();
+  const hashes = await inlineScriptHashes(html);
+  const merged = { ...extra, 'Content-Security-Policy': buildCsp(hashes) };
+  return withHeaders(response, merged, html);
 }
 
 function textResponse(body: string): Response {
@@ -127,6 +141,18 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     );
   }
 
+  // Browsers hitting /resume get bounced straight to the PDF; curl clients
+  // fall through to the terminal resume renderer below.
+  if (!isTerminalClient(ua) && (pathname === '/resume' || pathname === '/resume/')) {
+    return withHeaders(
+      new Response(null, {
+        status: 307,
+        headers: { Location: '/resume.pdf' },
+      }),
+      { 'Cache-Control': 'public, max-age=3600, s-maxage=86400' },
+    );
+  }
+
   if (!isTerminalClient(ua)) {
     const response = await next();
     // Only cache successful HTML pages. 3xx/4xx/5xx responses and the
@@ -138,7 +164,9 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const extra: Record<string, string> = {};
     if (response.status === 200 && isHtml) {
       extra['Cache-Control'] = HTML_CACHE;
-    } else if (response.status === 404) {
+      return await withHtmlHeaders(response, extra);
+    }
+    if (response.status === 404) {
       extra['Cache-Control'] = NOT_FOUND_CACHE;
     }
     return withHeaders(response, extra);

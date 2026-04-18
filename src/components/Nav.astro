@@ -1,5 +1,5 @@
 ---
-import { NAV_LINKS } from '../lib/nav';
+import { BROWSER_NAV_LINKS } from '../lib/nav';
 
 interface Props {
   path: string;
@@ -20,7 +20,7 @@ const segments = path === '/' ? [] : path.split('/').filter(Boolean);
     })}<span class="prompt-dollar">$</span><span class="cursor" aria-hidden="true"></span>
   </div>
   <div class="nav-links">
-    {NAV_LINKS.map(link => (
+    {BROWSER_NAV_LINKS.map(link => (
       <a
         href={link.href}
         class:list={['nav-link', { active: link.href === '/' ? path === '/' : (path === link.href || path.startsWith(link.href + '/')) }]}
