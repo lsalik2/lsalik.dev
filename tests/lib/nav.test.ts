@@ -20,6 +20,6 @@ describe('NAV_LINKS', () => {
 
   it('contains the expected top-level paths in stable order', () => {
     const hrefs = NAV_LINKS.map(l => l.href);
-    expect(hrefs).toEqual(['/', '/projects', '/blog', '/contact']);
+    expect(hrefs).toEqual(['/', '/projects', '/blog', '/contact', '/resume']);
   });
 });

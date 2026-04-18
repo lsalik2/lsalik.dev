@@ -15,6 +15,11 @@
   --ansi-amber: #e5c07b;
   --ansi-blue: #61afef;
   --ansi-cyan: #56b6c2;
+  --ansi-border-dim: #626262;
+  --ansi-title-bright: #5fd7ff;
+  --ansi-body-warm: #ffd7af;
+  --ansi-accent-magenta: #ff87af;
+  --ansi-accent-green: #87ff87;
   --palette-dot: #58a6ff;
 }
 
@@ -34,6 +39,11 @@
   --ansi-amber: #ffb000;
   --ansi-blue: #ffd27a;
   --ansi-cyan: #ffdb99;
+  --ansi-border-dim: #665500;
+  --ansi-title-bright: #ff8833;
+  --ansi-body-warm: #ffcc66;
+  --ansi-accent-magenta: #ff9966;
+  --ansi-accent-green: #b8d65c;
   --palette-dot: #ffb000;
 }
 
@@ -53,6 +63,11 @@
   --ansi-amber: #ccff66;
   --ansi-blue: #66ff99;
   --ansi-cyan: #99ffcc;
+  --ansi-border-dim: #003300;
+  --ansi-title-bright: #66ff99;
+  --ansi-body-warm: #99ffbb;
+  --ansi-accent-magenta: #66ff99;
+  --ansi-accent-green: #33ff66;
   --palette-dot: #33ff66;
 }
 
@@ -72,6 +87,11 @@
   --ansi-amber: #f7b32b;
   --ansi-blue: #7a5cff;
   --ansi-cyan: #05d9e8;
+  --ansi-border-dim: #5e3c8a;
+  --ansi-title-bright: #05d9e8;
+  --ansi-body-warm: #f9f8ff;
+  --ansi-accent-magenta: #ff5b8c;
+  --ansi-accent-green: #3bff88;
   --palette-dot: #ff2a6d;
 }
 
@@ -91,6 +111,11 @@
   --ansi-amber: #c48f56;
   --ansi-blue: #6b82a8;
   --ansi-cyan: #6b969e;
+  --ansi-border-dim: #4a3f3c;
+  --ansi-title-bright: #d48d6a;
+  --ansi-body-warm: #e5d5c5;
+  --ansi-accent-magenta: #c25e5e;
+  --ansi-accent-green: #7b8c5c;
   --palette-dot: #d48d6a;
 }
 
@@ -110,6 +135,11 @@
   --ansi-amber: #b58900;
   --ansi-blue: #268bd2;
   --ansi-cyan: #2aa198;
+  --ansi-border-dim: #094956;
+  --ansi-title-bright: #6ab0e4;
+  --ansi-body-warm: #93a1a1;
+  --ansi-accent-magenta: #d33682;
+  --ansi-accent-green: #859900;
   --palette-dot: #268bd2;
 }
 
@@ -129,6 +159,11 @@
   --ansi-amber: #fabd2f;
   --ansi-blue: #83a598;
   --ansi-cyan: #8ec07c;
+  --ansi-border-dim: #504945;
+  --ansi-title-bright: #83a598;
+  --ansi-body-warm: #ebdbb2;
+  --ansi-accent-magenta: #d3869b;
+  --ansi-accent-green: #b8bb26;
   --palette-dot: #fabd2f;
 }
 
@@ -148,5 +183,10 @@
   --ansi-amber: #ebcb8b;
   --ansi-blue: #81a1c1;
   --ansi-cyan: #88c0d0;
+  --ansi-border-dim: #434c5e;
+  --ansi-title-bright: #88c0d0;
+  --ansi-body-warm: #d8dee9;
+  --ansi-accent-magenta: #b48ead;
+  --ansi-accent-green: #a3be8c;
   --palette-dot: #88c0d0;
 }

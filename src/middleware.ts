@@ -9,35 +9,19 @@ import {
   renderContact,
   renderProjectPost,
   renderRSS,
+  renderResume,
 } from './curl/render';
 import { readingTime } from './lib/reading-time';
 import { CONTACT_SECTIONS } from './data/contact';
+import { RESUME } from './data/resume';
+import { red, stripDangerousEscapes } from './curl/ansi';
+import { box } from './curl/box';
+import { SECURITY_HEADERS } from './lib/security-headers';
 
-const TERMINAL_AGENTS = ['curl/', 'wget/', 'httpie/', 'fetch/', 'libfetch/'];
-
-// Security headers applied to every response that leaves this middleware.
-// CSP allows 'unsafe-inline' for script/style because Base.astro ships an
-// inline palette-restore head script and Astro emits inline component styles.
-// Everything else is same-origin; there are no third-party assets.
-const SECURITY_HEADERS: Record<string, string> = {
-  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
-  'Content-Security-Policy': [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data:",
-    "font-src 'self'",
-    "connect-src 'self'",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "frame-ancestors 'none'",
-    "form-action 'self'",
-  ].join('; '),
-};
+// Matches terminal/CLI HTTP clients by their product token at the start of the
+// User-Agent string. Anchoring to ^ prevents a crafted UA like
+// "Mozilla/5.0 (compatible; curl/8.0)" from matching.
+const TERMINAL_UA_RE = /^(curl|wget|httpie|fetch|libfetch)\//i;
 
 // Cache directives. We must prevent Vercel from caching responses on the edge
 // because we return fundamentally different content (HTML vs Plain Text) on the
@@ -51,8 +35,7 @@ const NOT_FOUND_CACHE = CACHE_CONTROL;
 
 function isTerminalClient(userAgent: string | null): boolean {
   if (!userAgent) return false;
-  const ua = userAgent.toLowerCase();
-  return TERMINAL_AGENTS.some(agent => ua.includes(agent));
+  return TERMINAL_UA_RE.test(userAgent.trim());
 }
 
 // Clone a response with additional/overridden headers. Upstream Response
@@ -91,21 +74,27 @@ function textResponse(body: string): Response {
 // clears, or terminal emulator exploits into the 404 output. Also caps the
 // length so a huge path can't flood the response.
 function sanitizePathnameForTerminal(pathname: string): string {
+  // Strip ASCII controls (C0 + DEL), C1 controls (0x80-0x9F), zero-width
+  // and directional override codepoints (BiDi) that could mask injected
+  // content in terminal output.
   // eslint-disable-next-line no-control-regex
-  const stripped = pathname.replace(/[\x00-\x1f\x7f]/g, '?');
+  const stripped = pathname.replace(/[\x00-\x1f\x7f-\x9f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/g, '?');
   return stripped.length > 120 ? stripped.slice(0, 117) + '...' : stripped;
 }
 
 function notFoundResponse(pathname: string): Response {
   const safePath = sanitizePathnameForTerminal(pathname);
   const navLines = NAV_LINKS.map(link => `  curl -L lsalik.dev${link.href}`);
-  const body = [
-    `404: ${safePath} — not found`,
-    '',
-    'navigate:',
-    '  curl -L lsalik.dev',
-    ...navLines,
-  ].join('\n');
+  const body = box(
+    [
+      red(`404: ${safePath} — not found`),
+      '',
+      'navigate:',
+      '  curl -L lsalik.dev',
+      ...navLines,
+    ],
+    { title: '404' },
+  );
   return withHeaders(
     new Response('\n' + body + '\n\n', {
       status: 404,
@@ -169,7 +158,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         title: post.data.title,
         date: post.data.date.toISOString().slice(0, 10),
         tags: post.data.tags,
-        description: post.data.description,
+        description: stripDangerousEscapes(post.data.description),
       }));
     return textResponse(renderBlogIndex(posts));
   }
@@ -184,7 +173,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         title: post.data.title,
         date: post.data.date.toISOString().slice(0, 10),
         tags: post.data.tags,
-        description: post.data.description,
+        description: stripDangerousEscapes(post.data.description),
       }));
     return textResponse(renderRSS(posts));
   }
@@ -208,7 +197,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         title: entry.data.title,
         date: entry.data.date.toISOString().slice(0, 10),
         tags: entry.data.tags,
-        content: entry.body ?? entry.data.description,
+        content: stripDangerousEscapes(entry.body ?? entry.data.description),
         readingMinutes: readingTime(entry.body ?? ''),
         prev: older ? { slug: older.id, title: older.data.title } : undefined,
         next: newer ? { slug: newer.id, title: newer.data.title } : undefined,
@@ -226,7 +215,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         date: project.data.date.toISOString().slice(0, 10),
         stack: project.data.stack,
         status: project.data.status,
-        description: project.data.description,
+        description: stripDangerousEscapes(project.data.description),
         permissions: project.data.permissions,
         repo: project.data.repo,
         url: project.data.url,
@@ -240,7 +229,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const entries = await getCollection('projects');
     const entry = entries.find(p => p.id === slug);
     if (!entry) return notFoundResponse(pathname);
-    const content = entry.body ?? entry.data.description;
+    const content = stripDangerousEscapes(entry.body ?? entry.data.description);
     return textResponse(
       renderProjectPost({
         title: entry.data.title,
@@ -253,6 +242,10 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
 
   if (pathname === '/contact' || pathname === '/contact/') {
     return textResponse(renderContact(CONTACT_SECTIONS));
+  }
+
+  if (pathname === '/resume' || pathname === '/resume/') {
+    return textResponse(renderResume(RESUME));
   }
 
   return notFoundResponse(pathname);

@@ -1,9 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderLogo } from '../../src/curl/logo';
 
-function stripAnsi(s: string): string {
-  return s.replace(/\x1b\[\d+m/g, '');
-}
+import { stripAnsi } from '../../src/curl/ansi';
 
 describe('renderLogo', () => {
   const logo = renderLogo();
@@ -25,7 +23,7 @@ describe('renderLogo', () => {
 
   it('has balanced ANSI open/reset codes on every line', () => {
     for (const line of lines) {
-      const opens = (line.match(/\x1b\[3[1-9]m/g) ?? []).length;
+      const opens = (line.match(/\x1b\[(3[1-9]|38;5;\d+)m/g) ?? []).length;
       const resets = (line.match(/\x1b\[(0|39)m/g) ?? []).length;
       expect(resets).toBeGreaterThanOrEqual(opens > 0 ? 1 : 0);
     }

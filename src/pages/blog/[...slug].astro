@@ -11,7 +11,7 @@ const posts = allPosts.sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime(),
 );
 const idx = posts.findIndex(p => p.id === slug);
-if (idx === -1) return Astro.redirect('/blog');
+if (idx === -1) return new Response(null, { status: 404 });
 const post = posts[idx];
 const { Content } = await render(post);
 const dateStr = post.data.date.toISOString().slice(0, 10);

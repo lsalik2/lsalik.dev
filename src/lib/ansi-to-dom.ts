@@ -8,50 +8,71 @@ interface StyleState {
   color: string | null;
 }
 
-const ANSI_RE = /\x1b\[(\d+)m/g;
+// Matches both simple SGR codes (\x1b[1m) and 256-color codes (\x1b[38;5;87m).
+const ANSI_RE = /\x1b\[([\d;]+)m/g;
 
-function applyCode(code: number, state: StyleState): void {
-  switch (code) {
-    case 0:
-      state.bold = false;
-      state.dim = false;
-      state.underline = false;
-      state.color = null;
-      break;
-    case 1:
-      state.bold = true;
-      break;
-    case 2:
-      state.dim = true;
-      break;
-    case 4:
-      state.underline = true;
-      break;
-    case 22:
-      state.bold = false;
-      state.dim = false;
-      break;
-    case 24:
-      state.underline = false;
-      break;
-    case 31:
-      state.color = 'ansi-red';
-      break;
-    case 32:
-      state.color = 'ansi-green';
-      break;
-    case 33:
-      state.color = 'ansi-amber';
-      break;
-    case 34:
-      state.color = 'ansi-blue';
-      break;
-    case 36:
-      state.color = 'ansi-cyan';
-      break;
-    case 39:
-      state.color = null;
-      break;
+const COLOR_256_MAP: Record<number, string> = {
+  87: 'ansi-title-bright',
+  120: 'ansi-accent-green',
+  211: 'ansi-accent-magenta',
+  223: 'ansi-body-warm',
+  241: 'ansi-border-dim',
+};
+
+function applyCodes(params: number[], state: StyleState): void {
+  let i = 0;
+  while (i < params.length) {
+    const code = params[i];
+    // 256-color foreground: 38;5;N
+    if (code === 38 && params[i + 1] === 5 && i + 2 < params.length) {
+      const n = params[i + 2];
+      state.color = COLOR_256_MAP[n] ?? null;
+      i += 3;
+      continue;
+    }
+    switch (code) {
+      case 0:
+        state.bold = false;
+        state.dim = false;
+        state.underline = false;
+        state.color = null;
+        break;
+      case 1:
+        state.bold = true;
+        break;
+      case 2:
+        state.dim = true;
+        break;
+      case 4:
+        state.underline = true;
+        break;
+      case 22:
+        state.bold = false;
+        state.dim = false;
+        break;
+      case 24:
+        state.underline = false;
+        break;
+      case 31:
+        state.color = 'ansi-red';
+        break;
+      case 32:
+        state.color = 'ansi-green';
+        break;
+      case 33:
+        state.color = 'ansi-amber';
+        break;
+      case 34:
+        state.color = 'ansi-blue';
+        break;
+      case 36:
+        state.color = 'ansi-cyan';
+        break;
+      case 39:
+        state.color = null;
+        break;
+    }
+    i++;
   }
 }
 
@@ -103,7 +124,8 @@ export function ansiToNodes(text: string): DocumentFragment {
     if (match.index > lastIndex) {
       appendText(fragment, text.slice(lastIndex, match.index), state);
     }
-    applyCode(parseInt(match[1], 10), state);
+    const params = match[1].split(';').map(Number);
+    applyCodes(params, state);
     lastIndex = ANSI_RE.lastIndex;
   }
 
