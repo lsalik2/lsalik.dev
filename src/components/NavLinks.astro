@@ -1,0 +1,40 @@
+---
+import { BROWSER_NAV_LINKS } from '../lib/nav';
+
+interface Props {
+  path: string;
+}
+
+const { path } = Astro.props;
+---
+<div class="nav-links">
+  {BROWSER_NAV_LINKS.map(link => (
+    <a
+      href={link.href}
+      class:list={['nav-link', { active: link.href === '/' ? path === '/' : (path === link.href || path.startsWith(link.href + '/')) }]}
+    >
+      {link.label}
+    </a>
+  ))}
+</div>
+
+<style>
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5ch;
+  }
+
+  .nav-link {
+    color: var(--fg-muted);
+    text-decoration: none;
+  }
+
+  .nav-link:hover {
+    color: var(--accent-bright);
+  }
+
+  .nav-link.active {
+    color: var(--accent);
+  }
+</style>

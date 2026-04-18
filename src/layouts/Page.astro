@@ -1,6 +1,7 @@
 ---
 import Base from './Base.astro';
-import Nav from '../components/Nav.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import NavLinks from '../components/NavLinks.astro';
 import PaletteToggle from '../components/PaletteToggle.astro';
 interface Props {
   title: string;
@@ -12,8 +13,9 @@ const { title, path } = Astro.props;
 <Base title={title}>
   <div class="page-container">
     <header class="page-header">
-      <Nav path={path} />
+      <Breadcrumb path={path} />
       <PaletteToggle />
+      <NavLinks path={path} />
     </header>
     <main class="page-content">
       <slot />
@@ -37,16 +39,50 @@ const { title, path } = Astro.props;
   }
 
   .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 1rem;
+    row-gap: 0.75rem;
+    align-items: start;
+    padding: 1.5rem 0 1rem;
+  }
+
+  .page-header > :global(.breadcrumb) {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .page-header > :global(.palette-picker) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    justify-self: end;
+  }
+
+  .page-header > :global(.nav-links) {
+    grid-column: 1;
+    grid-row: 2;
   }
 
   @media (max-width: 600px) {
     .page-header {
-      flex-direction: column;
-      gap: 0.5rem;
+      grid-template-columns: 1fr;
+      row-gap: 0.5rem;
+    }
+
+    .page-header > :global(.breadcrumb) {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .page-header > :global(.palette-picker) {
+      grid-column: 1;
+      grid-row: 2;
+      justify-self: start;
+    }
+
+    .page-header > :global(.nav-links) {
+      grid-column: 1;
+      grid-row: 3;
     }
   }
 
