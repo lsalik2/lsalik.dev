@@ -4,6 +4,7 @@ import { NAV_LINKS } from '../lib/nav';
 import { box, hr, sectionHeader, twoCol, PAGE_WIDTH } from './box';
 import type { ContactSection } from '../data/contact';
 import type { Resume } from '../data/resume';
+import type { Uses } from '../data/uses';
 export type { ContactSection };
 
 export interface BlogPostSummary {
@@ -210,4 +211,39 @@ export function renderResume(resume: Resume): string {
     hr(),
     footer,
   ].join('\n');
+}
+
+export function renderUses(uses: Uses): string {
+  const logoLines = renderLogo().split('\n');
+
+  // Build right-side info lines. Each category produces a dim heading
+  // followed by `key: value` rows; categories are separated by a blank line.
+  const infoLines: string[] = [];
+  for (let i = 0; i < uses.categories.length; i++) {
+    const category = uses.categories[i];
+    if (i > 0) infoLines.push('');
+    infoLines.push(dim(`── ${category.heading} ──`));
+    for (const item of category.items) {
+      infoLines.push(`${bold(cyan(item.key))}: ${bodyWarm(item.value)}`);
+    }
+  }
+
+  // Two-column layout: logo on the left, info on the right. Pad the shorter
+  // column with empty strings so rows zip cleanly.
+  const rowCount = Math.max(logoLines.length, infoLines.length);
+  const gap = '  ';
+  const logoVisibleWidth = logoLines.reduce(
+    (max, line) => Math.max(max, line.replace(/\x1b\[[\d;]*m/g, '').length),
+    0,
+  );
+  const blankLogo = ' '.repeat(logoVisibleWidth);
+
+  const rows: string[] = [];
+  for (let r = 0; r < rowCount; r++) {
+    const left = logoLines[r] ?? blankLogo;
+    const right = infoLines[r] ?? '';
+    rows.push(left + gap + right);
+  }
+
+  return box(rows, { title: '~/uses' });
 }
