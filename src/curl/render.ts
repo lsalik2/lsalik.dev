@@ -228,9 +228,9 @@ export function renderUses(uses: Uses): string {
     }
   }
 
-  // Two-column layout: logo on the left, info on the right. Pad the shorter
-  // column with empty strings so rows zip cleanly.
-  const rowCount = Math.max(logoLines.length, infoLines.length);
+  // Two-column layout: logo on the left, info on the right. A blank row leads
+  // the box, then logo and info zip until the logo runs out; a second blank
+  // row separates the logo from any info rows that overflow below it.
   const gap = '  ';
   const logoVisibleWidth = logoLines.reduce(
     (max, line) => Math.max(max, visibleWidth(line)),
@@ -238,11 +238,13 @@ export function renderUses(uses: Uses): string {
   );
   const blankLogo = ' '.repeat(logoVisibleWidth);
 
-  const rows: string[] = [];
-  for (let r = 0; r < rowCount; r++) {
-    const left = logoLines[r] ?? blankLogo;
-    const right = infoLines[r] ?? '';
-    rows.push(left + gap + right);
+  const rows: string[] = [''];
+  for (let r = 0; r < logoLines.length; r++) {
+    rows.push(logoLines[r] + gap + (infoLines[r] ?? ''));
+  }
+  rows.push('');
+  for (let r = logoLines.length; r < infoLines.length; r++) {
+    rows.push(blankLogo + gap + infoLines[r]);
   }
 
   return box(rows, { title: '~/uses' });
