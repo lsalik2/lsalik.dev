@@ -46,6 +46,7 @@ function buildOverlay(): HTMLDivElement {
   card.className = 'shortcuts-card';
   card.style.cssText = [
     'background:var(--bg-surface)',
+    'position:relative',
     'color:var(--fg)',
     'border:1px solid var(--border)',
     'border-radius:6px',
@@ -57,6 +58,33 @@ function buildOverlay(): HTMLDivElement {
     'box-shadow:0 8px 24px rgba(0,0,0,0.4)',
   ].join(';');
   card.addEventListener('click', e => e.stopPropagation());
+
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.setAttribute('aria-label', 'close');
+  closeButton.textContent = '×';
+  closeButton.style.cssText = [
+    'position:absolute',
+    'top:0.4rem',
+    'right:0.6rem',
+    'background:transparent',
+    'border:none',
+    'color:var(--fg-muted)',
+    'font-family:inherit',
+    'font-size:1.2rem',
+    'line-height:1',
+    'cursor:pointer',
+    'padding:0.25rem 0.4rem',
+    'border-radius:3px',
+  ].join(';');
+  closeButton.addEventListener('click', () => closeOverlay());
+  closeButton.addEventListener('mouseenter', () => {
+    closeButton.style.color = 'var(--accent)';
+  });
+  closeButton.addEventListener('mouseleave', () => {
+    closeButton.style.color = 'var(--fg-muted)';
+  });
+  card.appendChild(closeButton);
 
   const heading = document.createElement('h2');
   heading.id = 'shortcuts-title';
@@ -116,7 +144,7 @@ function buildOverlay(): HTMLDivElement {
   card.appendChild(list);
 
   const hint = document.createElement('p');
-  hint.textContent = 'click outside or press esc to close';
+  hint.textContent = 'press esc, click outside, or press × to close';
   hint.style.cssText = [
     'margin:1rem 0 0',
     'font-size:0.75rem',
