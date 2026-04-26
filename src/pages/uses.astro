@@ -1,0 +1,59 @@
+---
+import Page from '../layouts/Page.astro';
+import TerminalFrame from '../components/TerminalFrame.astro';
+import { USES } from '../data/uses';
+---
+<Page title="Uses" path="/uses">
+  <section class="uses-intro">
+    <h1 class="uses-title">~/uses</h1>
+    <p class="uses-tagline">the tools, software, and hardware i use day-to-day.</p>
+  </section>
+
+  {USES.categories.map(category => (
+    <TerminalFrame title={`~/uses/${category.heading}`}>
+      <dl class="uses-grid">
+        {category.items.map(item => (
+          <>
+            <dt>{item.key}</dt>
+            <dd>{item.value}</dd>
+          </>
+        ))}
+      </dl>
+    </TerminalFrame>
+  ))}
+</Page>
+
+<style>
+  .uses-intro {
+    padding: 1.5rem 0 1.25rem;
+  }
+
+  .uses-title {
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-size: 1.5rem;
+    color: var(--accent);
+    margin: 0 0 0.35rem;
+    font-weight: 600;
+  }
+
+  .uses-tagline {
+    font-size: 0.95rem;
+    color: var(--fg-muted);
+    margin: 0;
+  }
+
+  .uses-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.3rem 2rem;
+    font-size: 0.9rem;
+  }
+
+  .uses-grid dt {
+    color: var(--fg-muted);
+  }
+
+  .uses-grid dd {
+    color: var(--fg);
+  }
+</style>

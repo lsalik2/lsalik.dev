@@ -23,9 +23,11 @@ const { title, path } = Astro.props;
     <footer class="page-footer">
       <span class="footer-copy">&copy; Luis Salik &middot; lsalik.dev &middot; no cookies &middot; no analytics &middot; no tracking</span>
       <span class="footer-source">source: <a href="https://github.com/lsalik2/lsalik.dev" class="footer-link" target="_blank" rel="noopener noreferrer">github.com/lsalik2/lsalik.dev</a></span>
+      <span class="footer-shortcuts">press <kbd>?</kbd> for keyboard shortcuts</span>
     </footer>
   </div>
   <script src="../islands/palette-toggle.ts"></script>
+  <script src="../islands/keyboard-shortcuts.ts"></script>
 </Base>
 
 <style>
@@ -111,5 +113,18 @@ const { title, path } = Astro.props;
 
   .footer-link:hover {
     color: var(--accent);
+  }
+
+  .footer-shortcuts kbd {
+    display: inline-block;
+    min-width: 1.5em;
+    padding: 0 0.4em;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--bg);
+    color: var(--fg-muted);
+    font-family: inherit;
+    font-size: 0.75rem;
+    text-align: center;
   }
 </style>

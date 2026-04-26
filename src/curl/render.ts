@@ -1,9 +1,10 @@
-import { bold, dim, green, blue, amber, cyan, red, accentGreen, accentMagenta, bodyWarm, titleBright, borderDim } from './ansi';
+import { bold, dim, green, blue, amber, cyan, red, accentGreen, accentMagenta, bodyWarm, titleBright, borderDim, visibleWidth } from './ansi';
 import { renderLogo } from './logo';
 import { NAV_LINKS } from '../lib/nav';
 import { box, hr, sectionHeader, twoCol, PAGE_WIDTH } from './box';
 import type { ContactSection } from '../data/contact';
 import type { Resume } from '../data/resume';
+import type { Uses } from '../data/uses';
 export type { ContactSection };
 
 export interface BlogPostSummary {
@@ -210,4 +211,41 @@ export function renderResume(resume: Resume): string {
     hr(),
     footer,
   ].join('\n');
+}
+
+export function renderUses(uses: Uses): string {
+  const logoLines = renderLogo().split('\n');
+
+  // Build right-side info lines. Each category produces a dim heading
+  // followed by `key: value` rows; categories are separated by a blank line.
+  const infoLines: string[] = [];
+  for (let i = 0; i < uses.categories.length; i++) {
+    const category = uses.categories[i];
+    if (i > 0) infoLines.push('');
+    infoLines.push(dim(`── ${category.heading} ──`));
+    for (const item of category.items) {
+      infoLines.push(`${bold(cyan(item.key))}: ${bodyWarm(item.value)}`);
+    }
+  }
+
+  // Two-column layout: logo on the left, info on the right. A blank row leads
+  // the box, then logo and info zip until the logo runs out; a second blank
+  // row separates the logo from any info rows that overflow below it.
+  const gap = '  ';
+  const logoVisibleWidth = logoLines.reduce(
+    (max, line) => Math.max(max, visibleWidth(line)),
+    0,
+  );
+  const blankLogo = ' '.repeat(logoVisibleWidth);
+
+  const rows: string[] = [''];
+  for (let r = 0; r < logoLines.length; r++) {
+    rows.push(logoLines[r] + gap + (infoLines[r] ?? ''));
+  }
+  rows.push('');
+  for (let r = logoLines.length; r < infoLines.length; r++) {
+    rows.push(blankLogo + gap + infoLines[r]);
+  }
+
+  return box(rows, { title: '~/uses' });
 }

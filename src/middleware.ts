@@ -10,10 +10,12 @@ import {
   renderProjectPost,
   renderRSS,
   renderResume,
+  renderUses,
 } from './curl/render';
 import { readingTime } from './lib/reading-time';
 import { CONTACT_SECTIONS } from './data/contact';
 import { RESUME } from './data/resume';
+import { USES } from './data/uses';
 import { red, stripDangerousEscapes } from './curl/ansi';
 import { box } from './curl/box';
 import { BASE_SECURITY_HEADERS, buildCsp, inlineScriptHashes } from './lib/security-headers';
@@ -270,6 +272,10 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
 
   if (pathname === '/contact' || pathname === '/contact/') {
     return textResponse(renderContact(CONTACT_SECTIONS));
+  }
+
+  if (pathname === '/uses' || pathname === '/uses/') {
+    return textResponse(renderUses(USES));
   }
 
   if (pathname === '/resume' || pathname === '/resume/') {
