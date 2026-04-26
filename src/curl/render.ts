@@ -1,4 +1,4 @@
-import { bold, dim, green, blue, amber, cyan, red, accentGreen, accentMagenta, bodyWarm, titleBright, borderDim } from './ansi';
+import { bold, dim, green, blue, amber, cyan, red, accentGreen, accentMagenta, bodyWarm, titleBright, borderDim, visibleWidth } from './ansi';
 import { renderLogo } from './logo';
 import { NAV_LINKS } from '../lib/nav';
 import { box, hr, sectionHeader, twoCol, PAGE_WIDTH } from './box';
@@ -233,7 +233,7 @@ export function renderUses(uses: Uses): string {
   const rowCount = Math.max(logoLines.length, infoLines.length);
   const gap = '  ';
   const logoVisibleWidth = logoLines.reduce(
-    (max, line) => Math.max(max, line.replace(/\x1b\[[\d;]*m/g, '').length),
+    (max, line) => Math.max(max, visibleWidth(line)),
     0,
   );
   const blankLogo = ' '.repeat(logoVisibleWidth);
