@@ -81,11 +81,9 @@ Here's some future additions I plan to add:
 - blog searching/filtering: no way to look for specific titles or tags in blogs
 - curl -L lsalik.dev/ssh easter egg: not sure what the easter egg should be, maybe some ascii art of my cats?
 - live projects github stats: stars, last commit, etc.
-- keyboard shortcuts: g h, g b, / to focus search (vim-style)
 - man lsalik page: fake manpage layout
 - ASCII background reacting subtly to cursor/scroll: self-explanatory
 - OG image generation per post: Satori or similar, build-time so edge-safe
-- /uses page: structure it as faux neofetch output when curled: OS, shell, editor, WM, terminal, font, etc.
 - add different animations: self-explanatory
 
 ## Copying / reuse
