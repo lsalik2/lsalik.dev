@@ -11,7 +11,14 @@ const { title, date, tags, description, slug } = Astro.props;
 const dateStr = date.toISOString().slice(0, 10);
 const tagsStr = tags.join(', ');
 ---
-<a href={`/blog/${slug}`} class="blog-card">
+<a
+  href={`/blog/${slug}`}
+  class="blog-card"
+  data-blog-card
+  data-title={title}
+  data-description={description}
+  data-tags={tags.join(',')}
+>
   <div class="card-frame">
     <div class="card-titlebar">
       <span>── cat ~/blog/{slug}.md ──</span>
@@ -30,6 +37,10 @@ const tagsStr = tags.join(', ');
     text-decoration: none;
     color: inherit;
     margin-bottom: 1.5rem;
+  }
+
+  .blog-card[hidden] {
+    display: none;
   }
 
   .card-frame {

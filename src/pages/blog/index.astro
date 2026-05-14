@@ -6,12 +6,44 @@ import PageHeader from '../../components/PageHeader.astro';
 
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const allTags = Array.from(
+  new Set(posts.flatMap(post => post.data.tags))
+).sort();
 ---
 <Page title="Blog" path="/blog">
   <PageHeader heading="blog" description="essays, notes, and the occasional rant." />
   <p class="feed-link">
     <a href="/rss.xml" type="application/rss+xml">[rss feed]</a>
   </p>
+  <div class="blog-filters" data-blog-filters>
+    <label class="search-label" for="blog-search">
+      <span class="search-prompt" aria-hidden="true">$</span>
+      <input
+        id="blog-search"
+        class="search-input"
+        type="search"
+        placeholder="search posts…"
+        autocomplete="off"
+        spellcheck="false"
+        data-blog-search
+      />
+    </label>
+    <ul class="tag-chips" role="list">
+      {allTags.map(tag => (
+        <li>
+          <button
+            type="button"
+            class="tag-chip"
+            data-tag-chip
+            data-tag={tag}
+            aria-pressed="false"
+          >[{tag}]</button>
+        </li>
+      ))}
+    </ul>
+  </div>
+  <p class="empty-state" data-blog-empty hidden>no posts match.</p>
   {posts.map(post => (
     <BlogCard
       title={post.data.title}
@@ -21,6 +53,7 @@ posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
       slug={post.id}
     />
   ))}
+  <script src="../../islands/blog-filter.ts"></script>
 </Page>
 
 <style>
@@ -36,5 +69,87 @@ posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
   .feed-link a:hover {
     color: var(--accent-bright);
+  }
+
+  .blog-filters {
+    margin: 0 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .search-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.4rem 0.75rem;
+    background: var(--bg-surface);
+    transition: border-color 0.15s ease;
+  }
+
+  .search-label:focus-within {
+    border-color: var(--accent);
+  }
+
+  .search-prompt {
+    color: var(--accent);
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+  }
+
+  .search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--fg);
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-size: 0.95rem;
+    padding: 0.1rem 0;
+  }
+
+  .search-input::placeholder {
+    color: var(--fg-muted);
+    opacity: 0.7;
+  }
+
+  .tag-chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag-chip {
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.1rem 0.5rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .tag-chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .tag-chip[aria-pressed="true"] {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .empty-state {
+    margin: 1.5rem 0;
+    color: var(--fg-muted);
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-size: 0.9rem;
   }
 </style>

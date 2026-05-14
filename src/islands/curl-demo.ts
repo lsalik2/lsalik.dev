@@ -24,7 +24,8 @@ async function runCurlDemo(container: HTMLElement): Promise<void> {
     ghost.setAttribute('aria-hidden', 'true');
     ghost.style.cssText =
       'position:absolute;visibility:hidden;pointer-events:none;' +
-      'font:inherit;line-height:1;letter-spacing:0;white-space:pre-wrap;margin:0;' +
+      'font:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Cascadia Mono","DejaVu Sans Mono","Liberation Mono",monospace;' +
+      'line-height:1;letter-spacing:0;white-space:pre-wrap;margin:0;' +
       `width:${container.offsetWidth}px`;
     ghost.textContent =
       COMMAND + '\n\n' + response.replace(/\x1b\[[\d;]*m/g, '');
