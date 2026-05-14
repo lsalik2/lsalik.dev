@@ -53,6 +53,12 @@ const tag = `${MAN.name.toUpperCase()}(${MAN.section})`;
     line-height: 1.55;
     color: var(--fg);
     max-width: 80ch;
+    margin: 0 auto;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.5rem 2rem;
+    overflow: hidden;
   }
 
   .man-bar {
@@ -64,8 +70,8 @@ const tag = `${MAN.name.toUpperCase()}(${MAN.section})`;
     color: var(--fg-muted);
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
-    padding: 0.4rem 0;
-    margin: 0;
+    padding: 0.4rem 2rem;
+    margin: 0 -2rem;
   }
 
   .man-bar > :nth-child(1) {
@@ -129,38 +135,37 @@ const tag = `${MAN.name.toUpperCase()}(${MAN.section})`;
 
   .man-defs {
     display: grid;
-    grid-template-columns: minmax(0, max-content);
-    row-gap: 0.15rem;
+    grid-template-columns: max-content 1fr;
+    column-gap: 2ch;
+    row-gap: 0.25rem;
+    align-items: baseline;
   }
 
   .man-defs dt {
     font-weight: 700;
     color: var(--accent-bright, var(--accent));
-    margin-top: 0.35rem;
-  }
-
-  .man-defs dt:first-child {
-    margin-top: 0;
   }
 
   .man-defs dd {
-    margin: 0 0 0.25rem 7ch;
+    margin: 0;
     color: var(--fg);
   }
 
   @media (max-width: 600px) {
+    .man-page {
+      padding: 1rem;
+    }
+
     .man-prose,
     .man-lines,
     .man-defs {
       padding-left: 2ch;
     }
 
-    .man-defs dd {
-      margin-left: 2ch;
-    }
-
     .man-bar {
       font-size: 0.85rem;
+      padding: 0.4rem 1rem;
+      margin: 0 -1rem;
     }
   }
 </style>

@@ -11,10 +11,12 @@ const requestedPath = Astro.url.pathname.replace(/^\//, '') || '/';
     <p class="error-msg">cannot access '{requestedPath}': No such file or directory</p>
     <p class="nav-hint">navigate to:</p>
     <ul class="nav-list">
-      <li><a href="/">~/</a></li>
+      <li><a href="/">~/home</a></li>
       <li><a href="/projects">~/projects</a></li>
       <li><a href="/blog">~/blog</a></li>
+      <li><a href="/uses">~/uses</a></li>
       <li><a href="/contact">~/contact</a></li>
+      <li><a href="/man">~/man</a></li>
     </ul>
   </div>
 </Page>
@@ -58,12 +60,20 @@ const requestedPath = Astro.url.pathname.replace(/^\//, '') || '/';
     gap: 0.3rem;
   }
 
+  .nav-list li {
+    padding-left: 1ch;
+  }
+
   .nav-list li::before {
-    content: '  → ';
+    content: '→ ';
     color: var(--green);
   }
 
   .nav-list a {
     color: var(--accent);
+  }
+
+  .nav-list a:hover {
+    color: var(--accent-bright);
   }
 </style>

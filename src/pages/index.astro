@@ -50,12 +50,6 @@ import TerminalFrame from '../components/TerminalFrame.astro';
     </a>
   </TerminalFrame>
 
-  <nav class="quick-links">
-    <a href="/projects">&rarr; projects</a>
-    <a href="/blog">&rarr; blog</a>
-    <a href="/contact">&rarr; contact</a>
-  </nav>
-
   <section class="curl-easter-egg">
     <button class="curl-teaser" id="curl-teaser" type="button" aria-expanded="false">
       <div class="curl-teaser-titlebar">~ &mdash; bash &mdash; 80x24</div>
@@ -75,7 +69,7 @@ import TerminalFrame from '../components/TerminalFrame.astro';
 
 <style>
   .hero {
-    padding: 1.5rem 0 1.25rem;
+    margin: 0 0 1.5rem;
   }
 
   .hero-title {
@@ -154,23 +148,6 @@ import TerminalFrame from '../components/TerminalFrame.astro';
     color: var(--accent-bright);
   }
 
-  .quick-links {
-    display: flex;
-    gap: 2rem;
-    margin-top: 0.5rem;
-    margin-bottom: 2rem;
-    font-size: 0.9rem;
-  }
-
-  .quick-links a {
-    color: var(--accent);
-    text-decoration: none;
-  }
-
-  .quick-links a:hover {
-    color: var(--accent-bright);
-  }
-
   .curl-easter-egg {
     margin-top: 1rem;
   }
@@ -197,15 +174,15 @@ import TerminalFrame from '../components/TerminalFrame.astro';
 
   .curl-teaser-titlebar {
     background-color: var(--bg-surface);
-    padding: 0.3rem 0.875rem;
-    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
     color: var(--fg-muted);
     border-bottom: 1px solid var(--border);
   }
 
   .curl-teaser-body {
     background-color: var(--bg);
-    padding: 0.6rem 1rem;
+    padding: 0.75rem 1rem;
   }
 
   .curl-prompt {
@@ -260,6 +237,7 @@ import TerminalFrame from '../components/TerminalFrame.astro';
 
   #curl-demo-output {
     font: inherit;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Cascadia Mono", "DejaVu Sans Mono", "Liberation Mono", monospace;
     line-height: 1;
     letter-spacing: 0;
     white-space: pre-wrap;
