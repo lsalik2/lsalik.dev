@@ -7,24 +7,19 @@ export interface PostMeta {
   readonly tags: readonly string[];
 }
 
-// A post passes if (a) when any tags are active, at least one of its tags is
-// in that set (union semantics — clicking [meta] and [security] shows posts
-// tagged with either), and (b) when a query is present, the query is found
-// as a case-insensitive substring of title, description, or any tag.
+// A post passes if (a) when any tags are active, every active tag is also on
+// the post (intersection semantics — clicking [meta] and [security] shows
+// only posts tagged with both), and (b) when a query is present, the query
+// is found as a case-insensitive substring of title, description, or any tag.
 export function matchesFilter(
   post: PostMeta,
   query: string,
   activeTags: ReadonlySet<string>,
 ): boolean {
   if (activeTags.size > 0) {
-    let intersects = false;
-    for (const tag of post.tags) {
-      if (activeTags.has(tag)) {
-        intersects = true;
-        break;
-      }
+    for (const tag of activeTags) {
+      if (!post.tags.includes(tag)) return false;
     }
-    if (!intersects) return false;
   }
 
   const trimmed = query.trim();

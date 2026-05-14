@@ -32,13 +32,14 @@ describe('matchesFilter', () => {
     expect(matchesFilter(post, 'kubernetes', new Set())).toBe(false);
   });
 
-  it('returns true when at least one active tag intersects the post', () => {
+  it('returns true when every active tag is on the post', () => {
     expect(matchesFilter(post, '', new Set(['meta']))).toBe(true);
-    expect(matchesFilter(post, '', new Set(['meta', 'security']))).toBe(true);
+    expect(matchesFilter(post, '', new Set(['meta', 'webdev']))).toBe(true);
   });
 
-  it('returns false when no active tag intersects the post', () => {
+  it('returns false when any active tag is missing from the post', () => {
     expect(matchesFilter(post, '', new Set(['security']))).toBe(false);
+    expect(matchesFilter(post, '', new Set(['meta', 'security']))).toBe(false);
   });
 
   it('requires both tag and query conditions to pass', () => {
