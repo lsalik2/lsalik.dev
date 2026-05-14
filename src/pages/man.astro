@@ -1,0 +1,166 @@
+---
+import Page from '../layouts/Page.astro';
+import { MAN } from '../data/man';
+
+const tag = `${MAN.name.toUpperCase()}(${MAN.section})`;
+---
+<Page title="man lsalik" path="/man">
+  <article class="man-page" aria-label="manual page">
+    <header class="man-bar" aria-hidden="true">
+      <span>{tag}</span>
+      <span>{MAN.category}</span>
+      <span>{tag}</span>
+    </header>
+
+    {MAN.sections.map(section => (
+      <section class="man-section">
+        <h2 class="man-heading">{section.heading}</h2>
+        {section.blocks.map(block => (
+          <>
+            {block.type === 'prose' && (
+              <p class="man-prose">{block.text}</p>
+            )}
+            {block.type === 'lines' && (
+              <pre class="man-lines">{block.lines.join('\n')}</pre>
+            )}
+            {block.type === 'definitions' && (
+              <dl class="man-defs">
+                {block.items.map(item => (
+                  <>
+                    <dt>{item.term}</dt>
+                    <dd>{item.def}</dd>
+                  </>
+                ))}
+              </dl>
+            )}
+          </>
+        ))}
+      </section>
+    ))}
+
+    <footer class="man-bar" aria-hidden="true">
+      <span>{MAN.version}</span>
+      <span>{MAN.date}</span>
+      <span>{tag}</span>
+    </footer>
+  </article>
+</Page>
+
+<style>
+  .man-page {
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--fg);
+    max-width: 80ch;
+  }
+
+  .man-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: baseline;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--fg-muted);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 0.4rem 0;
+    margin: 0;
+  }
+
+  .man-bar > :nth-child(1) {
+    text-align: left;
+  }
+
+  .man-bar > :nth-child(2) {
+    text-align: center;
+  }
+
+  .man-bar > :nth-child(3) {
+    text-align: right;
+  }
+
+  header.man-bar {
+    margin-bottom: 1.5rem;
+  }
+
+  footer.man-bar {
+    margin-top: 1.5rem;
+  }
+
+  .man-section {
+    margin: 0 0 1.5rem;
+  }
+
+  .man-heading {
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.5rem;
+  }
+
+  .man-prose,
+  .man-lines,
+  .man-defs {
+    margin: 0 0 0.75rem;
+    padding-left: 7ch;
+  }
+
+  .man-prose:last-child,
+  .man-lines:last-child,
+  .man-defs:last-child {
+    margin-bottom: 0;
+  }
+
+  .man-prose {
+    color: var(--fg);
+    white-space: normal;
+  }
+
+  .man-lines {
+    font-family: inherit;
+    font-size: inherit;
+    color: var(--fg);
+    white-space: pre-wrap;
+    margin-top: 0;
+  }
+
+  .man-defs {
+    display: grid;
+    grid-template-columns: minmax(0, max-content);
+    row-gap: 0.15rem;
+  }
+
+  .man-defs dt {
+    font-weight: 700;
+    color: var(--accent-bright, var(--accent));
+    margin-top: 0.35rem;
+  }
+
+  .man-defs dt:first-child {
+    margin-top: 0;
+  }
+
+  .man-defs dd {
+    margin: 0 0 0.25rem 7ch;
+    color: var(--fg);
+  }
+
+  @media (max-width: 600px) {
+    .man-prose,
+    .man-lines,
+    .man-defs {
+      padding-left: 2ch;
+    }
+
+    .man-defs dd {
+      margin-left: 2ch;
+    }
+
+    .man-bar {
+      font-size: 0.85rem;
+    }
+  }
+</style>

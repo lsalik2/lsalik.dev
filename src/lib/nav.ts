@@ -13,6 +13,7 @@ export const NAV_LINKS: readonly NavLink[] = [
   { href: '/blog', label: '~/blog' },
   { href: '/uses', label: '~/uses' },
   { href: '/contact', label: '~/contact' },
+  { href: '/man', label: '~/man' },
   { href: '/resume', label: '~/resume', terminalOnly: true },
 ] as const;
 
