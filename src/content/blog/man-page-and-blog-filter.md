@@ -42,7 +42,7 @@ matchesFilter(
 ): boolean
 ```
 
-Pure, no DOM, no globals. Semantics: if any tags are active, a post passes when at least one of its tags is in the active set (union, not intersection — clicking `[meta]` and `[security]` shows posts tagged with either). The query, if present, is a case-insensitive substring match against title, description, or any tag. The unit tests just feed it tuples and assert booleans, no JSDOM needed.
+Pure, no DOM, no globals. Semantics: if any tags are active, a post passes only when every active tag is also on the post (intersection — clicking `[meta]` and `[security]` shows posts tagged with both, not either). The query, if present, is a case-insensitive substring match against title, description, or any tag. The unit tests just feed it tuples and assert booleans, no JSDOM needed.
 
 `src/islands/blog-filter.ts` is the DOM layer: read each `[data-blog-card]`'s dataset into a `PostMeta`, attach `input` and `click` handlers to the search bar and chips, run `matchesFilter()` on every change, and toggle `el.hidden` accordingly. A `[data-blog-empty]` element shows "no posts match." when the visible count drops to zero. The whole thing re-runs on `astro:page-load` so Astro's view transitions don't strand the listeners on swapped-out nodes.
 
