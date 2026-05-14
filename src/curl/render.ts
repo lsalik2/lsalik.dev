@@ -1,10 +1,11 @@
 import { bold, dim, green, blue, amber, cyan, red, accentGreen, accentMagenta, bodyWarm, titleBright, borderDim, visibleWidth } from './ansi';
 import { renderLogo } from './logo';
 import { NAV_LINKS } from '../lib/nav';
-import { box, hr, sectionHeader, twoCol, PAGE_WIDTH } from './box';
+import { box, hr, sectionHeader, twoCol, wrap, PAGE_WIDTH } from './box';
 import type { ContactSection } from '../data/contact';
 import type { Resume } from '../data/resume';
 import type { Uses } from '../data/uses';
+import type { Man, ManBlock } from '../data/man';
 export type { ContactSection };
 
 export interface BlogPostSummary {
@@ -211,6 +212,74 @@ export function renderResume(resume: Resume): string {
     hr(),
     footer,
   ].join('\n');
+}
+
+// Mimic the three-column manpage header/footer:
+//   LSALIK(1)              User Commands              LSALIK(1)
+// `width` is the visible column count; left and right are pinned to the
+// edges and `center` is centred in whatever space is left. If the three
+// can't fit on one line we fall back to left + right with center under.
+function manBar(left: string, center: string, right: string, width: number): string {
+  const lw = visibleWidth(left);
+  const cw = visibleWidth(center);
+  const rw = visibleWidth(right);
+  const minGap = 2;
+  if (lw + cw + rw + minGap * 2 > width) {
+    const filler = ' '.repeat(Math.max(0, width - lw - rw));
+    return left + filler + right + '\n' + ' '.repeat(Math.max(0, Math.floor((width - cw) / 2))) + center;
+  }
+  const leftPad = Math.floor((width - cw) / 2) - lw;
+  const rightPad = width - lw - leftPad - cw - rw;
+  return left + ' '.repeat(Math.max(1, leftPad)) + center + ' '.repeat(Math.max(1, rightPad)) + right;
+}
+
+function renderManBlock(block: ManBlock, indent: number, contentWidth: number): string[] {
+  const pad = ' '.repeat(indent);
+  switch (block.type) {
+    case 'prose': {
+      const wrapped = wrap(block.text, contentWidth).split('\n');
+      return wrapped.map(line => pad + bodyWarm(line));
+    }
+    case 'lines':
+      return block.lines.map(line => pad + line);
+    case 'definitions': {
+      // Tagged paragraph style:
+      //   term
+      //          definition wrapped to content width
+      const out: string[] = [];
+      const termIndent = ' '.repeat(indent);
+      const defIndent = ' '.repeat(indent + 7);
+      const defWidth = Math.max(10, contentWidth - 7);
+      for (const item of block.items) {
+        out.push(termIndent + bold(item.term));
+        const wrapped = wrap(item.def, defWidth).split('\n');
+        for (const line of wrapped) out.push(defIndent + bodyWarm(line));
+      }
+      return out;
+    }
+  }
+}
+
+export function renderMan(man: Man): string {
+  const width = PAGE_WIDTH;
+  const tag = `${man.name.toUpperCase()}(${man.section})`;
+  const header = manBar(tag, man.category, tag, width);
+  const footer = manBar(man.version, man.date, tag, width);
+
+  const indent = 7;
+  const contentWidth = width - indent;
+
+  const out: string[] = [header, ''];
+  for (const section of man.sections) {
+    out.push(bold(titleBright(section.heading.toUpperCase())));
+    for (let i = 0; i < section.blocks.length; i++) {
+      if (i > 0) out.push('');
+      out.push(...renderManBlock(section.blocks[i], indent, contentWidth));
+    }
+    out.push('');
+  }
+  out.push(footer);
+  return out.join('\n');
 }
 
 export function renderUses(uses: Uses): string {
