@@ -63,67 +63,13 @@ function withHeaders(response: Response, extra: Record<string, string>, body?: B
   });
 }
 
-// Routes whose HTML carries inline <script> tags unique to that route.
-// Astro inlines small hoisted scripts directly, so blog-filter (only on
-// /blog) and code-copy (only on blog posts) don't appear in the home
-// page's inline-script set. ClientRouter swaps the body in place but the
-// browser keeps enforcing the original page's CSP, so a script that
-// arrives via SPA navigation needs its hash to already be in that CSP.
-// We warm the union once per process and include it in every CSP.
-const PREWARM_HEADER = 'x-csp-prewarm';
-const PREWARM_ROUTES = ['/', '/blog'] as const;
-
-let warmedHashesPromise: Promise<readonly string[]> | null = null;
-
-async function warmedScriptHashes(request: Request): Promise<readonly string[]> {
-  warmedHashesPromise ??= (async () => {
-    const origin = new URL(request.url).origin;
-    const blog = await getCollection('blog', ({ data }) => !data.draft);
-    const sample = blog[0]?.id;
-    const routes: string[] = [...PREWARM_ROUTES];
-    if (sample) routes.push(`/blog/${sample}`);
-    const hashes = new Set<string>();
-    await Promise.all(
-      routes.map(async path => {
-        try {
-          const resp = await fetch(origin + path, {
-            headers: { 'user-agent': 'Mozilla/5.0', [PREWARM_HEADER]: '1' },
-          });
-          if (
-            resp.ok &&
-            resp.headers.get('content-type')?.toLowerCase().includes('text/html')
-          ) {
-            for (const h of await inlineScriptHashes(await resp.text())) {
-              hashes.add(h);
-            }
-          }
-        } catch (_) {
-          // Warming is best-effort; per-page hashes still cover refresh.
-        }
-      })
-    );
-    return [...hashes];
-  })();
-  return warmedHashesPromise;
-}
-
 // For HTML responses, compute SHA-256 hashes of every inline <script> in the
 // body and emit a CSP that whitelists exactly those hashes. Astro inlines
 // hoisted scripts with content that changes across builds, so a static CSP
-// hash list goes stale and blocks the scripts. We also include the union
-// of hashes from every page that has unique inline scripts so SPA
-// navigations into them don't get blocked by the originating page's CSP.
-async function withHtmlHeaders(
-  response: Response,
-  extra: Record<string, string>,
-  request: Request,
-): Promise<Response> {
+// hash list goes stale and blocks the scripts.
+async function withHtmlHeaders(response: Response, extra: Record<string, string>): Promise<Response> {
   const html = await response.text();
-  const localHashes = await inlineScriptHashes(html);
-  const isPrewarm = request.headers.get(PREWARM_HEADER) === '1';
-  const hashes = isPrewarm
-    ? localHashes
-    : [...new Set([...localHashes, ...(await warmedScriptHashes(request))])];
+  const hashes = await inlineScriptHashes(html);
   const merged = { ...extra, 'Content-Security-Policy': buildCsp(hashes) };
   return withHeaders(response, merged, html);
 }
@@ -222,7 +168,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const extra: Record<string, string> = {};
     if (response.status === 200 && isHtml) {
       extra['Cache-Control'] = HTML_CACHE;
-      return await withHtmlHeaders(response, extra, request);
+      return await withHtmlHeaders(response, extra);
     }
     if (response.status === 404) {
       extra['Cache-Control'] = NOT_FOUND_CACHE;
