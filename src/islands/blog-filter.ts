@@ -4,11 +4,7 @@
 //
 // We re-run setup on every astro:page-load because Astro view transitions
 // swap the DOM in place — the listeners attached to the previous page's
-// nodes go with it. We also run setup once at module load: when navigating
-// into /blog via the ClientRouter, the script is dynamically imported
-// after astro:page-load has already fired, so the listener alone misses
-// the first visit. The dataset.filtersReady marker keeps the same DOM
-// from being wired twice.
+// nodes go with it.
 
 import { matchesFilter, type PostMeta } from '../lib/blog-filter';
 
@@ -31,9 +27,6 @@ function readCard(el: HTMLElement): FilterCard {
 }
 
 function setupBlogFilter(): void {
-  const filters = document.querySelector<HTMLElement>('[data-blog-filters]');
-  if (!filters || filters.dataset.filtersReady === '1') return;
-
   const search = document.querySelector<HTMLInputElement>('[data-blog-search]');
   const chips = Array.from(
     document.querySelectorAll<HTMLButtonElement>('[data-tag-chip]'),
@@ -44,7 +37,6 @@ function setupBlogFilter(): void {
   const empty = document.querySelector<HTMLElement>('[data-blog-empty]');
 
   if (!search || cardEls.length === 0) return;
-  filters.dataset.filtersReady = '1';
 
   const cards = cardEls.map(readCard);
   const activeTags = new Set<string>();
@@ -81,4 +73,3 @@ function setupBlogFilter(): void {
 }
 
 document.addEventListener('astro:page-load', setupBlogFilter);
-setupBlogFilter();
