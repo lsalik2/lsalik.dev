@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
-import { buildOgTree } from '../../lib/og-template';
+import { buildOgTree, type OgData } from '../../lib/og-template';
 
 export const prerender = true;
 
@@ -18,13 +18,6 @@ export const prerender = true;
 const fontDir = join(process.cwd(), 'src', 'assets', 'fonts');
 const fontRegular = readFileSync(join(fontDir, 'RobotoMono-Regular.ttf'));
 const fontBold = readFileSync(join(fontDir, 'RobotoMono-Bold.ttf'));
-
-interface OgProps {
-  title: string;
-  date: string;
-  tags: string[];
-  slug: string;
-}
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
@@ -35,12 +28,12 @@ export async function getStaticPaths() {
       date: post.data.date.toISOString().slice(0, 10),
       tags: post.data.tags,
       slug: post.id,
-    } satisfies OgProps,
+    } satisfies OgData,
   }));
 }
 
 export const GET: APIRoute = async ({ props }) => {
-  const { title, date, tags, slug } = props as OgProps;
+  const { title, date, tags, slug } = props as OgData;
 
   const svg = await satori(buildOgTree({ title, date, tags, slug }) as never, {
     width: 1200,
