@@ -28,6 +28,7 @@ const { title } = Astro.props;
       } catch (_) {}
     })();
   </script>
+  <slot name="head" />
   <ClientRouter />
 </head>
 <body>

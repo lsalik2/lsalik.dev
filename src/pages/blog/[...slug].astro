@@ -4,6 +4,7 @@ import Page from '../../layouts/Page.astro';
 import TerminalFrame from '../../components/TerminalFrame.astro';
 import { readingTime } from '../../lib/reading-time';
 import '../../styles/prose.css';
+import { SITE_URL } from '../../lib/site';
 
 const slug = Astro.params.slug;
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
@@ -22,6 +23,13 @@ const next = posts[idx - 1];
 const prev = posts[idx + 1];
 ---
 <Page title={post.data.title} path="/blog">
+  <Fragment slot="head">
+    <meta property="og:title" content={post.data.title} />
+    <meta property="og:description" content={post.data.description} />
+    <meta property="og:type" content="article" />
+    <meta property="og:image" content={`${SITE_URL}/og/${post.id}.png`} />
+    <meta name="twitter:card" content="summary_large_image" />
+  </Fragment>
   <TerminalFrame title={`cat ~/blog/${post.id}.md`}>
     <p class="feed-link">
       <a href="/rss.xml" type="application/rss+xml">[rss feed]</a>

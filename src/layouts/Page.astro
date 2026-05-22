@@ -11,6 +11,7 @@ interface Props {
 const { title, path } = Astro.props;
 ---
 <Base title={title}>
+  <slot name="head" slot="head" />
   <div class="page-container">
     <header class="page-header">
       <Breadcrumb path={path} />
