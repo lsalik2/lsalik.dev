@@ -77,11 +77,8 @@ Deploys automatically via Vercel on push to `main`. The Vercel adapter runs the 
 
 Here's some future additions I plan to add:
 - blog pagination: will add this once i have too many blogs, same with projects
-- add logo/images: specifically on the top corners of page-main
-- curl -L lsalik.dev/ssh easter egg: not sure what the easter egg should be, maybe some ascii art of my cats?
 - live projects github stats: stars, last commit, etc.
 - ASCII background reacting subtly to cursor/scroll: self-explanatory
-- OG image generation per post: Satori or similar, build-time so edge-safe
 - add different animations: self-explanatory
 
 ## Copying / reuse
