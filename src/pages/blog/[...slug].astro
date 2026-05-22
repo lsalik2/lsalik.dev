@@ -27,6 +27,7 @@ const prev = posts[idx + 1];
     <meta property="og:title" content={post.data.title} />
     <meta property="og:description" content={post.data.description} />
     <meta property="og:type" content="article" />
+    <meta property="og:url" content={`${SITE_URL}/blog/${post.id}/`} />
     <meta property="og:image" content={`${SITE_URL}/og/${post.id}.png`} />
     <meta name="twitter:card" content="summary_large_image" />
   </Fragment>
