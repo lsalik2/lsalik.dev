@@ -116,6 +116,24 @@ describe('wrap', () => {
   });
 });
 
+describe('box with wrap: false', () => {
+  it('preserves leading whitespace on each line', () => {
+    const out = box(['   /\\_/\\', '  ( o.o )'], { width: 40, wrap: false });
+    const lines = stripAnsi(out).split('\n');
+    // Body lines are framed: "│ " + content + filler + " │"
+    expect(lines[1]).toBe('│    /\\_/\\' + ' '.repeat(40 - 2 - 2 - '   /\\_/\\'.length) + ' │');
+    expect(lines[2]).toBe('│   ( o.o )' + ' '.repeat(40 - 2 - 2 - '  ( o.o )'.length) + ' │');
+  });
+
+  it('still wraps long lines when wrap is not disabled (default)', () => {
+    const longLine = 'x'.repeat(100);
+    const out = box([longLine], { width: 40 });
+    const lines = stripAnsi(out).split('\n');
+    // Default behavior: long line is soft-wrapped onto multiple body lines.
+    expect(lines.length).toBeGreaterThan(3);
+  });
+});
+
 describe('twoCol', () => {
   it('puts left and right on one line', () => {
     const result = twoCol('left', 'right', 40);
