@@ -28,6 +28,8 @@ export interface BoxOptions {
 //
 // If `title` is given, it's inlined on the top border like `┌─ title ─...─┐`.
 // Lines longer than the inner width are soft-wrapped via `wrap()`.
+// Pass `wrap: false` to frame each line verbatim (e.g. for ASCII art, where
+// soft-wrapping would strip the leading indentation that holds it together).
 export function box(lines: readonly string[], opts: BoxOptions = {}): string {
   const width = opts.width ?? PAGE_WIDTH;
   const padX = opts.padX ?? 1;

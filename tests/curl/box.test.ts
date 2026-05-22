@@ -132,6 +132,19 @@ describe('box with wrap: false', () => {
     // Default behavior: long line is soft-wrapped onto multiple body lines.
     expect(lines.length).toBeGreaterThan(3);
   });
+
+  it('does not crash when a line exceeds the inner width (caller-owned overflow)', () => {
+    // wrap:false documents that callers guarantee width. If they don't,
+    // the line should still render without throwing — it just protrudes past
+    // the right border. Lock that in so the comment stays honest.
+    const longLine = 'y'.repeat(100);
+    expect(() => box([longLine], { width: 20, wrap: false })).not.toThrow();
+    const out = box([longLine], { width: 20, wrap: false });
+    const lines = stripAnsi(out).split('\n');
+    // Top border, one body row containing the full long line, bottom border.
+    expect(lines).toHaveLength(3);
+    expect(lines[1]).toContain(longLine);
+  });
 });
 
 describe('twoCol', () => {
