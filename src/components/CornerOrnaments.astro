@@ -1,0 +1,51 @@
+---
+// Decorative ASCII corner ornaments for the homepage top corners. Purely
+// visual: aria-hidden and pointer-events:none so they never affect layout,
+// selection, or screen readers. The strokes "draw in" once on load via a
+// CSS-only clip-path wipe (no JS, so the strict CSP is untouched).
+---
+<div class="corner-ornament corner-tl" aria-hidden="true">{`┌──\n│`}</div>
+<div class="corner-ornament corner-tr" aria-hidden="true">{`──┐\n  │`}</div>
+
+<style>
+  .corner-ornament {
+    position: absolute;
+    top: 0;
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-size: 1rem;
+    line-height: 1.1;
+    color: var(--accent);
+    opacity: 0.4;
+    white-space: pre;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .corner-tl {
+    left: 0;
+    animation: draw-in-left 0.7s ease-out both;
+  }
+
+  .corner-tr {
+    right: 0;
+    text-align: right;
+    animation: draw-in-right 0.7s ease-out both;
+  }
+
+  @keyframes draw-in-left {
+    from { clip-path: inset(0 100% 0 0); }
+    to   { clip-path: inset(0 0 0 0); }
+  }
+
+  @keyframes draw-in-right {
+    from { clip-path: inset(0 0 0 100%); }
+    to   { clip-path: inset(0 0 0 0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .corner-ornament {
+      animation: none;
+      clip-path: none;
+    }
+  }
+</style>

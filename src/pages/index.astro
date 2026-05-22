@@ -1,9 +1,12 @@
 ---
 import Page from '../layouts/Page.astro';
 import TerminalFrame from '../components/TerminalFrame.astro';
+import CornerOrnaments from '../components/CornerOrnaments.astro';
 ---
 <Page title="Home" path="/">
-  <section class="hero">
+  <div class="home-main">
+    <CornerOrnaments />
+    <section class="hero">
     <h1 class="hero-title"><span class="accent">lsalik</span>.dev</h1>
     <p class="tagline">aerospace & software engineer</p>
   </section>
@@ -64,9 +67,14 @@ import TerminalFrame from '../components/TerminalFrame.astro';
       </div>
     </div>
   </section>
+  </div>
 </Page>
 
 <style>
+  .home-main {
+    position: relative;
+  }
+
   .hero {
     margin: 0 0 1.5rem;
   }
