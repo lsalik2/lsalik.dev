@@ -318,3 +318,57 @@ export function renderUses(uses: Uses): string {
 
   return box(rows, { title: '~/uses' });
 }
+
+// curl -L lsalik.dev/ssh — a hidden easter egg. Mimics an SSH login session
+// whose message-of-the-day introduces the site's two "maintainers", Finch and
+// Raven. Terminal-clients only; browsers hitting /ssh get the normal 404.
+//
+// The cat art is framed with `box(..., { wrap: false })` so its leading
+// indentation survives (the default soft-wrap path strips it).
+export function renderSsh(): string {
+  // Finch — oversized tuxedo Maine Coon. Drawn larger, warm-toned.
+  const finch = [
+    '      /\\___/\\',
+    '     /  o   o  \\',
+    '    ( ==  ^  == )',
+    '     )         (',
+    '    (  )  v  (  )',
+    '   (__(_______)__)',
+  ];
+  // Raven — small black cat. Drawn compact, dim.
+  const raven = [
+    '   /\\_/\\',
+    '  ( o.o )',
+    '   > ^ <',
+  ];
+
+  const banner = [
+    `${green('$')} ssh guest@lsalik.dev`,
+    dim("The authenticity of host 'lsalik.dev (104.21.0.7)' can't be established."),
+    dim('ED25519 key fingerprint is SHA256:9faSn0w+ba11sm30wmix...purr='),
+    amber("Warning: Permanently added 'lsalik.dev' to the list of known hosts."),
+  ];
+
+  const motd = box(
+    [
+      `${bold(titleBright('Welcome to lsalik.dev'))}${dim('  —  last login: just now')}`,
+      '',
+      ...finch.map(line => bodyWarm(line)),
+      '',
+      ...raven.map(line => dim(line)),
+      '',
+      dim('the maintainers:'),
+      `  ${bold(cyan('finch'))}  ·  oversized tuxedo maine coon`,
+      `  ${bold(cyan('raven'))}  ·  small black cat, runs ops`,
+    ],
+    { title: 'motd', wrap: false },
+  );
+
+  const footer = [
+    '',
+    `${dim('hint: the rest of the site →')} ${cyan('curl -L lsalik.dev')}`,
+    dim('Connection to lsalik.dev closed.'),
+  ];
+
+  return [...banner, '', motd, ...footer].join('\n');
+}
