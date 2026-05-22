@@ -48,4 +48,12 @@ describe('buildOgTree', () => {
     expect(tree).toHaveProperty('type');
     expect(tree).toHaveProperty('props');
   });
+
+  it('formats the date+tags meta line with the documented spacing', () => {
+    // Pin the contract: date, then 4 spaces, then hash-tags joined by 2 space.
+    // Without this, a regression in metaLine's whitespace would not be caught
+    // by the individual token assertions above.
+    const text = collectText(buildOgTree(data)).join(' ');
+    expect(text).toContain('2026-05-10    #astro  #ansi');
+  });
 });
