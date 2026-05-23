@@ -29,6 +29,8 @@ const prev = posts[idx + 1];
     <meta property="og:type" content="article" />
     <meta property="og:url" content={`${SITE_URL}/blog/${post.id}/`} />
     <meta property="og:image" content={`${SITE_URL}/og/${post.id}.png`} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
   </Fragment>
   <TerminalFrame title={`cat ~/blog/${post.id}.md`}>
