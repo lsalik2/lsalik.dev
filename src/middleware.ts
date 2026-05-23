@@ -124,7 +124,6 @@ function notFoundResponse(pathname: string): Response {
 }
 
 export const onRequest = defineMiddleware(async ({ request }, next) => {
-  const ua = request.headers.get('user-agent');
   const { pathname } = new URL(request.url);
 
   // Feed / crawler endpoints — served as-is to every client (curl included),
@@ -136,13 +135,16 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
   }
 
   // Prerendered Open Graph PNGs are static assets, not pages — they should
-  // never go through the terminal/browser UA gate. Skipping the gate also
-  // suppresses the per-image "Astro.request.headers unavailable" build
-  // warnings emitted when middleware runs against prerender-time requests.
+  // never go through the terminal/browser UA gate. Skipping early (before we
+  // touch `request.headers`) also suppresses the per-image "Astro.request.headers
+  // unavailable" warnings Astro emits when middleware runs against
+  // prerender-time requests.
   if (pathname.startsWith('/og/')) {
     const response = await next();
     return withHeaders(response, {});
   }
+
+  const ua = request.headers.get('user-agent');
 
   // /links → /contact redirect (applies to both browser and curl traffic).
   if (pathname === '/links' || pathname === '/links/') {
