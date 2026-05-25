@@ -2,6 +2,7 @@ import { defineConfig, passthroughImageService } from 'astro/config';
 import vercel from '@astrojs/vercel';
 
 export default defineConfig({
+  site: 'https://lsalik.dev',
   output: 'server',
   // Skip sharp-based image optimization: the Vercel edge middleware bundle
   // rejects Node built-ins that sharp pulls in, and we don't need
