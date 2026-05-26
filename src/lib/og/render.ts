@@ -37,10 +37,9 @@ export async function renderOgPng(props: OgTemplateProps): Promise<Buffer> {
     height: 630,
     fonts,
   });
-  const png = new Resvg(svg, {
+  return new Resvg(svg, {
     fitTo: { mode: 'width', value: 1200 },
   })
     .render()
     .asPng();
-  return Buffer.from(png);
 }
