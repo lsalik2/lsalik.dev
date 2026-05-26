@@ -69,7 +69,7 @@ const _require = createRequire(import.meta.url);
 
 /** Extract YAML frontmatter from a markdown file string. */
 function parseFrontmatter(raw: string): { data: Record<string, unknown>; body: string } {
-  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  const match = raw.match(/^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*\r?\n?([\s\S]*)$/);
   if (!match) return { data: {}, body: raw };
   const { load } = _require('js-yaml') as typeof import('js-yaml');
   const data = (load(match[1]) ?? {}) as Record<string, unknown>;
@@ -102,11 +102,14 @@ async function readContentEntries(
   kind: OgKind,
   opts: { skipDraft?: boolean } = {},
 ): Promise<OgEntry[]> {
+  // Match the Astro glob loader's `**/*.md` pattern. Returns paths relative
+  // to contentDir, so a nested file `sub/post.md` becomes slug `sub/post`.
   let files: string[];
   try {
-    files = await readdir(contentDir);
-  } catch {
-    return [];
+    files = await readdir(contentDir, { recursive: true });
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return [];
+    throw err;
   }
   const entries: OgEntry[] = [];
   for (const file of files) {
@@ -114,7 +117,8 @@ async function readContentEntries(
     const raw = await readFile(join(contentDir, file), 'utf-8');
     const { data, body } = parseFrontmatter(raw);
     if (opts.skipDraft && data.draft === true) continue;
-    const slug = file.replace(/\.md$/, '');
+    // Use forward-slashes regardless of platform so slugs match Astro's id format.
+    const slug = file.replace(/\.md$/, '').split(/[\\/]/).join('/');
     const title = String(data.title ?? slug);
     const meta =
       kind === 'blog'
@@ -133,6 +137,7 @@ export default function ogImagesIntegration(): AstroIntegration {
         // We read content files directly from the source tree using fs/promises
         // rather than `astro:content`, because the Vite module runner used to
         // resolve that virtual module is closed before this hook fires.
+        // Assumes this file lives at <root>/src/integrations/. Adjust '../..' if moved.
         const root = fileURLToPath(new URL('../..', import.meta.url));
         const blogDir = join(root, 'src', 'content', 'blog');
         const projectsDir = join(root, 'src', 'content', 'projects');

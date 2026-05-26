@@ -21,7 +21,7 @@ describe('generateOgImages', () => {
   it('writes one PNG per non-draft blog entry', async () => {
     const result = await generateOgImages({
       outDir: tmpDir,
-      // Fixture entries injected directly; production uses getCollection().
+      // Fixture entries injected directly; production reads from disk via readContentEntries.
       entries: [
         { kind: 'blog', slug: 'post-a', title: 'Post A', meta: '2026-01-01 · a · 1 min read' },
         { kind: 'blog', slug: 'post-b', title: 'Post B', meta: '2026-01-02 · b · 2 min read' },
