@@ -21,7 +21,13 @@ const minutes = readingTime(post.body ?? '');
 const next = posts[idx - 1];
 const prev = posts[idx + 1];
 ---
-<Page title={post.data.title} path="/blog">
+<Page
+  title={post.data.title}
+  path="/blog"
+  description={post.data.description}
+  image={`/og/blog/${post.id}.png`}
+  type="article"
+>
   <TerminalFrame title={`cat ~/blog/${post.id}.md`}>
     <p class="feed-link">
       <a href="/rss.xml" type="application/rss+xml">[rss feed]</a>
