@@ -6,11 +6,14 @@ import PaletteToggle from '../components/PaletteToggle.astro';
 interface Props {
   title: string;
   path: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
 }
 
-const { title, path } = Astro.props;
+const { title, path, description, image, type } = Astro.props;
 ---
-<Base title={title}>
+<Base title={title} description={description} image={image} type={type}>
   <div class="page-container">
     <header class="page-header">
       <Breadcrumb path={path} />
