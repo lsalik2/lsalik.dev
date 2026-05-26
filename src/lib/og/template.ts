@@ -11,12 +11,15 @@ export interface OgTemplateProps {
   meta: string;
 }
 
+// Hex values pulled from src/styles/palettes.css `:root[data-palette="dark-terminal"]`.
+// Build-time rendering can't read CSS vars, so we mirror the palette here.
 const COLORS = {
-  bg: '#0b0c0e',
-  fg: '#e6e6e6',
-  fgMuted: '#8a8a8a',
-  accent: '#f5b041',
-  border: '#2a2c30',
+  bg: '#0d1117',
+  bgSurface: '#161b22',
+  fg: '#c9d1d9',
+  fgMuted: '#8b949e',
+  accent: '#58a6ff',
+  border: '#30363d',
 };
 
 // Satori expects a plain element object: {type, props: {style, children}}.
@@ -56,7 +59,7 @@ export function OgTemplate({ kind, slug, title, meta }: OgTemplateProps) {
             style: {
               padding: '18px 28px',
               borderBottom: `1px solid ${COLORS.border}`,
-              backgroundColor: '#15171a',
+              backgroundColor: COLORS.bgSurface,
               color: COLORS.fgMuted,
               fontSize: '28px',
             },
@@ -78,11 +81,8 @@ export function OgTemplate({ kind, slug, title, meta }: OgTemplateProps) {
                   fontWeight: 700,
                   color: COLORS.fg,
                   lineHeight: 1.15,
-                  // Clamp to 3 lines — Satori supports lineClamp via this property.
-                  display: '-webkit-box',
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
+                  // Satori v0.10+ supports native lineClamp; -webkit-box is ignored.
+                  lineClamp: 3,
                 },
                 children: title,
               }),
