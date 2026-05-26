@@ -27,6 +27,11 @@ const SUBDIR: Record<OgKind, string> = {
 // Reject slugs that would escape the output directory. Allow nested slugs
 // (Astro's glob loader emits `sub/post` for `src/content/blog/sub/post.md`)
 // but block traversal, absolute, and hidden patterns.
+//
+// The character set is intentionally narrow: lowercase letters, digits,
+// hyphen, slash. Files like `MyPost.md` or `my_post.md` will be silently
+// skipped — if a future post needs them, expand this regex and ensure
+// downstream URL/path code handles the wider character set.
 function isSafeSlug(slug: string): boolean {
   if (!slug) return false;
   if (slug.includes('..')) return false;
