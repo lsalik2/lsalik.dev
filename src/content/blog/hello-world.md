@@ -47,7 +47,7 @@ print some_python_code
 Now for some [clickable links](https://lsalik.dev)!
 
 Let's try some images:
-![lsalik.dev logo](https://github.com/lsalik2/lsalik.dev/blob/main/public/favicon.svg "lsalik.dev logo")
+![lsalik.dev logo](/favicon.svg "lsalik.dev logo")
 
 How about some headings?
 
