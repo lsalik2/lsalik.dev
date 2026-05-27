@@ -12,7 +12,13 @@ const { Content } = await render(project);
 const dateStr = project.data.date.toISOString().slice(0, 10);
 const stackStr = project.data.stack.join(' · ');
 ---
-<Page title={project.data.title} path="/projects">
+<Page
+  title={project.data.title}
+  path="/projects"
+  description={project.data.description}
+  image={`/og/projects/${project.id}.png`}
+  type="article"
+>
   <TerminalFrame title={`cat ~/projects/${project.id}/README.md`}>
     <div class="project-meta">
       <div class="meta-row">
