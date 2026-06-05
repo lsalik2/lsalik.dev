@@ -51,7 +51,7 @@ export const RESUME: Resume = {
       title: 'Data Integration Engineer',
       company: 'MW Components',
       location: 'Chicago, IL',
-      dates: 'December 2025 - Present',
+      dates: 'December 2025 - June 2026',
       bullets: [
         'Engineered time-series forecasting pipelines using ARIMA and Random Forest models, identifying 200 anomalies in manufacturing data, improving predictive accuracy by 30%.',
         'Designed and deployed an interactive Streamlit dashboard to deliver key insights to the Executive Leadership Team, streamlining reports and eliminating past-due orders by 80%.',
