@@ -109,31 +109,54 @@ export interface RenderLayersResult {
   layers: string[]; // one string per phase; each is `rows` lines joined by '\n'
 }
 
+export interface RenderOptions {
+  spotlightX?: number;       // spotlight center, in cell coordinates
+  spotlightY?: number;
+  spotlightRadius?: number;  // 0 disables the spotlight
+  spotlightStrength?: number;
+  parallaxX?: number;        // cells to offset the sampled field
+  parallaxY?: number;
+}
+
 export function renderLayers(
   cols: number,
   rows: number,
   t: number,
   phases: readonly number[],
+  opts: RenderOptions = {},
 ): RenderLayersResult {
+  const {
+    spotlightX = 0,
+    spotlightY = 0,
+    spotlightRadius = 0,
+    spotlightStrength = 0,
+    parallaxX = 0,
+    parallaxY = 0,
+  } = opts;
+
   const layerCount = phases.length;
 
   const layerChars: string[][] = Array.from({ length: layerCount }, () =>
     new Array<string>(cols * rows).fill(' '),
   );
 
-  // For each cell, compute every layer's brightness; the brightest wins that cell.
+  // For each cell, compute every layer's brightness; the brightest wins that
+  // cell. Parallax shifts the sampled coordinates; the spotlight brightens the
+  // winning brightness before glyph selection.
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       let maxB = 0;
       let maxL = 0;
       for (let li = 0; li < layerCount; li++) {
-        const b = sample(c, r, t, phases[li]);
+        const b = sample(c + parallaxX, r + parallaxY, t, phases[li]);
         if (b > maxB) {
           maxB = b;
           maxL = li;
         }
       }
-      const ch = charForBrightness(maxB);
+      const boost = spotlight(c, r, spotlightX, spotlightY, spotlightRadius);
+      const finalB = applySpotlight(maxB, boost, spotlightStrength);
+      const ch = charForBrightness(finalB);
       for (let li = 0; li < layerCount; li++) {
         layerChars[li][r * cols + c] = li === maxL ? ch : ' ';
       }
