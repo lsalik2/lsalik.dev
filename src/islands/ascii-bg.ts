@@ -76,6 +76,35 @@ export function charForBrightness(b: number): string {
   return RAMP[idx];
 }
 
+// Smooth radial falloff in [0, 1]: 1 at the spotlight center, 0 at/beyond
+// `radius`. Uses smoothstep so the edge is soft rather than a hard ring.
+export function spotlight(
+  c: number,
+  r: number,
+  sx: number,
+  sy: number,
+  radius: number,
+): number {
+  if (radius <= 0) return 0;
+  const dx = c - sx;
+  const dy = r - sy;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist >= radius) return 0;
+  const t = 1 - dist / radius; // 1 at center → 0 at edge
+  return t * t * (3 - 2 * t); // smoothstep
+}
+
+// base brightness + (boost * strength), clamped to [0, 1]. Boost is in [0, 1]
+// and strength is non-negative, so this can only brighten a cell.
+export function applySpotlight(
+  base: number,
+  boost: number,
+  strength: number,
+): number {
+  const v = base + boost * strength;
+  return v < 0 ? 0 : v > 1 ? 1 : v;
+}
+
 export interface RenderLayersResult {
   layers: string[]; // one string per phase; each is `rows` lines joined by '\n'
 }

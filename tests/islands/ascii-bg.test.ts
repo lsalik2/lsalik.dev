@@ -3,6 +3,8 @@ import {
   sample,
   charForBrightness,
   renderLayers,
+  spotlight,
+  applySpotlight,
   RAMP,
   LAYER_PHASES,
   LAYER_COLORS,
@@ -45,6 +47,57 @@ describe('charForBrightness', () => {
 
   it('clamps values below 0 to the first ramp glyph', () => {
     expect(charForBrightness(-5)).toBe(RAMP[0]);
+  });
+});
+
+describe('spotlight', () => {
+  it('returns 1 at the exact center', () => {
+    expect(spotlight(5, 5, 5, 5, 10)).toBe(1);
+  });
+
+  it('returns 0 at or beyond the radius', () => {
+    expect(spotlight(15, 5, 5, 5, 10)).toBe(0); // dist 10 == radius
+    expect(spotlight(20, 5, 5, 5, 10)).toBe(0); // dist 15 > radius
+  });
+
+  it('returns 0 when radius is non-positive', () => {
+    expect(spotlight(5, 5, 5, 5, 0)).toBe(0);
+    expect(spotlight(5, 5, 5, 5, -3)).toBe(0);
+  });
+
+  it('stays within [0, 1] and is non-increasing with distance', () => {
+    let prev = Infinity;
+    for (let d = 0; d <= 10; d++) {
+      const v = spotlight(5 + d, 5, 5, 5, 10);
+      expect(v).toBeGreaterThanOrEqual(0);
+      expect(v).toBeLessThanOrEqual(1);
+      expect(v).toBeLessThanOrEqual(prev);
+      prev = v;
+    }
+  });
+});
+
+describe('applySpotlight', () => {
+  it('returns the base unchanged when boost is zero', () => {
+    expect(applySpotlight(0.4, 0, 0.5)).toBe(0.4);
+  });
+
+  it('only raises brightness, never lowers it', () => {
+    expect(applySpotlight(0.4, 1, 0.5)).toBeGreaterThan(0.4);
+  });
+
+  it('clamps the result to at most 1', () => {
+    expect(applySpotlight(0.9, 1, 0.5)).toBe(1);
+  });
+
+  it('never returns a value outside [0, 1]', () => {
+    for (const base of [0, 0.3, 0.7, 1]) {
+      for (const boost of [0, 0.5, 1]) {
+        const v = applySpotlight(base, boost, 0.5);
+        expect(v).toBeGreaterThanOrEqual(0);
+        expect(v).toBeLessThanOrEqual(1);
+      }
+    }
   });
 });
 
