@@ -127,6 +127,47 @@ describe('renderLayers', () => {
     const b = renderLayers(10, 4, 2.0, [0, 3.7, 7.2]);
     expect(a.layers).not.toEqual(b.layers);
   });
+
+  it('produces identical output for default vs explicit no-op options', () => {
+    const a = renderLayers(12, 5, 0.5, [0, 3.7, 7.2]);
+    const b = renderLayers(12, 5, 0.5, [0, 3.7, 7.2], {
+      spotlightRadius: 0,
+      spotlightStrength: 0,
+      parallaxX: 0,
+      parallaxY: 0,
+    });
+    expect(a.layers).toEqual(b.layers);
+  });
+
+  it('changes output when a parallax offset is applied', () => {
+    const a = renderLayers(12, 5, 0.5, [0, 3.7, 7.2], { parallaxX: 0 });
+    const b = renderLayers(12, 5, 0.5, [0, 3.7, 7.2], { parallaxX: 4 });
+    expect(a.layers).not.toEqual(b.layers);
+  });
+
+  it('a parallax offset is deterministic', () => {
+    const shifted = renderLayers(12, 5, 0.5, [0, 3.7, 7.2], { parallaxX: 3, parallaxY: 2 });
+    const again = renderLayers(12, 5, 0.5, [0, 3.7, 7.2], { parallaxX: 3, parallaxY: 2 });
+    expect(shifted.layers).toEqual(again.layers);
+  });
+
+  it('keeps the correct shape when options are supplied', () => {
+    const cols = 10;
+    const rows = 4;
+    const result = renderLayers(cols, rows, 1.0, [0, 3.7, 7.2], {
+      spotlightX: 5,
+      spotlightY: 2,
+      spotlightRadius: 6,
+      spotlightStrength: 0.5,
+      parallaxY: 1.5,
+    });
+    expect(result.layers).toHaveLength(3);
+    for (const layer of result.layers) {
+      const lines = layer.split('\n');
+      expect(lines).toHaveLength(rows);
+      for (const line of lines) expect([...line]).toHaveLength(cols);
+    }
+  });
 });
 
 describe('layer constants', () => {
