@@ -57,6 +57,13 @@ if (LAYER_PHASES.length !== LAYER_COLORS.length) {
   );
 }
 
+// Interaction tuning (cursor spotlight + parallax). All in cell units unless noted.
+const SPOTLIGHT_RADIUS = 14;     // cells
+const SPOTLIGHT_STRENGTH = 0.5;  // max brightness boost at center
+const SPOTLIGHT_EASE = 0.08;     // per-frame lerp of spotlight toward pointer
+const SCROLL_PARALLAX = 0.02;    // cells of vertical drift per scrolled pixel
+const CURSOR_PARALLAX_X = 1.5;   // max cells of horizontal drift at screen edges
+
 // ─── Pure / exported ─────────────────────────────────────────────────────────
 
 export function sample(x: number, y: number, t: number, phase: number): number {
@@ -190,11 +197,16 @@ function initBackground(): void {
 
   ACTIVE_PRESET = pickPreset();
 
+  const reduceMotion =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const FONT_SIZE = 11;
   const LINE_HEIGHT = 13;
 
   let cols = 0;
   let rows = 0;
+  let charW = FONT_SIZE * 0.6; // updated by measure()
   let rafHandle: number | null = null;
 
   // Pre-build one <pre> per layer; reuse across frames.
@@ -213,6 +225,34 @@ function initBackground(): void {
     ].join(';');
     return pre;
   });
+
+  // Pointer spotlight + scroll parallax state (px until converted per frame).
+  let pointerActive = false;
+  let targetX = 0;
+  let targetY = 0;
+  let easedX = 0;
+  let easedY = 0;
+  let scrollPx = 0;
+
+  function onPointerMove(e: PointerEvent): void {
+    targetX = e.clientX;
+    targetY = e.clientY;
+    if (!pointerActive) {
+      // Snap on first move so the spotlight doesn't streak in from (0,0).
+      easedX = targetX;
+      easedY = targetY;
+      pointerActive = true;
+    }
+  }
+
+  function onScroll(): void {
+    scrollPx = window.scrollY;
+  }
+
+  if (!reduceMotion) {
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
 
   function measureCharWidth(): number {
     // Measure the real rendered width of a monospace glyph rather than
@@ -234,7 +274,7 @@ function initBackground(): void {
   }
 
   function measure(): void {
-    const charW = measureCharWidth();
+    charW = measureCharWidth();
     // +1 cell overscan to absorb subpixel rounding at the right edge.
     cols = Math.max(1, Math.ceil(window.innerWidth / charW) + 1);
     rows = Math.max(1, Math.ceil(window.innerHeight / LINE_HEIGHT) + 1);
@@ -249,7 +289,27 @@ function initBackground(): void {
 
   function frame(now: number): void {
     const t = now / 1000;
-    const { layers } = renderLayers(cols, rows, t, LAYER_PHASES);
+
+    let opts: RenderOptions = {};
+    if (!reduceMotion) {
+      if (pointerActive) {
+        easedX += (targetX - easedX) * SPOTLIGHT_EASE;
+        easedY += (targetY - easedY) * SPOTLIGHT_EASE;
+      }
+      const parallaxX = pointerActive
+        ? (targetX / window.innerWidth - 0.5) * CURSOR_PARALLAX_X * 2
+        : 0;
+      opts = {
+        spotlightX: easedX / charW,
+        spotlightY: easedY / LINE_HEIGHT,
+        spotlightRadius: pointerActive ? SPOTLIGHT_RADIUS : 0,
+        spotlightStrength: SPOTLIGHT_STRENGTH,
+        parallaxX,
+        parallaxY: scrollPx * SCROLL_PARALLAX,
+      };
+    }
+
+    const { layers } = renderLayers(cols, rows, t, LAYER_PHASES, opts);
     for (let li = 0; li < layerPres.length; li++) {
       layerPres[li].textContent = layers[li];
     }
