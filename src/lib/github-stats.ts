@@ -51,3 +51,27 @@ export function statsForRepo(
 export function mergeStats(prev: StatsMap, fresh: StatsMap): StatsMap {
   return { ...prev, ...fresh };
 }
+
+export function formatStars(n: number): string {
+  if (n < 1000) return String(n);
+  const s = (n / 1000).toFixed(1);
+  return (s.endsWith('.0') ? s.slice(0, -2) : s) + 'k';
+}
+
+export function relativeTime(iso: string, now: Date): string {
+  const secs = Math.max(0, Math.floor((now.getTime() - new Date(iso).getTime()) / 1000));
+  if (secs < 60) return 'just now';
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  if (days < 365) return `${Math.floor(days / 30)}mo ago`;
+  return `${Math.floor(days / 365)}y ago`;
+}
+
+export function formatStatsText(stats: RepoStats, now: Date): string {
+  return `★ ${formatStars(stats.stars)} · updated ${relativeTime(stats.pushedAt, now)}`;
+}
