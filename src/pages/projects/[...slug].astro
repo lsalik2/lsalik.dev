@@ -2,6 +2,8 @@
 import { getCollection, render } from 'astro:content';
 import Page from '../../layouts/Page.astro';
 import TerminalFrame from '../../components/TerminalFrame.astro';
+import statsMap from '../../data/github-stats.json';
+import { statsForRepo, formatStars, relativeTime, type StatsMap } from '../../lib/github-stats';
 import '../../styles/prose.css';
 
 const slug = Astro.params.slug;
@@ -11,6 +13,7 @@ if (!project) return new Response(null, { status: 404 });
 const { Content } = await render(project);
 const dateStr = project.data.date.toISOString().slice(0, 10);
 const stackStr = project.data.stack.join(' · ');
+const repoStats = statsForRepo(project.data.repo, statsMap as StatsMap);
 ---
 <Page
   title={project.data.title}
@@ -46,6 +49,12 @@ const stackStr = project.data.stack.join(' · ');
           : <span class="meta-value muted">closed source</span>
         }
       </div>
+      {repoStats && (
+        <div class="meta-row">
+          <span class="meta-key">GitHub</span>
+          <span class="meta-value muted">★ {formatStars(repoStats.stars)} · updated {relativeTime(repoStats.pushedAt, new Date())}</span>
+        </div>
+      )}
     </div>
     <hr class="divider" />
     <div class="prose">
