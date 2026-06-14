@@ -1,6 +1,7 @@
 import { defineConfig, passthroughImageService } from 'astro/config';
 import vercel from '@astrojs/vercel';
 import ogImages from './src/integrations/og-images.ts';
+import githubStats from './src/integrations/github-stats.ts';
 
 export default defineConfig({
   site: 'https://lsalik.dev',
@@ -11,7 +12,7 @@ export default defineConfig({
   image: {
     service: passthroughImageService(),
   },
-  integrations: [ogImages()],
+  integrations: [ogImages(), githubStats()],
   adapter: vercel({
     // edgeMiddleware: true,
   }),
