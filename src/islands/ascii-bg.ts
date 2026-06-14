@@ -57,6 +57,13 @@ if (LAYER_PHASES.length !== LAYER_COLORS.length) {
   );
 }
 
+// Interaction tuning (cursor spotlight + parallax). All in cell units unless noted.
+const SPOTLIGHT_RADIUS = 16;     // cells
+const SPOTLIGHT_STRENGTH = 0.3;  // max brightness boost at center
+const SPOTLIGHT_EASE = 0.08;     // per-frame lerp of spotlight toward pointer
+const SCROLL_PARALLAX = 0.02;    // cells of vertical drift per scrolled pixel
+const CURSOR_PARALLAX_X = 1.5;   // max cells of horizontal drift at screen edges
+
 // ─── Pure / exported ─────────────────────────────────────────────────────────
 
 export function sample(x: number, y: number, t: number, phase: number): number {
@@ -76,8 +83,46 @@ export function charForBrightness(b: number): string {
   return RAMP[idx];
 }
 
+// Smooth radial falloff in [0, 1]: 1 at the spotlight center, 0 at/beyond
+// `radius`. Uses smoothstep so the edge is soft rather than a hard ring.
+export function spotlight(
+  c: number,
+  r: number,
+  sx: number,
+  sy: number,
+  radius: number,
+): number {
+  if (radius <= 0) return 0;
+  const dx = c - sx;
+  const dy = r - sy;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist >= radius) return 0;
+  const t = 1 - dist / radius; // 1 at center → 0 at edge
+  return t * t * (3 - 2 * t); // smoothstep
+}
+
+// base brightness + (boost * strength), clamped to [0, 1]. Boost is in [0, 1]
+// and strength is non-negative, so this can only brighten a cell.
+export function applySpotlight(
+  base: number,
+  boost: number,
+  strength: number,
+): number {
+  const v = base + boost * strength;
+  return v < 0 ? 0 : v > 1 ? 1 : v;
+}
+
 export interface RenderLayersResult {
   layers: string[]; // one string per phase; each is `rows` lines joined by '\n'
+}
+
+export interface RenderOptions {
+  spotlightX?: number;       // spotlight center, in cell coordinates
+  spotlightY?: number;
+  spotlightRadius?: number;  // 0 disables the spotlight
+  spotlightStrength?: number;
+  parallaxX?: number;        // cells to offset the sampled field
+  parallaxY?: number;
 }
 
 export function renderLayers(
@@ -85,26 +130,40 @@ export function renderLayers(
   rows: number,
   t: number,
   phases: readonly number[],
+  opts: RenderOptions = {},
 ): RenderLayersResult {
+  const {
+    spotlightX = 0,
+    spotlightY = 0,
+    spotlightRadius = 0,
+    spotlightStrength = 0,
+    parallaxX = 0,
+    parallaxY = 0,
+  } = opts;
+
   const layerCount = phases.length;
 
   const layerChars: string[][] = Array.from({ length: layerCount }, () =>
     new Array<string>(cols * rows).fill(' '),
   );
 
-  // For each cell, compute every layer's brightness; the brightest wins that cell.
+  // For each cell, compute every layer's brightness; the brightest wins that
+  // cell. Parallax shifts the sampled coordinates; the spotlight brightens the
+  // winning brightness before glyph selection.
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       let maxB = 0;
       let maxL = 0;
       for (let li = 0; li < layerCount; li++) {
-        const b = sample(c, r, t, phases[li]);
+        const b = sample(c + parallaxX, r + parallaxY, t, phases[li]);
         if (b > maxB) {
           maxB = b;
           maxL = li;
         }
       }
-      const ch = charForBrightness(maxB);
+      const boost = spotlight(c, r, spotlightX, spotlightY, spotlightRadius);
+      const finalB = applySpotlight(maxB, boost, spotlightStrength);
+      const ch = charForBrightness(finalB);
       for (let li = 0; li < layerCount; li++) {
         layerChars[li][r * cols + c] = li === maxL ? ch : ' ';
       }
@@ -138,11 +197,16 @@ function initBackground(): void {
 
   ACTIVE_PRESET = pickPreset();
 
+  const reduceMotion =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const FONT_SIZE = 11;
   const LINE_HEIGHT = 13;
 
   let cols = 0;
   let rows = 0;
+  let charW = FONT_SIZE * 0.6; // updated by measure()
   let rafHandle: number | null = null;
 
   // Pre-build one <pre> per layer; reuse across frames.
@@ -161,6 +225,34 @@ function initBackground(): void {
     ].join(';');
     return pre;
   });
+
+  // Pointer spotlight + scroll parallax state (px until converted per frame).
+  let pointerActive = false;
+  let targetX = 0;
+  let targetY = 0;
+  let easedX = 0;
+  let easedY = 0;
+  let scrollPx = 0;
+
+  function onPointerMove(e: PointerEvent): void {
+    targetX = e.clientX;
+    targetY = e.clientY;
+    if (!pointerActive) {
+      // Snap on first move so the spotlight doesn't streak in from (0,0).
+      easedX = targetX;
+      easedY = targetY;
+      pointerActive = true;
+    }
+  }
+
+  function onScroll(): void {
+    scrollPx = window.scrollY;
+  }
+
+  if (!reduceMotion) {
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
 
   function measureCharWidth(): number {
     // Measure the real rendered width of a monospace glyph rather than
@@ -182,7 +274,7 @@ function initBackground(): void {
   }
 
   function measure(): void {
-    const charW = measureCharWidth();
+    charW = measureCharWidth();
     // +1 cell overscan to absorb subpixel rounding at the right edge.
     cols = Math.max(1, Math.ceil(window.innerWidth / charW) + 1);
     rows = Math.max(1, Math.ceil(window.innerHeight / LINE_HEIGHT) + 1);
@@ -197,7 +289,27 @@ function initBackground(): void {
 
   function frame(now: number): void {
     const t = now / 1000;
-    const { layers } = renderLayers(cols, rows, t, LAYER_PHASES);
+
+    let opts: RenderOptions = {};
+    if (!reduceMotion) {
+      if (pointerActive) {
+        easedX += (targetX - easedX) * SPOTLIGHT_EASE;
+        easedY += (targetY - easedY) * SPOTLIGHT_EASE;
+      }
+      const parallaxX = pointerActive
+        ? (targetX / window.innerWidth - 0.5) * CURSOR_PARALLAX_X * 2
+        : 0;
+      opts = {
+        spotlightX: easedX / charW,
+        spotlightY: easedY / LINE_HEIGHT,
+        spotlightRadius: pointerActive ? SPOTLIGHT_RADIUS : 0,
+        spotlightStrength: SPOTLIGHT_STRENGTH,
+        parallaxX,
+        parallaxY: scrollPx * SCROLL_PARALLAX,
+      };
+    }
+
+    const { layers } = renderLayers(cols, rows, t, LAYER_PHASES, opts);
     for (let li = 0; li < layerPres.length; li++) {
       layerPres[li].textContent = layers[li];
     }
