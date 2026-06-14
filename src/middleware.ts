@@ -21,6 +21,8 @@ import { MAN } from './data/man';
 import { red, stripDangerousEscapes } from './curl/ansi';
 import { box } from './curl/box';
 import { BASE_SECURITY_HEADERS, buildCsp, inlineScriptHashes } from './lib/security-headers';
+import statsMap from './data/github-stats.json';
+import { statsForRepo, formatStatsText, type StatsMap } from './lib/github-stats';
 
 // Matches terminal/CLI HTTP clients by their product token at the start of the
 // User-Agent string. Anchoring to ^ prevents a crafted UA like
@@ -241,17 +243,21 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const entries = await getCollection('projects');
     const projects = entries
       .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-      .map(project => ({
-        slug: project.id,
-        title: project.data.title,
-        date: project.data.date.toISOString().slice(0, 10),
-        stack: project.data.stack,
-        status: project.data.status,
-        description: stripDangerousEscapes(project.data.description),
-        permissions: project.data.permissions,
-        repo: project.data.repo,
-        url: project.data.url,
-      }));
+      .map(project => {
+        const s = statsForRepo(project.data.repo, statsMap as StatsMap);
+        return {
+          slug: project.id,
+          title: project.data.title,
+          date: project.data.date.toISOString().slice(0, 10),
+          stack: project.data.stack,
+          status: project.data.status,
+          description: stripDangerousEscapes(project.data.description),
+          permissions: project.data.permissions,
+          repo: project.data.repo,
+          url: project.data.url,
+          stats: s ? formatStatsText(s, new Date()) : undefined,
+        };
+      });
     return textResponse(renderProjectsIndex(projects));
   }
 
@@ -262,12 +268,14 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const entry = entries.find(p => p.id === slug);
     if (!entry) return notFoundResponse(pathname);
     const content = stripDangerousEscapes(entry.body ?? entry.data.description);
+    const s = statsForRepo(entry.data.repo, statsMap as StatsMap);
     return textResponse(
       renderProjectPost({
         title: entry.data.title,
         status: entry.data.status,
         stack: entry.data.stack,
         content,
+        stats: s ? formatStatsText(s, new Date()) : undefined,
       })
     );
   }

@@ -36,6 +36,7 @@ export interface ProjectPostFull {
   status: string;
   stack: string[];
   content: string;
+  stats?: string;
 }
 
 export interface ProjectSummary {
@@ -48,6 +49,7 @@ export interface ProjectSummary {
   permissions: string;
   repo?: string;
   url?: string;
+  stats?: string;
 }
 
 export function renderHome(): string {
@@ -129,7 +131,9 @@ export function renderRSS(posts: BlogPostSummary[]): string {
 
 export function renderProjectPost(project: ProjectPostFull): string {
   const meta = `${dim(project.status)} · ${project.stack.join(' · ')}`;
-  const headerBox = box([bold(project.title), meta], { title: project.title });
+  const headerLines = [bold(project.title), meta];
+  if (project.stats) headerLines.push(dim(project.stats));
+  const headerBox = box(headerLines, { title: project.title });
   return [headerBox, '', project.content].join('\n');
 }
 
@@ -145,7 +149,10 @@ export function renderProjectsIndex(projects: ProjectSummary[]): string {
     const stack = dim(project.stack.join(' · '));
     const repoLink = project.repo ? `${cyan('→')} ${project.repo}` : dim('→ closed source');
     const url = cyan(`curl -L lsalik.dev/projects/${project.slug}`);
-    return box([topLine, project.description, stack, repoLink, url]);
+    const lines = [topLine, project.description, stack];
+    if (project.stats) lines.push(dim(project.stats));
+    lines.push(repoLink, url);
+    return box(lines);
   });
 
   return [header, '', ...projectBoxes].join('\n');
