@@ -33,7 +33,6 @@ src/
     projects/     # Project entries (.md)
   middleware.ts   # UA sniffing + terminal response routing
   content.config.ts  # Zod schemas for content collections
-docs/             # Internal notes and review backlog
 tests/            # Vitest test suite
 ```
 
