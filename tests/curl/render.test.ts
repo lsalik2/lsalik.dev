@@ -150,6 +150,15 @@ describe('renderProjectsIndex', () => {
     const result = renderProjectsIndex(projects);
     expect(result).toContain('https://github.com/lsalik2/lsalik.dev');
   });
+
+  it('includes the stats line when provided', () => {
+    const withStats: ProjectSummary[] = [{ ...projects[0], stats: '★ 42 · updated 3d ago' }];
+    expect(stripAnsi(renderProjectsIndex(withStats))).toContain('★ 42 · updated 3d ago');
+  });
+
+  it('omits the star glyph when stats are absent', () => {
+    expect(stripAnsi(renderProjectsIndex(projects))).not.toContain('★');
+  });
 });
 
 describe('renderContact', () => {
@@ -213,6 +222,11 @@ describe('renderProjectPost', () => {
     const out = stripAnsi(renderProjectPost(project));
     expect(out).toContain('Astro');
     expect(out).toContain('TypeScript');
+  });
+
+  it('includes the stats line when provided', () => {
+    const out = stripAnsi(renderProjectPost({ ...project, stats: '★ 7 · updated 1w ago' }));
+    expect(out).toContain('★ 7 · updated 1w ago');
   });
 
   it('includes the body content', () => {

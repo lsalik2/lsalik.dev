@@ -2,6 +2,8 @@
 import { getCollection } from 'astro:content';
 import Page from '../../layouts/Page.astro';
 import PageHeader from '../../components/PageHeader.astro';
+import statsMap from '../../data/github-stats.json';
+import { statsForRepo, formatStars, relativeTime, type StatsMap } from '../../lib/github-stats';
 
 const projects = await getCollection('projects');
 projects.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
@@ -30,6 +32,12 @@ function formatDateRange(start: Date, end?: Date): string {
           </div>
           <p class="project-desc">{project.data.description}</p>
           <div class="project-status">status: {project.data.status}</div>
+          {(() => {
+            const s = statsForRepo(project.data.repo, statsMap as StatsMap);
+            return s ? (
+              <div class="project-stats">★ {formatStars(s.stars)} · updated {relativeTime(s.pushedAt, new Date())}</div>
+            ) : null;
+          })()}
           <div class="project-tags">
             {project.data.stack.map(tag => (
               <span class="tag">#{tag}</span>
@@ -115,6 +123,12 @@ function formatDateRange(start: Date, end?: Date): string {
   .project-status {
     font-size: 0.85rem;
     color: var(--amber);
+    margin-bottom: 0.5rem;
+  }
+
+  .project-stats {
+    font-size: 0.8rem;
+    color: var(--fg-muted);
     margin-bottom: 0.5rem;
   }
 
