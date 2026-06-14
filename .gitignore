@@ -10,3 +10,6 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Internal planning docs (specs, plans)
+docs/
