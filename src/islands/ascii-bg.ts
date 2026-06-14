@@ -58,8 +58,8 @@ if (LAYER_PHASES.length !== LAYER_COLORS.length) {
 }
 
 // Interaction tuning (cursor spotlight + parallax). All in cell units unless noted.
-const SPOTLIGHT_RADIUS = 14;     // cells
-const SPOTLIGHT_STRENGTH = 0.5;  // max brightness boost at center
+const SPOTLIGHT_RADIUS = 16;     // cells
+const SPOTLIGHT_STRENGTH = 0.3;  // max brightness boost at center
 const SPOTLIGHT_EASE = 0.08;     // per-frame lerp of spotlight toward pointer
 const SCROLL_PARALLAX = 0.02;    // cells of vertical drift per scrolled pixel
 const CURSOR_PARALLAX_X = 1.5;   // max cells of horizontal drift at screen edges
