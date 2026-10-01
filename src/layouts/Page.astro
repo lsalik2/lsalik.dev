@@ -31,9 +31,9 @@ const { title, path, description, image, type } = Astro.props;
   </div>
   <script src="../islands/palette-toggle.ts"></script>
   <script src="../islands/keyboard-shortcuts.ts"></script>
-  {/* The next three scripts are page-specific (curl demo on /, filter on
-      /blog, copy buttons on blog posts) but are hoisted globally on
-      purpose. ClientRouter swaps the body in place while the browser
+  {/* The next scripts are page-specific (curl demo on /, filter on /blog,
+      pager on /projects, copy buttons on blog posts) but are hoisted
+      globally on purpose. ClientRouter swaps the body in place while the browser
       keeps enforcing the originating page's CSP, which only whitelists
       inline-script hashes from the page it served. Loading these in the
       shared layout puts the same inline content on every page, so each
@@ -41,6 +41,7 @@ const { title, path, description, image, type } = Astro.props;
       self-guards (early-return when its target elements are absent). */}
   <script src="../islands/curl-demo.ts"></script>
   <script src="../islands/blog-filter.ts"></script>
+  <script src="../islands/projects-pager.ts"></script>
   <script src="../islands/code-copy.ts"></script>
 </Base>
 
