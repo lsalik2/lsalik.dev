@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import Page from '../../layouts/Page.astro';
 import BlogCard from '../../components/BlogCard.astro';
 import PageHeader from '../../components/PageHeader.astro';
+import Pager from '../../components/Pager.astro';
 
 const posts = await getCollection('blog', ({ data }) => !data.draft);
 posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
@@ -53,6 +54,7 @@ const allTags = Array.from(
       slug={post.id}
     />
   ))}
+  <Pager size={5} />
 </Page>
 
 <style>
