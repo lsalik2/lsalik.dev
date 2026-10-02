@@ -1,0 +1,72 @@
+---
+// Prev/next controls for a paginated listing. Rendered hidden: the pager
+// island (src/islands/pager-dom.ts) reveals it only when there is more than
+// one page, so without JS every item stays visible and the pager never shows.
+interface Props {
+  size: number;
+}
+
+const { size } = Astro.props;
+---
+<nav class="pager" data-pager data-page-size={size} aria-label="pagination" hidden>
+  <button type="button" class="pager-btn" data-pager-prev>[← prev]</button>
+  <span class="pager-status" aria-live="polite">
+    <span class="pager-part" data-pager-page></span><span class="pager-sep"> · </span><span class="pager-part" data-pager-range></span>
+  </span>
+  <button type="button" class="pager-btn" data-pager-next>[next →]</button>
+</nav>
+
+<style>
+  .pager:not([hidden]) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 1.5rem 0 0;
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-size: 0.85rem;
+  }
+
+  .pager-btn {
+    font: inherit;
+    color: var(--accent);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.2rem 0.6rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .pager-btn:hover:not(:disabled) {
+    color: var(--accent-bright);
+    border-color: var(--accent);
+  }
+
+  .pager-btn:disabled {
+    color: var(--fg-muted);
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .pager-status {
+    color: var(--fg-muted);
+    text-align: center;
+  }
+
+  .pager-part {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 480px) {
+    .pager-sep {
+      display: none;
+    }
+
+    .pager-part {
+      display: block;
+    }
+  }
+</style>

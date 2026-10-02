@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Page from '../../layouts/Page.astro';
 import PageHeader from '../../components/PageHeader.astro';
+import Pager from '../../components/Pager.astro';
 import statsMap from '../../data/github-stats.json';
 import { statsForRepo, formatStars, relativeTime, type StatsMap } from '../../lib/github-stats';
 
@@ -17,9 +18,9 @@ function formatDateRange(start: Date, end?: Date): string {
 ---
 <Page title="Projects" path="/projects">
   <PageHeader heading="projects" description="things I've built, public and otherwise." />
-  <div class="project-list">
+  <div class="project-list" data-project-list>
     {projects.map(project => (
-      <a href={`/projects/${project.id}`} class="project-card">
+      <a href={`/projects/${project.id}`} class="project-card" data-project-card>
         <div class="project-titlebar">
           <span class="permissions">{project.data.permissions}</span>
           {' '}
@@ -47,6 +48,7 @@ function formatDateRange(start: Date, end?: Date): string {
       </a>
     ))}
   </div>
+  <Pager size={5} />
 </Page>
 
 <style>
@@ -64,6 +66,10 @@ function formatDateRange(start: Date, end?: Date): string {
     border-radius: 4px;
     overflow: hidden;
     transition: border-color 0.15s, background-color 0.15s;
+  }
+
+  .project-card[hidden] {
+    display: none;
   }
 
   .project-card:hover {
