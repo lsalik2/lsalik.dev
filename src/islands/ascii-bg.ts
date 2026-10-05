@@ -3,33 +3,110 @@
 
 export const RAMP = ' -_:,;^+/|\\?0oOQ#%@';
 
-interface AnimationPreset {
-  NOISE_X: number;
-  NOISE_Y: number;
-  NOISE_XY: number;
-  NOISE_XMY: number;
-  TIME_X: number;
-  TIME_Y: number;
-  TIME_XY: number;
-  TIME_XMY: number;
+// Grid size, for fields that place features relative to the screen (ripple
+// centers, vortex hub, interference sources).
+export interface FieldContext {
+  cols: number;
+  rows: number;
 }
 
-const PRESETS: AnimationPreset[] = [
+// Brightness in [0, 1] for cell (x, y) at time t. `phase` decorrelates the
+// three layers that share one field.
+export type Field = (x: number, y: number, t: number, phase: number, ctx: FieldContext) => number;
+
+export interface AnimationPreset {
+  name: string;
+  field: Field;
+}
+
+// Characters are roughly twice as tall as they are wide, so vertical cell
+// distances count double — otherwise rings render as wide ovals.
+const CELL_ASPECT = 2;
+
+function clamp01(v: number): number {
+  return v < 0 ? 0 : v > 1 ? 1 : v;
+}
+
+// The original sum of four planar sine waves. Each tuning is one preset.
+function waves(
+  NOISE_X: number, NOISE_Y: number, NOISE_XY: number, NOISE_XMY: number,
+  TIME_X: number, TIME_Y: number, TIME_XY: number, TIME_XMY: number,
+): Field {
+  return (x, y, t, phase) => {
+    const s1 = Math.sin(x * NOISE_X + t * TIME_X + phase);
+    const s2 = Math.sin(y * NOISE_Y - t * TIME_Y + phase * 1.3);
+    const s3 = Math.sin((x + y) * NOISE_XY + t * TIME_XY);
+    const s4 = Math.sin((x - y) * NOISE_XMY - t * TIME_XMY + phase * 0.7);
+    return clamp01((s1 + s2 + s3 + s4) * 0.25 + 0.5);
+  };
+}
+
+// Contrast for the radial fields: their weighted sums are scaled so the
+// brightness spread matches the original wave presets (sd ≈ 0.3) rather than
+// sitting in a washed-out middle band. Peaks clip to 0/1, which is fine.
+const RADIAL_GAIN = 0.17;
+
+// Aspect-corrected distance from (x, y) to (cx, cy), in cell widths.
+function dist(x: number, y: number, cx: number, cy: number): number {
+  const dx = x - cx;
+  const dy = (y - cy) * CELL_ASPECT;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+// Geometry (centers, sources) is shared by all layers on purpose: `phase`
+// only shifts wave timing, so the three layers' rings line up instead of
+// blurring into each other.
+
+// Ripple — rings spreading from a center that wanders slowly around the screen.
+const ripple: Field = (x, y, t, phase, { cols, rows }) => {
+  const cx = cols * (0.5 + 0.2 * Math.sin(t * 0.07));
+  const cy = rows * (0.5 + 0.2 * Math.cos(t * 0.05));
+  const d = dist(x, y, cx, cy);
+  const s1 = Math.sin(d * 0.3 - t * 1.1 + phase);
+  const s2 = Math.sin(d * 0.11 - t * 0.35 + phase * 1.7);
+  const s3 = Math.sin(x * 0.05 + y * 0.09 + t * 0.2 + phase * 0.6);
+  return clamp01((s1 * 2 + s2 + s3) * RADIAL_GAIN + 0.5);
+};
+
+// Vortex — three spiral arms turning around the screen center.
+const vortex: Field = (x, y, t, phase, { cols, rows }) => {
+  const cx = cols * 0.5;
+  const cy = rows * 0.5;
+  const a = Math.atan2((y - cy) * CELL_ASPECT, x - cx);
+  const d = dist(x, y, cx, cy);
+  const s1 = Math.sin(a * 3 + d * 0.12 - t * 0.5 + phase);
+  const s2 = Math.sin(a * 2 - d * 0.07 + t * 0.3 + phase * 1.3);
+  const s3 = Math.sin(d * 0.2 - t * 0.8 + phase * 0.7);
+  return clamp01((s1 * 2 + s2 + s3) * RADIAL_GAIN + 0.5);
+};
+
+// Interference — two sources orbiting the center; their waves cross into
+// shifting moiré bands.
+const interference: Field = (x, y, t, phase, { cols, rows }) => {
+  const cx = cols * 0.5;
+  const cy = rows * 0.5;
+  const r = Math.min(cols, rows * CELL_ASPECT) * 0.25;
+  const a = t * 0.12;
+  const ox = Math.cos(a) * r;
+  const oy = (Math.sin(a) * r) / CELL_ASPECT;
+  const d1 = dist(x, y, cx + ox, cy + oy);
+  const d2 = dist(x, y, cx - ox, cy - oy);
+  const s1 = Math.sin(d1 * 0.18 - t * 0.9 + phase);
+  const s2 = Math.sin(d2 * 0.18 - t * 0.9 + phase * 1.3);
+  const s3 = Math.sin((x - y) * 0.04 + t * 0.15);
+  return clamp01((s1 * 1.5 + s2 * 1.5 + s3) * RADIAL_GAIN + 0.5);
+};
+
+export const PRESETS: readonly AnimationPreset[] = [
   // Drift — slow, wide waves with smooth organic motion
-  {
-    NOISE_X: 0.08, NOISE_Y: 0.11, NOISE_XY: 0.06, NOISE_XMY: 0.09,
-    TIME_X: 0.6, TIME_Y: 0.4, TIME_XY: 0.5, TIME_XMY: 0.3,
-  },
+  { name: 'drift', field: waves(0.08, 0.11, 0.06, 0.09, 0.6, 0.4, 0.5, 0.3) },
   // Cascade — fast diagonal rain-like streaks
-  {
-    NOISE_X: 0.04, NOISE_Y: 0.22, NOISE_XY: 0.18, NOISE_XMY: 0.03,
-    TIME_X: 1.4, TIME_Y: 0.15, TIME_XY: 1.1, TIME_XMY: 0.1,
-  },
+  { name: 'cascade', field: waves(0.04, 0.22, 0.18, 0.03, 1.4, 0.15, 1.1, 0.1) },
   // Pulse — low-frequency throb with slow breathing motion
-  {
-    NOISE_X: 0.03, NOISE_Y: 0.04, NOISE_XY: 0.025, NOISE_XMY: 0.035,
-    TIME_X: 0.25, TIME_Y: 0.3, TIME_XY: 0.2, TIME_XMY: 0.15,
-  },
+  { name: 'pulse', field: waves(0.03, 0.04, 0.025, 0.035, 0.25, 0.3, 0.2, 0.15) },
+  { name: 'ripple', field: ripple },
+  { name: 'vortex', field: vortex },
+  { name: 'interference', field: interference },
 ];
 
 // Pick a different preset than last time so the background visibly changes.
@@ -66,14 +143,16 @@ const CURSOR_PARALLAX_X = 1.5;   // max cells of horizontal drift at screen edge
 
 // ─── Pure / exported ─────────────────────────────────────────────────────────
 
-export function sample(x: number, y: number, t: number, phase: number): number {
-  const p = ACTIVE_PRESET;
-  const s1 = Math.sin(x * p.NOISE_X + t * p.TIME_X + phase);
-  const s2 = Math.sin(y * p.NOISE_Y - t * p.TIME_Y + phase * 1.3);
-  const s3 = Math.sin((x + y) * p.NOISE_XY + t * p.TIME_XY);
-  const s4 = Math.sin((x - y) * p.NOISE_XMY - t * p.TIME_XMY + phase * 0.7);
-  const raw = (s1 + s2 + s3 + s4) * 0.25 + 0.5;
-  return raw < 0 ? 0 : raw > 1 ? 1 : raw;
+const DEFAULT_CTX: FieldContext = { cols: 80, rows: 40 };
+
+export function sample(
+  x: number,
+  y: number,
+  t: number,
+  phase: number,
+  ctx: FieldContext = DEFAULT_CTX,
+): number {
+  return ACTIVE_PRESET.field(x, y, t, phase, ctx);
 }
 
 export function charForBrightness(b: number): string {
@@ -142,6 +221,7 @@ export function renderLayers(
   } = opts;
 
   const layerCount = phases.length;
+  const ctx: FieldContext = { cols, rows };
 
   const layerChars: string[][] = Array.from({ length: layerCount }, () =>
     new Array<string>(cols * rows).fill(' '),
@@ -155,7 +235,7 @@ export function renderLayers(
       let maxB = 0;
       let maxL = 0;
       for (let li = 0; li < layerCount; li++) {
-        const b = sample(c + parallaxX, r + parallaxY, t, phases[li]);
+        const b = sample(c + parallaxX, r + parallaxY, t, phases[li], ctx);
         if (b > maxB) {
           maxB = b;
           maxL = li;
@@ -196,6 +276,7 @@ function initBackground(): void {
   if (!container) return;
 
   ACTIVE_PRESET = pickPreset();
+  container.dataset.preset = ACTIVE_PRESET.name;
 
   const reduceMotion =
     typeof window.matchMedia === 'function' &&
