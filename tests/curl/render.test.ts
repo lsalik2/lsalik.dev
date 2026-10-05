@@ -7,6 +7,7 @@ import {
   renderContact,
   renderProjectPost,
   renderResume,
+  renderSsh,
   type ContactSection,
 } from '../../src/curl/render';
 import type { BlogPostSummary, BlogPostFull, ProjectSummary } from '../../src/curl/render';
@@ -235,3 +236,33 @@ describe('renderProjectPost', () => {
   });
 });
 
+describe('renderSsh', () => {
+  it('contains ANSI escape codes', () => {
+    expect(renderSsh()).toContain('\x1b[');
+  });
+
+  it('shows the fake ssh banner', () => {
+    expect(stripAnsi(renderSsh())).toContain('ssh guest@lsalik.dev');
+  });
+
+  it('names both cats in the maintainers list', () => {
+    const plain = stripAnsi(renderSsh());
+    expect(plain).toContain('finch');
+    expect(plain).toContain('raven');
+  });
+
+  it('closes the session', () => {
+    expect(stripAnsi(renderSsh())).toContain('Connection to lsalik.dev closed.');
+  });
+
+  it('points the visitor back to the homepage', () => {
+    expect(stripAnsi(renderSsh())).toContain('curl -L lsalik.dev');
+  });
+
+  it('preserves the Finch art indentation through box(wrap:false)', () => {
+    // Integration guard: if box() ever regresses on the wrap:false path,
+    // the indentation that holds the cat art together would be stripped.
+    const plain = stripAnsi(renderSsh());
+    expect(plain).toContain('      /\\___/\\');
+  });
+});
