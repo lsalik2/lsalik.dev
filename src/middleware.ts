@@ -12,6 +12,7 @@ import {
   renderResume,
   renderUses,
   renderMan,
+  renderSsh,
 } from './curl/render';
 import { readingTime } from './lib/reading-time';
 import { CONTACT_SECTIONS } from './data/contact';
@@ -294,6 +295,12 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
 
   if (pathname === '/man' || pathname === '/man/') {
     return textResponse(renderMan(MAN));
+  }
+
+  // Hidden easter egg: terminal clients only (browsers were already sent to
+  // next() above, so they get the normal 404).
+  if (pathname === '/ssh' || pathname === '/ssh/') {
+    return textResponse(renderSsh());
   }
 
   return notFoundResponse(pathname);

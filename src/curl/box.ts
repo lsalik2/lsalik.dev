@@ -19,6 +19,7 @@ export interface BoxOptions {
   readonly title?: string;
   readonly width?: number;
   readonly padX?: number;
+  readonly wrap?: boolean;
 }
 
 // Wrap a list of pre-styled lines in a single-line Unicode frame. Each line
@@ -27,15 +28,25 @@ export interface BoxOptions {
 //
 // If `title` is given, it's inlined on the top border like `┌─ title ─...─┐`.
 // Lines longer than the inner width are soft-wrapped via `wrap()`.
+// Pass `wrap: false` to frame each line verbatim (e.g. for ASCII art, where
+// soft-wrapping would strip the leading indentation that holds it together).
 export function box(lines: readonly string[], opts: BoxOptions = {}): string {
   const width = opts.width ?? PAGE_WIDTH;
   const padX = opts.padX ?? 1;
   const inner = width - 2 - padX * 2;
 
+  const doWrap = opts.wrap ?? true;
   const wrapped: string[] = [];
   for (const line of lines) {
     if (line === '') {
       wrapped.push('');
+      continue;
+    }
+    if (!doWrap) {
+      // Frame the line verbatim — no soft-wrap, so leading whitespace
+      // (needed for multi-line ASCII art) survives. Caller guarantees the
+      // line fits within the inner width.
+      wrapped.push(line);
       continue;
     }
     const sub = wrap(line, inner);
