@@ -131,3 +131,34 @@ export function renderLogo(rng: () => number = Math.random): string {
   const rows = renderPatternRows(pattern, markColor);
   return [...rows, renderUnderline(bar1Color), renderUnderline(bar2Color)].join('\n');
 }
+
+// Header mark for the web UI: a 5×2 mirrored pixel pattern packed into one
+// line of five half-block glyphs (e.g. ▄█▀█▄), so it fits inside the prompt.
+// Plain text, no ANSI — the page colors it with CSS.
+const MINI_WIDTH = 5;
+const MINI_FALLBACK = '▄█▀█▄';
+
+function miniRow(rng: () => number): boolean[] {
+  const left = [rng() < 0.5, rng() < 0.5];
+  const mid = rng() < 0.5;
+  return [...left, mid, ...[...left].reverse()];
+}
+
+function miniAcceptable(top: readonly boolean[], bot: readonly boolean[]): boolean {
+  const center = (MINI_WIDTH - 1) / 2;
+  if (!top[center] && !bot[center]) return false;
+  if (!top.some(Boolean) || !bot.some(Boolean)) return false;
+  const fill = (top.filter(Boolean).length + bot.filter(Boolean).length) / (MINI_WIDTH * 2);
+  return fill >= 0.4 && fill <= 0.8;
+}
+
+export function renderMiniMark(rng: () => number = Math.random): string {
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    const top = miniRow(rng);
+    const bot = miniRow(rng);
+    if (miniAcceptable(top, bot)) {
+      return top.map((t, c) => packPair(t, bot[c])).join('');
+    }
+  }
+  return MINI_FALLBACK;
+}

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   renderLogo,
+  renderMiniMark,
   generatePattern,
   isAcceptable,
   LOGO_WIDTH,
@@ -129,5 +130,40 @@ describe('renderLogo', () => {
   it('defaults to Math.random and differs between calls', () => {
     const a = new Set(Array.from({ length: 10 }, () => stripAnsi(renderLogo())));
     expect(a.size).toBeGreaterThan(1);
+  });
+});
+
+describe('renderMiniMark', () => {
+  const seeds = Array.from({ length: 300 }, (_, i) => i + 1);
+
+  it('is 5 half-block characters with no ANSI codes', () => {
+    for (const seed of seeds) {
+      expect(renderMiniMark(seeded(seed))).toMatch(/^[ ▀▄█]{5}$/);
+    }
+  });
+
+  it('is mirrored around the center', () => {
+    for (const seed of seeds) {
+      const m = renderMiniMark(seeded(seed));
+      expect(m).toBe([...m].reverse().join(''));
+    }
+  });
+
+  it('fills the center, uses both pixel rows, and stays within 40–80% fill', () => {
+    for (const seed of seeds) {
+      const m = [...renderMiniMark(seeded(seed))];
+      const top = m.map(ch => ch === '▀' || ch === '█');
+      const bot = m.map(ch => ch === '▄' || ch === '█');
+      expect(top[2] || bot[2]).toBe(true);
+      expect(top.some(Boolean)).toBe(true);
+      expect(bot.some(Boolean)).toBe(true);
+      const fill = (top.filter(Boolean).length + bot.filter(Boolean).length) / 10;
+      expect(fill).toBeGreaterThanOrEqual(0.4);
+      expect(fill).toBeLessThanOrEqual(0.8);
+    }
+  });
+
+  it('varies across seeds', () => {
+    expect(new Set(seeds.map(s => renderMiniMark(seeded(s)))).size).toBeGreaterThan(10);
   });
 });
