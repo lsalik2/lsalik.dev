@@ -13,6 +13,7 @@ import {
   renderUses,
   renderMan,
   renderSsh,
+  renderScreensaverNote,
 } from './curl/render';
 import { readingTime } from './lib/reading-time';
 import { CONTACT_SECTIONS } from './data/contact';
@@ -302,6 +303,10 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
   // next() above, so they get the normal 404).
   if (pathname === '/ssh' || pathname === '/ssh/') {
     return textResponse(renderSsh());
+  }
+
+  if (pathname === '/screensaver' || pathname === '/screensaver/') {
+    return textResponse(renderScreensaverNote());
   }
 
   return notFoundResponse(pathname);
