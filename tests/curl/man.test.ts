@@ -105,3 +105,12 @@ describe('renderMan', () => {
     expect(out).toContain('AUTHOR');
   });
 });
+
+
+describe('MAN shortcuts section', () => {
+  it('documents g s → screensaver', () => {
+    const section = MAN.sections.find(s => s.heading === 'shortcuts')!;
+    const defs = section.blocks.flatMap(b => (b.type === 'definitions' ? b.items : []));
+    expect(defs).toContainEqual({ term: 'g s', def: 'open the screensaver' });
+  });
+});

@@ -24,7 +24,7 @@ const { title, path, description, image, type } = Astro.props;
       <slot />
     </main>
     <footer class="page-footer">
-      <span class="footer-copy">&copy; Luis Salik &middot; lsalik.dev &middot; no cookies &middot; no analytics &middot; no tracking</span>
+      <span class="footer-copy">&copy; Luis Salik &middot; lsalik.dev &middot; no cookies &middot; no analytics &middot; no tracking <a href="/screensaver" class="footer-secret" data-astro-reload aria-label="screensaver" title="screensaver">░</a></span>
       <span class="footer-source">source: <a href="https://github.com/lsalik2/lsalik.dev" class="footer-link" target="_blank" rel="noopener noreferrer">github.com/lsalik2/lsalik.dev</a></span>
       <span class="footer-shortcuts">press <kbd>?</kbd> for keyboard shortcuts</span>
     </footer>
@@ -124,6 +124,23 @@ const { title, path, description, image, type } = Astro.props;
     color: var(--fg-muted);
     text-decoration: underline;
     text-underline-offset: 2px;
+  }
+
+  /* The screensaver's quiet way in for visitors without a keyboard: one dim
+     glyph that only brightens on hover/focus. Full page load (the
+     screensaver page has no ClientRouter). */
+  .footer-secret {
+    color: var(--fg-muted);
+    text-decoration: none;
+    opacity: 0.5;
+    padding: 0 0.25em;
+    transition: opacity 0.15s ease, color 0.15s ease;
+  }
+
+  .footer-secret:hover,
+  .footer-secret:focus-visible {
+    color: var(--accent);
+    opacity: 1;
   }
 
   .footer-link:hover {

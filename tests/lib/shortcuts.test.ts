@@ -82,3 +82,16 @@ describe('resolveChord', () => {
     expect(result.next.leader).toBeNull();
   });
 });
+
+describe('g s → screensaver', () => {
+  it('navigates to /screensaver with a full page load', () => {
+    const after_g = resolveChord(INITIAL_CHORD_STATE, 'g', 1000, TIMEOUT);
+    const after_s = resolveChord(after_g.next, 's', 1500, TIMEOUT);
+    expect(after_s.action).toEqual({ type: 'navigate', href: '/screensaver', fullLoad: true });
+  });
+
+  it('leaves other bindings as client-side navigations', () => {
+    const after_g = resolveChord(INITIAL_CHORD_STATE, 'g', 1000, TIMEOUT);
+    expect(resolveChord(after_g.next, 'b', 1500, TIMEOUT).action).toEqual({ type: 'navigate', href: '/blog' });
+  });
+});
