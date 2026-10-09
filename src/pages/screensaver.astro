@@ -16,11 +16,27 @@ import { PALETTES } from '../lib/palettes';
   router={false}
   noindex
 >
+  <Fragment slot="head">
+    <link rel="manifest" href="/screensaver.webmanifest" />
+    <meta name="theme-color" content="#0d1117" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="screensaver" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  </Fragment>
+
   <div class="ss-wrapper" data-ss-wrapper>
     <div class="ss-stage" data-ss-stage aria-hidden="true"></div>
     <div class="ss-clock" data-ss-clock data-pos="center"></div>
   </div>
   <noscript><p class="ss-noscript">the screensaver needs JavaScript.</p></noscript>
+
+  <button type="button" class="ss-fs" data-ss-fs data-mode="none" hidden>[fullscreen]</button>
+  <p class="ss-install-hint" data-ss-install-hint hidden>
+    iPhone can't go fullscreen in Safari. Tap <strong>Share</strong> → <strong>Add to Home Screen</strong>,
+    then open the screensaver from your home screen.
+  </p>
 
   <aside class="ss-panel" data-ss-panel aria-label="screensaver settings">
     <p class="ss-title">── screensaver ──</p>
@@ -177,6 +193,45 @@ import { PALETTES } from '../lib/palettes';
     z-index: 2;
   }
   body.ss-idle .ss-panel { opacity: 0; pointer-events: none; }
+
+  /* Always-reachable fullscreen control, outside the (scrolling) panel. */
+  .ss-fs {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 3;
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-size: 1rem;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.45rem 0.7rem;
+    cursor: pointer;
+    transition: opacity 0.4s ease;
+  }
+  .ss-fs:hover { border-color: var(--accent); color: var(--accent-bright); }
+  body.ss-idle .ss-fs { opacity: 0; pointer-events: none; }
+
+  .ss-install-hint {
+    position: fixed;
+    top: 4rem;
+    left: 1rem;
+    right: 1rem;
+    max-width: 22rem;
+    z-index: 3;
+    margin: 0;
+    padding: 0.75rem 0.9rem;
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--fg);
+    background: color-mix(in srgb, var(--bg-surface) 96%, transparent);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+  }
+  .ss-install-hint strong { color: var(--accent); font-weight: 600; }
+  body.ss-idle .ss-install-hint { display: none; }
   .ss-panel label { display: flex; flex-direction: column; gap: 0.25rem; color: var(--fg-muted); }
   .ss-panel label.ss-check { flex-direction: row; align-items: center; }
   .ss-panel select, .ss-panel input[type="text"] {

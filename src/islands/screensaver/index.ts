@@ -16,7 +16,8 @@ import {
 import { keyAction, exitTarget } from '../../lib/screensaver-input';
 import { createColorController } from './color-layer';
 import { createClockLayer } from './clock-layer';
-import { createAutoHide, fullscreenSupported, toggleFullscreen, keepScreenAwake } from './power';
+import { createAutoHide, fullscreenSupported, toggleFullscreen, keepScreenAwake, isFullscreen, isStandalone } from './power';
+import { fullscreenMode, isIosPhone } from '../../lib/fullscreen-mode';
 import { bindPanel, copyShareUrl } from './panel';
 import { effectiveFont } from './sizing';
 
@@ -143,9 +144,35 @@ function boot(): void {
   // Buttons.
   const fsButton = panel.querySelector<HTMLButtonElement>('[data-action="fullscreen"]');
   if (fsButton && !fullscreenSupported()) fsButton.hidden = true;
-  document.addEventListener('fullscreenchange', () => {
-    if (fsButton) fsButton.textContent = document.fullscreenElement ? '[exit fullscreen]' : '[fullscreen]';
+
+  // Floating control outside the panel: real fullscreen where the browser
+  // supports it, otherwise (iPhone) a hint to add the page to the home screen.
+  const floatFs = document.querySelector<HTMLButtonElement>('[data-ss-fs]');
+  const installHint = document.querySelector<HTMLElement>('[data-ss-install-hint]');
+  const mode = fullscreenMode({
+    fullscreenApi: fullscreenSupported(),
+    standalone: isStandalone(),
+    iosPhone: isIosPhone(navigator.userAgent),
   });
+  if (floatFs) {
+    floatFs.dataset.mode = mode;
+    floatFs.hidden = mode === 'none';
+    floatFs.setAttribute('aria-label', mode === 'install-hint' ? 'how to go fullscreen' : 'toggle fullscreen');
+    if (mode === 'install-hint') floatFs.textContent = '[add to home screen]';
+    floatFs.addEventListener('click', async () => {
+      if (mode === 'fullscreen') await toggleFullscreen();
+      else if (installHint) installHint.hidden = !installHint.hidden;
+      floatFs.blur(); // focus inside a fixed control would block auto-hide on some browsers
+    });
+  }
+
+  const syncFsLabels = () => {
+    const on = isFullscreen();
+    if (fsButton) fsButton.textContent = on ? '[exit fullscreen]' : '[fullscreen]';
+    if (floatFs && mode === 'fullscreen') floatFs.textContent = on ? '[exit fullscreen]' : '[fullscreen]';
+  };
+  document.addEventListener('fullscreenchange', syncFsLabels);
+  document.addEventListener('webkitfullscreenchange', syncFsLabels);
   const shareField = panel.querySelector<HTMLInputElement>('[data-share-url]');
   const status = panel.querySelector<HTMLElement>('[data-ss-status]');
   const exit = () => {
@@ -207,7 +234,7 @@ function boot(): void {
         break;
       }
       case 'escape':
-        if (document.fullscreenElement) break; // the browser exits fullscreen itself
+        if (isFullscreen()) break; // the browser exits fullscreen itself
         if (isTypingTarget(e.target)) (e.target as HTMLElement).blur();
         if (autoHide.visible()) {
           // An open panel closes first, pinned or not; Esc again exits.
