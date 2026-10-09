@@ -30,16 +30,16 @@ import { PALETTES } from '../lib/palettes';
         {PATTERN_CHOICES.map(p => <option value={p}>{p}</option>)}
       </select>
     </label>
-    <label class="ss-when-cycle">cycle every <output data-for="cycleMinutes"></output> min
+    <label class="ss-when-cycle"><span class="ss-label">cycle every <output data-for="cycleMinutes"></output> min</span>
       <input type="range" data-setting="cycleMinutes" min={RANGES.cycleMinutes.min} max={RANGES.cycleMinutes.max} step="1" />
     </label>
-    <label>speed <output data-for="speed"></output>×
+    <label><span class="ss-label">speed <output data-for="speed"></output>×</span>
       <input type="range" data-setting="speed" min={RANGES.speed.min} max={RANGES.speed.max} step="0.05" />
     </label>
-    <label>cell size <output data-for="cellSize"></output>px
+    <label><span class="ss-label">cell size <output data-for="cellSize"></output>px</span>
       <input type="range" data-setting="cellSize" min={RANGES.cellSize.min} max={RANGES.cellSize.max} step="1" />
     </label>
-    <label>brightness <output data-for="brightness"></output>
+    <label><span class="ss-label">brightness <output data-for="brightness"></output></span>
       <input type="range" data-setting="brightness" min={RANGES.brightness.min} max={RANGES.brightness.max} step="0.05" />
     </label>
 
@@ -60,7 +60,7 @@ import { PALETTES } from '../lib/palettes';
         {COLOR_ANIMS.map(a => <option value={a}>{a}</option>)}
       </select>
     </label>
-    <label>cycle length <output data-for="colorAnimSeconds"></output>s
+    <label><span class="ss-label">cycle length <output data-for="colorAnimSeconds"></output>s</span>
       <input type="range" data-setting="colorAnimSeconds" min={RANGES.colorAnimSeconds.min} max={RANGES.colorAnimSeconds.max} step="5" />
     </label>
 
@@ -135,17 +135,22 @@ import { PALETTES } from '../lib/palettes';
     position: absolute;
     color: var(--ss-l3);
     text-shadow: 0 0 12px var(--ss-bg, #000);
+    /* A soft plate behind the clock keeps it legible over busy patterns. */
+    padding: 1.25rem 1.75rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--ss-bg, #000) 62%, transparent);
     font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
     text-align: center;
     pointer-events: none;
     transition: translate 2s ease;
   }
+  .ss-clock[hidden] { display: none; }
   .ss-clock[data-pos="center"] { top: 50%; left: 50%; transform: translate(-50%, -50%); }
   .ss-clock[data-pos="top-left"] { top: 4vh; left: 4vw; text-align: left; }
   .ss-clock[data-pos="top-right"] { top: 4vh; right: 4vw; text-align: right; }
   .ss-clock[data-pos="bottom-left"] { bottom: 4vh; left: 4vw; text-align: left; }
   .ss-clock[data-pos="bottom-right"] { bottom: 4vh; right: 4vw; text-align: right; }
-  .ss-clock-big { margin: 0; font-size: clamp(10px, 2.2vw, 28px); line-height: 1; white-space: pre; }
+  .ss-clock-big { margin: 0; font-size: clamp(10px, 2.2vw, 28px); line-height: 1; white-space: pre; text-shadow: none; }
   .ss-clock-small { font-size: clamp(28px, 7vw, 96px); }
   .ss-clock-date { margin-top: 0.75em; font-size: clamp(12px, 1.4vw, 20px); opacity: 0.8; }
 
