@@ -34,6 +34,10 @@ export function exitTarget(referrer: string, origin: string): string {
   try {
     const url = new URL(referrer);
     if (url.origin !== origin) return '/';
+    // A same-origin URL can still carry a path like //evil.example (the URL
+    // parser also folds /\evil.example into it). Assigned to location.href,
+    // that is protocol-relative and leaves the site.
+    if (url.pathname.startsWith('//')) return '/';
     if (url.pathname.replace(/\/$/, '') === '/screensaver') return '/';
     return url.pathname + url.search + url.hash;
   } catch {
