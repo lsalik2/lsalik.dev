@@ -122,6 +122,7 @@ export const MAN: Man = {
             { term: 'g b', def: 'go to blog' },
             { term: 'g u', def: 'go to uses' },
             { term: 'g c', def: 'go to contact' },
+            { term: 'g s', def: 'open the screensaver' },
             { term: '?', def: 'toggle the keyboard shortcuts overlay' },
             { term: 'Esc', def: 'close the overlay' },
           ],

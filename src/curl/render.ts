@@ -379,3 +379,17 @@ export function renderSsh(): string {
 
   return [...banner, '', motd, ...footer].join('\n');
 }
+
+// curl -L lsalik.dev/screensaver — the screensaver is browser-only; say so
+// instead of serving the generic 404.
+export function renderScreensaverNote(): string {
+  return box(
+    [
+      dim('the screensaver is a browser thing — it runs the site background full-screen'),
+      dim('with a clock and custom colours.'),
+      '',
+      `${dim('open')} ${cyan('https://lsalik.dev/screensaver')}`,
+    ],
+    { title: 'screensaver' },
+  );
+}

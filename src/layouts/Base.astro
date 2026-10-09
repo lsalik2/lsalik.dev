@@ -8,6 +8,11 @@ interface Props {
   description?: string;
   image?: string;
   type?: 'website' | 'article';
+  // Screensaver-style pages opt out of the site background, the client
+  // router (they navigate with full loads), and search indexing.
+  background?: boolean;
+  router?: boolean;
+  noindex?: boolean;
 }
 
 const {
@@ -15,6 +20,9 @@ const {
   description = 'A terminal-inspired personal site.',
   image = '/og/default.png',
   type = 'website',
+  background = true,
+  router = true,
+  noindex = false,
 } = Astro.props;
 ---
 <!doctype html>
@@ -28,6 +36,8 @@ const {
   <link rel="alternate" type="application/rss+xml" title="lsalik.dev blog" href="/rss.xml" />
   <title>{title}</title>
   <Seo title={title} description={description} image={image} type={type} />
+  {noindex && <meta name="robots" content="noindex" />}
+  <slot name="head" />
   {/* Apply the saved palette before first paint so there's no flash.
       Must be an inline head script, not a module import. */}
   <script is:inline>
@@ -38,14 +48,14 @@ const {
       } catch (_) {}
     })();
   </script>
-  <ClientRouter />
+  {router && <ClientRouter />}
 </head>
 <body>
-  <div id="ascii-bg" transition:persist="ascii-bg" aria-hidden="true"></div>
+  {background && <div id="ascii-bg" transition:persist="ascii-bg" aria-hidden="true"></div>}
   <div class="content-layer">
     <slot />
   </div>
-  <script src="../islands/ascii-bg.ts"></script>
+  {background && <script src="../islands/ascii-bg.ts"></script>}
 </body>
 </html>
 
