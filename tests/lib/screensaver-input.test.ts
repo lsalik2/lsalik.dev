@@ -31,6 +31,12 @@ describe('exitTarget', () => {
     expect(exitTarget('https://lsalik.dev/screensaver?p=vortex', origin)).toBe('/');
   });
 
+  it('never returns a protocol-relative path that would leave the site', () => {
+    expect(exitTarget('https://lsalik.dev//evil.example/x', origin)).toBe('/');
+    expect(exitTarget('https://lsalik.dev/%2F%2Fevil.example', origin)).toBe('/%2F%2Fevil.example');
+    expect(exitTarget('https://lsalik.dev/\\evil.example', origin)).toBe('/');
+  });
+
   it('falls back to / for empty, foreign, or malformed referrers', () => {
     expect(exitTarget('', origin)).toBe('/');
     expect(exitTarget('https://evil.example/phish', origin)).toBe('/');
