@@ -165,7 +165,9 @@ export function toSearchParams(s: ScreensaverSettings, d: ScreensaverSettings): 
   put('s', s.speed, d.speed);
   put('cs', s.cellSize, d.cellSize);
   put('b', s.brightness, d.brightness);
-  put('c', s.colorSource, d.colorSource);
+  // Always written: the default colour source is the *visitor's* site
+  // palette, so omitting it would hand recipients their own colours.
+  out.set('c', s.colorSource);
   put('bg', s.custom.bg, d.custom.bg);
   put('l1', s.custom.layers[0], d.custom.layers[0]);
   put('l2', s.custom.layers[1], d.custom.layers[1]);

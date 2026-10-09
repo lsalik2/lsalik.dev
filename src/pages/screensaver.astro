@@ -30,17 +30,17 @@ import { PALETTES } from '../lib/palettes';
         {PATTERN_CHOICES.map(p => <option value={p}>{p}</option>)}
       </select>
     </label>
-    <label class="ss-when-cycle"><span class="ss-label">cycle every <output data-for="cycleMinutes"></output> min</span>
-      <input type="range" data-setting="cycleMinutes" min={RANGES.cycleMinutes.min} max={RANGES.cycleMinutes.max} step="1" />
+    <label class="ss-when-cycle" for="ss-cycleMinutes"><span class="ss-label">cycle every <output data-for="cycleMinutes"></output> min</span>
+      <input type="range" id="ss-cycleMinutes" data-setting="cycleMinutes" min={RANGES.cycleMinutes.min} max={RANGES.cycleMinutes.max} step="1" />
     </label>
-    <label><span class="ss-label">speed <output data-for="speed"></output>×</span>
-      <input type="range" data-setting="speed" min={RANGES.speed.min} max={RANGES.speed.max} step="0.05" />
+    <label for="ss-speed"><span class="ss-label">speed <output data-for="speed"></output>×</span>
+      <input type="range" id="ss-speed" data-setting="speed" min={RANGES.speed.min} max={RANGES.speed.max} step="0.05" />
     </label>
-    <label><span class="ss-label">cell size <output data-for="cellSize"></output>px</span>
-      <input type="range" data-setting="cellSize" min={RANGES.cellSize.min} max={RANGES.cellSize.max} step="1" />
+    <label for="ss-cellSize"><span class="ss-label">cell size <output data-for="cellSize"></output>px</span>
+      <input type="range" id="ss-cellSize" data-setting="cellSize" min={RANGES.cellSize.min} max={RANGES.cellSize.max} step="1" />
     </label>
-    <label><span class="ss-label">brightness <output data-for="brightness"></output></span>
-      <input type="range" data-setting="brightness" min={RANGES.brightness.min} max={RANGES.brightness.max} step="0.05" />
+    <label for="ss-brightness"><span class="ss-label">brightness <output data-for="brightness"></output></span>
+      <input type="range" id="ss-brightness" data-setting="brightness" min={RANGES.brightness.min} max={RANGES.brightness.max} step="0.05" />
     </label>
 
     <label>colours
@@ -60,8 +60,8 @@ import { PALETTES } from '../lib/palettes';
         {COLOR_ANIMS.map(a => <option value={a}>{a}</option>)}
       </select>
     </label>
-    <label><span class="ss-label">cycle length <output data-for="colorAnimSeconds"></output>s</span>
-      <input type="range" data-setting="colorAnimSeconds" min={RANGES.colorAnimSeconds.min} max={RANGES.colorAnimSeconds.max} step="5" />
+    <label for="ss-colorAnimSeconds"><span class="ss-label">cycle length <output data-for="colorAnimSeconds"></output>s</span>
+      <input type="range" id="ss-colorAnimSeconds" data-setting="colorAnimSeconds" min={RANGES.colorAnimSeconds.min} max={RANGES.colorAnimSeconds.max} step="5" />
     </label>
 
     <label>clock

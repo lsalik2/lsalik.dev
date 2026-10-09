@@ -115,8 +115,17 @@ function boot(): void {
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
   function save(): void {
     if (saveTimer !== null) clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => writeStorage(settings), SAVE_DEBOUNCE_MS);
+    saveTimer = setTimeout(flushSave, SAVE_DEBOUNCE_MS);
   }
+  // Writes a pending debounced save now, so leaving the page (exit, Esc,
+  // closing the tab) never drops the last change.
+  function flushSave(): void {
+    if (saveTimer === null) return;
+    clearTimeout(saveTimer);
+    saveTimer = null;
+    writeStorage(settings);
+  }
+  window.addEventListener('pagehide', flushSave);
 
   const panelApi = bindPanel(panel, settings, next => {
     const prev = settings;
@@ -140,6 +149,7 @@ function boot(): void {
   const shareField = panel.querySelector<HTMLInputElement>('[data-share-url]');
   const status = panel.querySelector<HTMLElement>('[data-ss-status]');
   const exit = () => {
+    flushSave();
     location.href = exitTarget(document.referrer, location.origin);
   };
 
@@ -165,6 +175,11 @@ function boot(): void {
         if (result === 'fallback') shareField.select();
       }
     }
+    // Browsers leave focus on a clicked button, and auto-hide never hides a
+    // panel with focus inside it. Drop it — except when the share field was
+    // just revealed and selected for the user to copy.
+    const keepFocus = action === 'copy' && shareField !== null && !shareField.hidden;
+    if (!keepFocus) (e.target as HTMLElement).closest('button')?.blur();
   });
 
   // Keys.
@@ -194,8 +209,13 @@ function boot(): void {
       case 'escape':
         if (document.fullscreenElement) break; // the browser exits fullscreen itself
         if (isTypingTarget(e.target)) (e.target as HTMLElement).blur();
-        if (autoHide.visible() && panel.dataset.pinned !== 'true') autoHide.hideNow();
-        else exit();
+        if (autoHide.visible()) {
+          // An open panel closes first, pinned or not; Esc again exits.
+          if (panel.dataset.pinned === 'true') autoHide.togglePin();
+          autoHide.hideNow();
+        } else {
+          exit();
+        }
         break;
       default:
         break;
