@@ -8,6 +8,7 @@ import {
   renderProjectPost,
   renderResume,
   renderSsh,
+  renderScreensaverNote,
   type ContactSection,
 } from '../../src/curl/render';
 import type { BlogPostSummary, BlogPostFull, ProjectSummary } from '../../src/curl/render';
@@ -264,5 +265,13 @@ describe('renderSsh', () => {
     // the indentation that holds the cat art together would be stripped.
     const plain = stripAnsi(renderSsh());
     expect(plain).toContain('      /\\___/\\');
+  });
+});
+
+describe('renderScreensaverNote', () => {
+  it('points terminal users to the browser page', () => {
+    const plain = stripAnsi(renderScreensaverNote());
+    expect(plain).toContain('screensaver');
+    expect(plain).toContain('https://lsalik.dev/screensaver');
   });
 });
