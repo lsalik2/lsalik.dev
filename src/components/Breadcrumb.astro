@@ -1,19 +1,14 @@
 ---
-import { renderMiniMark } from '../curl/logo';
-
 interface Props {
   path: string;
 }
 
 const { path } = Astro.props;
 
-// Fresh per server render; transition:persist keeps it stable across
-// client-side navigations, so it only changes on a full load.
-const mark = renderMiniMark();
 const segments = path === '/' ? [] : path.split('/').filter(Boolean);
 ---
 <div class="breadcrumb">
-  <span class="prompt-logo" aria-hidden="true" transition:persist="header-mark">{mark}</span>
+  <span class="prompt-logo" aria-hidden="true" transition:persist="header-mark"></span>
   <a href="/" class="prompt-user">lsalik@dev</a><span class="prompt-sep">:</span><span class="prompt-root">~</span>{segments.map((seg, i) => {
     const href = '/' + segments.slice(0, i + 1).join('/');
     const isCurrent = i === segments.length - 1;
@@ -28,10 +23,44 @@ const segments = path === '/' ? [] : path.split('/').filter(Boolean);
     font-size: 1rem;
   }
 
+  /* A braille "working…" spinner, like a long-running CLI command. Pure CSS:
+     the frames are stepped through `content`, so no script is needed. Fixed
+     at 1ch so the prompt never shifts between frames. */
   .prompt-logo {
+    display: inline-block;
+    width: 0.7em;
     color: var(--accent);
-    white-space: pre; /* the mark may contain spaces that must not collapse */
+    /* Braille glyphs come from a fallback font and render small next to the
+       prompt; scale them up so the spinner reads at a glance. */
+    font-size: 1.5em;
+    line-height: 1;
+    vertical-align: -0.2em;
     user-select: none;
+  }
+
+  .prompt-logo::before {
+    content: '⠋';
+    animation: prompt-spin 0.9s steps(1, end) infinite;
+  }
+
+  @keyframes prompt-spin {
+    0%    { content: '⠋'; }
+    10%   { content: '⠙'; }
+    20%   { content: '⠹'; }
+    30%   { content: '⠸'; }
+    40%   { content: '⠼'; }
+    50%   { content: '⠴'; }
+    60%   { content: '⠦'; }
+    70%   { content: '⠧'; }
+    80%   { content: '⠇'; }
+    90%   { content: '⠏'; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .prompt-logo::before {
+      content: '⠿';
+      animation: none;
+    }
   }
 
   .prompt-user {
