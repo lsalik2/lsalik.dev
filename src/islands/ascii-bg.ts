@@ -202,6 +202,7 @@ export interface RenderOptions {
   spotlightStrength?: number;
   parallaxX?: number;        // cells to offset the sampled field
   parallaxY?: number;
+  field?: Field;             // render this field instead of the module's active preset
 }
 
 export function renderLayers(
@@ -218,6 +219,7 @@ export function renderLayers(
     spotlightStrength = 0,
     parallaxX = 0,
     parallaxY = 0,
+    field,
   } = opts;
 
   const layerCount = phases.length;
@@ -235,7 +237,9 @@ export function renderLayers(
       let maxB = 0;
       let maxL = 0;
       for (let li = 0; li < layerCount; li++) {
-        const b = sample(c + parallaxX, r + parallaxY, t, phases[li], ctx);
+        const b = field
+          ? field(c + parallaxX, r + parallaxY, t, phases[li], ctx)
+          : sample(c + parallaxX, r + parallaxY, t, phases[li], ctx);
         if (b > maxB) {
           maxB = b;
           maxL = li;
@@ -267,53 +271,88 @@ export function renderLayers(
   return { layers };
 }
 
-// ─── DOM / animation wiring ─────────────────────────────────────────────────
+// ─── Engine (DOM) ───────────────────────────────────────────────────────────
+// A self-contained renderer bound to one container. The site background and
+// the screensaver each create their own, so nothing here is module-global.
 
-let started = false;
+export interface EngineOptions {
+  preset: AnimationPreset;
+  speed: number;                    // time multiplier; 1 = the site default
+  fontSize: number;                 // px
+  lineHeight: number;               // px
+  layerColors: readonly string[];   // one CSS color per layer
+  interactive: boolean;             // cursor spotlight + parallax
+  reduceMotion: boolean;            // render one frame, no animation loop
+}
 
-function initBackground(): void {
-  const container = document.getElementById('ascii-bg');
-  if (!container) return;
+export interface AsciiEngine {
+  readonly container: HTMLElement;
+  update(partial: Partial<EngineOptions>): void;
+  destroy(): void;
+}
 
-  ACTIVE_PRESET = pickPreset();
-  container.dataset.preset = ACTIVE_PRESET.name;
+// Longest frame step we honour. A tab that was hidden for an hour resumes
+// where it left off instead of fast-forwarding the field.
+export const MAX_DT_SECONDS = 0.1;
 
-  const reduceMotion =
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+export function advanceTime(elapsed: number, dtSeconds: number, speed: number): number {
+  const dt = dtSeconds > MAX_DT_SECONDS ? MAX_DT_SECONDS : dtSeconds < 0 ? 0 : dtSeconds;
+  return elapsed + dt * speed;
+}
 
-  const FONT_SIZE = 11;
-  const LINE_HEIGHT = 13;
+export const MAX_CELLS_PER_LAYER = 60_000;
+const CHAR_ASPECT = 0.6;     // glyph width / font size (estimate; the engine measures the real one)
+const LINE_RATIO = 13 / 11;  // line height / font size, as on the site
 
+export function lineHeightFor(fontSize: number): number {
+  return Math.round(fontSize * LINE_RATIO);
+}
+
+// Smallest font size that keeps cols × rows ≤ MAX_CELLS_PER_LAYER.
+export function minFontForViewport(width: number, height: number): number {
+  const area = Math.max(0, width) * Math.max(0, height);
+  return Math.ceil(Math.sqrt(area / (MAX_CELLS_PER_LAYER * CHAR_ASPECT * LINE_RATIO)));
+}
+
+export function createAsciiEngine(container: HTMLElement, initial: EngineOptions): AsciiEngine {
+  let opts: EngineOptions = { ...initial };
   let cols = 0;
   let rows = 0;
-  let charW = FONT_SIZE * 0.6; // updated by measure()
+  let charW = opts.fontSize * CHAR_ASPECT;
   let rafHandle: number | null = null;
-
-  // Pre-build one <pre> per layer; reuse across frames.
-  const layerPres: HTMLPreElement[] = LAYER_COLORS.map((color) => {
-    const pre = document.createElement('pre');
-    pre.style.cssText = [
-      'position:absolute',
-      'inset:0',
-      'margin:0',
-      'white-space:pre',
-      'font-family:monospace',
-      `font-size:${FONT_SIZE}px`,
-      `line-height:${LINE_HEIGHT}px`,
-      `color:${color}`,
-      'pointer-events:none',
-    ].join(';');
-    return pre;
-  });
+  let elapsed = 0;
+  let lastNow: number | null = null;
 
   // Pointer spotlight + scroll parallax state (px until converted per frame).
+  let listening = false;
   let pointerActive = false;
   let targetX = 0;
   let targetY = 0;
   let easedX = 0;
   let easedY = 0;
   let scrollPx = 0;
+
+  const pres: HTMLPreElement[] = opts.layerColors.map((_, i) => {
+    const pre = document.createElement('pre');
+    pre.className = `ascii-layer ascii-layer-${i + 1}`;
+    return pre;
+  });
+
+  function styleLayers(): void {
+    pres.forEach((pre, i) => {
+      pre.style.cssText = [
+        'position:absolute',
+        'inset:0',
+        'margin:0',
+        'white-space:pre',
+        'font-family:monospace',
+        `font-size:${opts.fontSize}px`,
+        `line-height:${opts.lineHeight}px`,
+        `color:${opts.layerColors[i] ?? 'inherit'}`,
+        'pointer-events:none',
+      ].join(';');
+    });
+  }
 
   function onPointerMove(e: PointerEvent): void {
     targetX = e.clientX;
@@ -330,14 +369,22 @@ function initBackground(): void {
     scrollPx = window.scrollY;
   }
 
-  if (!reduceMotion) {
-    window.addEventListener('pointermove', onPointerMove, { passive: true });
-    window.addEventListener('scroll', onScroll, { passive: true });
+  function setInteractive(on: boolean): void {
+    if (on === listening) return;
+    if (on) {
+      window.addEventListener('pointermove', onPointerMove, { passive: true });
+      window.addEventListener('scroll', onScroll, { passive: true });
+    } else {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('scroll', onScroll);
+      pointerActive = false;
+    }
+    listening = on;
   }
 
   function measureCharWidth(): number {
     // Measure the real rendered width of a monospace glyph rather than
-    // guessing FONT_SIZE * 0.6. Under-guessing leaves a right-edge gap.
+    // guessing fontSize * 0.6. Under-guessing leaves a right-edge gap.
     const probe = document.createElement('span');
     probe.textContent = 'M'.repeat(80);
     probe.style.cssText = [
@@ -345,34 +392,25 @@ function initBackground(): void {
       'visibility:hidden',
       'white-space:pre',
       'font-family:monospace',
-      `font-size:${FONT_SIZE}px`,
-      `line-height:${LINE_HEIGHT}px`,
+      `font-size:${opts.fontSize}px`,
+      `line-height:${opts.lineHeight}px`,
     ].join(';');
     document.body.appendChild(probe);
     const w = probe.getBoundingClientRect().width / 80;
     probe.remove();
-    return w > 0 ? w : FONT_SIZE * 0.6;
+    return w > 0 ? w : opts.fontSize * CHAR_ASPECT;
   }
 
   function measure(): void {
     charW = measureCharWidth();
     // +1 cell overscan to absorb subpixel rounding at the right edge.
     cols = Math.max(1, Math.ceil(window.innerWidth / charW) + 1);
-    rows = Math.max(1, Math.ceil(window.innerHeight / LINE_HEIGHT) + 1);
+    rows = Math.max(1, Math.ceil(window.innerHeight / opts.lineHeight) + 1);
   }
 
-  function buildDOM(): void {
-    container.textContent = '';
-    for (const pre of layerPres) {
-      container.appendChild(pre);
-    }
-  }
-
-  function frame(now: number): void {
-    const t = now / 1000;
-
-    let opts: RenderOptions = {};
-    if (!reduceMotion) {
+  function draw(): void {
+    let ro: RenderOptions = { field: opts.preset.field };
+    if (opts.interactive) {
       if (pointerActive) {
         easedX += (targetX - easedX) * SPOTLIGHT_EASE;
         easedY += (targetY - easedY) * SPOTLIGHT_EASE;
@@ -380,49 +418,120 @@ function initBackground(): void {
       const parallaxX = pointerActive
         ? (targetX / window.innerWidth - 0.5) * CURSOR_PARALLAX_X * 2
         : 0;
-      opts = {
+      ro = {
+        ...ro,
         spotlightX: easedX / charW,
-        spotlightY: easedY / LINE_HEIGHT,
+        spotlightY: easedY / opts.lineHeight,
         spotlightRadius: pointerActive ? SPOTLIGHT_RADIUS : 0,
         spotlightStrength: SPOTLIGHT_STRENGTH,
         parallaxX,
         parallaxY: scrollPx * SCROLL_PARALLAX,
       };
     }
+    const { layers } = renderLayers(cols, rows, elapsed, LAYER_PHASES, ro);
+    for (let li = 0; li < pres.length; li++) {
+      pres[li].textContent = layers[li];
+    }
+  }
 
-    const { layers } = renderLayers(cols, rows, t, LAYER_PHASES, opts);
-    for (let li = 0; li < layerPres.length; li++) {
-      layerPres[li].textContent = layers[li];
+  function frame(now: number): void {
+    const dt = lastNow === null ? 0 : (now - lastNow) / 1000;
+    lastNow = now;
+    elapsed = advanceTime(elapsed, dt, opts.speed);
+    draw();
+    rafHandle = requestAnimationFrame(frame);
+  }
+
+  function stopLoop(): void {
+    if (rafHandle !== null) cancelAnimationFrame(rafHandle);
+    rafHandle = null;
+    lastNow = null;
+  }
+
+  function startLoop(): void {
+    stopLoop();
+    if (opts.reduceMotion) {
+      draw();
+      return;
     }
     rafHandle = requestAnimationFrame(frame);
   }
 
-  function start(): void {
-    if (rafHandle !== null) {
-      cancelAnimationFrame(rafHandle);
-      rafHandle = null;
-    }
+  function onResize(): void {
     measure();
-    buildDOM();
-    rafHandle = requestAnimationFrame(frame);
+    if (opts.reduceMotion) draw();
   }
 
-  function handleResize(): void {
-    measure();
-  }
+  container.textContent = '';
+  styleLayers();
+  for (const pre of pres) container.appendChild(pre);
+  measure();
+  setInteractive(opts.interactive);
+  window.addEventListener('resize', onResize);
+  startLoop();
 
-  window.addEventListener('resize', handleResize);
-  start();
+  return {
+    container,
+    update(partial) {
+      const prevReduce = opts.reduceMotion;
+      opts = { ...opts, ...partial };
+      if (
+        partial.fontSize !== undefined ||
+        partial.lineHeight !== undefined ||
+        partial.layerColors !== undefined
+      ) {
+        styleLayers();
+        measure();
+      }
+      if (partial.interactive !== undefined) setInteractive(opts.interactive);
+      if (opts.reduceMotion !== prevReduce) startLoop();
+      else if (opts.reduceMotion) draw();
+    },
+    destroy() {
+      stopLoop();
+      setInteractive(false);
+      window.removeEventListener('resize', onResize);
+      container.textContent = '';
+    },
+  };
+}
+
+// ─── Site background ────────────────────────────────────────────────────────
+// One engine for #ascii-bg. On every astro:page-load, reuse it if the
+// persisted container is still the same element; otherwise (e.g. coming back
+// from a page without a background) replace it.
+
+let siteEngine: AsciiEngine | null = null;
+
+function initSiteBackground(): void {
+  const container = document.getElementById('ascii-bg');
+  if (!container) {
+    siteEngine?.destroy();
+    siteEngine = null;
+    return;
+  }
+  if (siteEngine && siteEngine.container === container) return;
+  siteEngine?.destroy();
+
+  ACTIVE_PRESET = pickPreset();
+  container.dataset.preset = ACTIVE_PRESET.name;
+  const prefersReduced =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Same behaviour as before the refactor: keep animating under reduced
+  // motion, but drop the cursor/scroll interaction.
+  siteEngine = createAsciiEngine(container, {
+    preset: ACTIVE_PRESET,
+    speed: 1,
+    fontSize: 11,
+    lineHeight: 13,
+    layerColors: LAYER_COLORS,
+    interactive: !prefersReduced,
+    reduceMotion: false,
+  });
 }
 
 if (typeof document !== 'undefined') {
-  document.addEventListener('astro:page-load', () => {
-    if (started) return;
-    // Don't mark as started until we've confirmed the container exists on
-    // this page. Otherwise a visitor landing on a future layout without
-    // `#ascii-bg` would permanently block init on subsequent navigations.
-    if (!document.getElementById('ascii-bg')) return;
-    started = true;
-    initBackground();
-  });
+  document.addEventListener('astro:page-load', initSiteBackground);
 }
