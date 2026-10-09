@@ -171,11 +171,12 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const extra: Record<string, string> = {};
     if (response.status === 200 && isHtml) {
       extra['Cache-Control'] = HTML_CACHE;
-      return await withHtmlHeaders(response, extra);
-    }
-    if (response.status === 404) {
+    } else if (response.status === 404) {
       extra['Cache-Control'] = NOT_FOUND_CACHE;
     }
+    // Every HTML page (the 404 page included) carries the layout's inline
+    // scripts, so every HTML page needs their hashes in its CSP — not just 200s.
+    if (isHtml) return await withHtmlHeaders(response, extra);
     return withHeaders(response, extra);
   }
 
