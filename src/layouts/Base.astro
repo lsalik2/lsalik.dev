@@ -37,6 +37,7 @@ const {
   <title>{title}</title>
   <Seo title={title} description={description} image={image} type={type} />
   {noindex && <meta name="robots" content="noindex" />}
+  <slot name="head" />
   {/* Apply the saved palette before first paint so there's no flash.
       Must be an inline head script, not a module import. */}
   <script is:inline>

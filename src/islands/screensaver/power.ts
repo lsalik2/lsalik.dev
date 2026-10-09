@@ -66,17 +66,44 @@ export function createAutoHide(panel: HTMLElement, idleMs: number): AutoHide {
   };
 }
 
+// Older Safari (incl. iPadOS before 16.4) only has the webkit-prefixed API.
+interface WebkitFullscreen {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+  webkitExitFullscreen?: () => Promise<void> | void;
+  webkitFullscreenElement?: Element | null;
+}
+
 export function fullscreenSupported(): boolean {
-  return typeof document.documentElement.requestFullscreen === 'function';
+  const el = document.documentElement as HTMLElement & WebkitFullscreen;
+  return typeof el.requestFullscreen === 'function' || typeof el.webkitRequestFullscreen === 'function';
+}
+
+export function isFullscreen(): boolean {
+  return Boolean(document.fullscreenElement ?? (document as Document & WebkitFullscreen).webkitFullscreenElement);
 }
 
 export async function toggleFullscreen(): Promise<void> {
+  const doc = document as Document & WebkitFullscreen;
+  const el = document.documentElement as HTMLElement & WebkitFullscreen;
   try {
-    if (document.fullscreenElement) await document.exitFullscreen();
-    else await document.documentElement.requestFullscreen();
+    if (isFullscreen()) {
+      if (doc.exitFullscreen) await doc.exitFullscreen();
+      else await doc.webkitExitFullscreen?.();
+    } else if (el.requestFullscreen) {
+      await el.requestFullscreen();
+    } else {
+      await el.webkitRequestFullscreen?.();
+    }
   } catch {
     // Denied (e.g. not triggered by a user gesture) — nothing to do.
   }
+}
+
+// Already running chrome-less from the home screen.
+export function isStandalone(): boolean {
+  const mm = (q: string) => typeof window.matchMedia === 'function' && window.matchMedia(q).matches;
+  return mm('(display-mode: fullscreen)') || mm('(display-mode: standalone)') ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true;
 }
 
 interface WakeLockSentinelLike {
