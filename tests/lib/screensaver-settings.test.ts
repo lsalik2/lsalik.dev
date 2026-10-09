@@ -106,13 +106,22 @@ describe('parseStored', () => {
 });
 
 describe('URL round-trip', () => {
-  it('writes nothing for defaults', () => {
-    expect(toSearchParams(D, D).toString()).toBe('');
+  it('writes only the colour source for defaults', () => {
+    expect(toSearchParams(D, D).toString()).toBe('c=dark-terminal');
   });
 
-  it('writes only changed fields with short keys', () => {
+  it('writes only changed fields with short keys, plus the colour source', () => {
     const s: ScreensaverSettings = { ...D, pattern: 'vortex', clock24h: true };
-    expect(toSearchParams(s, D).toString()).toBe('p=vortex&h24=1');
+    expect(toSearchParams(s, D).toString()).toBe('p=vortex&c=dark-terminal&h24=1');
+  });
+
+  it('always writes the colour source, because the default differs per visitor', () => {
+    // A sharer on nord whose colours match their own default must still
+    // hand nord to a recipient whose default is dark-terminal.
+    const nord = defaultSettings('nord');
+    const url = toSearchParams({ ...nord, pattern: 'vortex' }, nord);
+    expect(url.get('c')).toBe('nord');
+    expect(parseSearchParams(url, defaultSettings('dark-terminal')).colorSource).toBe('nord');
   });
 
   it('round-trips every field losslessly', () => {
