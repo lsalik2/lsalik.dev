@@ -8,6 +8,7 @@ import {
   RAMP,
   LAYER_PHASES,
   LAYER_COLORS,
+  PRESETS,
 } from '../../src/islands/ascii-bg';
 
 describe('sample', () => {
@@ -177,5 +178,80 @@ describe('layer constants', () => {
 
   it('has at least one layer', () => {
     expect(LAYER_PHASES.length).toBeGreaterThan(0);
+  });
+});
+
+describe('presets', () => {
+  // Reference copy of the original sum-of-sines formula and its three tunings,
+  // so the refactor onto per-preset fields can't silently change them.
+  const LEGACY = {
+    drift: [0.08, 0.11, 0.06, 0.09, 0.6, 0.4, 0.5, 0.3],
+    cascade: [0.04, 0.22, 0.18, 0.03, 1.4, 0.15, 1.1, 0.1],
+    pulse: [0.03, 0.04, 0.025, 0.035, 0.25, 0.3, 0.2, 0.15],
+  } as const;
+
+  function legacy(p: readonly number[], x: number, y: number, t: number, phase: number): number {
+    const [nx, ny, nxy, nxmy, tx, ty, txy, txmy] = p;
+    const s1 = Math.sin(x * nx + t * tx + phase);
+    const s2 = Math.sin(y * ny - t * ty + phase * 1.3);
+    const s3 = Math.sin((x + y) * nxy + t * txy);
+    const s4 = Math.sin((x - y) * nxmy - t * txmy + phase * 0.7);
+    const raw = (s1 + s2 + s3 + s4) * 0.25 + 0.5;
+    return raw < 0 ? 0 : raw > 1 ? 1 : raw;
+  }
+
+  const ctx = { cols: 120, rows: 40 };
+
+  it('includes the original three plus ripple, vortex, and interference', () => {
+    expect(PRESETS.map(p => p.name)).toEqual([
+      'drift', 'cascade', 'pulse', 'ripple', 'vortex', 'interference',
+    ]);
+  });
+
+  it('keeps the original presets bit-for-bit identical', () => {
+    for (const [name, params] of Object.entries(LEGACY)) {
+      const preset = PRESETS.find(p => p.name === name)!;
+      for (const [x, y, t, phase] of [[0, 0, 0, 0], [4, 5, 1.25, 3.7], [37, 12, 9.5, 7.2], [119, 39, 100, 0]]) {
+        expect(preset.field(x, y, t, phase, ctx)).toBe(legacy(params, x, y, t, phase));
+      }
+    }
+  });
+
+  it('every preset stays within [0, 1] and is deterministic', () => {
+    for (const preset of PRESETS) {
+      for (let x = 0; x < ctx.cols; x += 7) {
+        for (let y = 0; y < ctx.rows; y += 3) {
+          for (const t of [0, 2.5, 61.3]) {
+            for (const phase of LAYER_PHASES) {
+              const v = preset.field(x, y, t, phase, ctx);
+              expect(v).toBeGreaterThanOrEqual(0);
+              expect(v).toBeLessThanOrEqual(1);
+              expect(preset.field(x, y, t, phase, ctx)).toBe(v);
+            }
+          }
+        }
+      }
+    }
+  });
+
+  it('new presets are not flat and stay near the original brightness spread', () => {
+    // Keeps new fields from reading far busier or emptier than the originals,
+    // which measure mean 0.54–0.69, sd 0.29–0.33 on this grid.
+    function spread(preset: (typeof PRESETS)[number]): { mean: number; sd: number } {
+      const vals: number[] = [];
+      for (let x = 0; x < ctx.cols; x += 2) {
+        for (let y = 0; y < ctx.rows; y++) vals.push(preset.field(x, y, 3.3, 0, ctx));
+      }
+      const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+      const sd = Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / vals.length);
+      return { mean, sd };
+    }
+    for (const name of ['ripple', 'vortex', 'interference']) {
+      const { mean, sd } = spread(PRESETS.find(p => p.name === name)!);
+      expect(mean).toBeGreaterThan(0.35);
+      expect(mean).toBeLessThan(0.65);
+      expect(sd).toBeGreaterThan(0.25);
+      expect(sd).toBeLessThan(0.36);
+    }
   });
 });

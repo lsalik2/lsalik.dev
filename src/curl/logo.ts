@@ -1,5 +1,6 @@
-// SLK logo rendered at 8×17 pixel resolution, packed into 4 text rows using
-// half-block glyphs (▀ ▄ █) plus space. Two colored underline rows follow.
+// Curl logo: a random, mirrored 8×17 pixel mark (identicon-style), different
+// on every request. Packed into 4 text rows using half-block glyphs (▀ ▄ █)
+// plus space. Two colored underline rows follow.
 //
 // Pixel mapping per cell (top, bottom):
 //   (0,0) -> ' '   (0,1) -> '▄'   (1,0) -> '▀'   (1,1) -> '█'
@@ -9,7 +10,7 @@ const RST = '\x1b[39m';
 const WIDTH = 17;
 
 // 256-color palette of light foreground colors that stay legible on a black
-// terminal background. The word + each underline bar pick from this pool per
+// terminal background. The mark + each underline bar pick from this pool per
 // render.
 const LIGHT_COLORS: readonly number[] = [
   87,  // bright cyan
@@ -32,34 +33,68 @@ function fgCode(idx: number): string {
   return `\x1b[38;5;${idx}m`;
 }
 
-// Pick `n` distinct color codes from the palette so the word and its two bars
+// Pick `n` distinct color codes from the palette so the mark and its two bars
 // read as three separate stripes rather than collapsing visually.
-function pickDistinctColors(n: number): string[] {
+function pickDistinctColors(n: number, rng: () => number): string[] {
   const pool = [...LIGHT_COLORS];
   const out: string[] = [];
   for (let i = 0; i < n && pool.length > 0; i++) {
-    const j = Math.floor(Math.random() * pool.length);
+    const j = Math.floor(rng() * pool.length);
     out.push(fgCode(pool[j]));
     pool.splice(j, 1);
   }
   return out;
 }
 
-// 8 pixel rows × 17 columns. '#' = on, '.' = off.
-// Layout: S (cols 0-4), gap (col 5), L (cols 6-10), gap (col 11), K (cols 12-16).
-const BITMAP: readonly string[] = [
-  '.####.#.....#...#',
-  '#.....#.....#..#.',
-  '#.....#.....#.#..',
-  '.###..#.....##...',
-  '....#.#.....##...',
-  '....#.#.....#.#..',
-  '#...#.#.....#..#.',
-  '.###..#####.#...#',
-];
+export const LOGO_HEIGHT = 8;
+export const LOGO_WIDTH = WIDTH;
 
-function pixel(row: number, col: number): boolean {
-  return BITMAP[row][col] === '#';
+const HALF = (WIDTH - 1) / 2; // columns left of the mirror axis
+const CENTER = HALF;
+const MIN_FILL = 0.35;
+const MAX_FILL = 0.65;
+const MIN_CENTER = 2;
+const MAX_ATTEMPTS = 20;
+
+// Rejects patterns that read badly at this size: near-blank smudges, solid
+// blocks, rows with a hole straight through, or a bare center column that
+// splits the mirror into two unrelated shapes.
+export function isAcceptable(pattern: readonly string[]): boolean {
+  let on = 0;
+  for (const row of pattern) {
+    if (!row.includes('#')) return false;
+    for (const ch of row) if (ch === '#') on++;
+  }
+  const fill = on / (LOGO_WIDTH * LOGO_HEIGHT);
+  if (fill < MIN_FILL || fill > MAX_FILL) return false;
+  const center = pattern.filter(row => row[CENTER] === '#').length;
+  return center >= MIN_CENTER;
+}
+
+function randomPattern(rng: () => number): string[] {
+  const rows: string[] = [];
+  for (let r = 0; r < LOGO_HEIGHT; r++) {
+    let left = '';
+    for (let c = 0; c < HALF; c++) left += rng() < 0.5 ? '#' : '.';
+    const mid = rng() < 0.5 ? '#' : '.';
+    rows.push(left + mid + [...left].reverse().join(''));
+  }
+  return rows;
+}
+
+// Identicon-style mark: random left half, mirrored onto the right. Retries
+// until the pattern passes isAcceptable(), falling back to the last attempt
+// so a degenerate rng can never hang the request.
+export function generatePattern(rng: () => number = Math.random): string[] {
+  let pattern = randomPattern(rng);
+  for (let i = 1; i < MAX_ATTEMPTS && !isAcceptable(pattern); i++) {
+    pattern = randomPattern(rng);
+  }
+  return pattern;
+}
+
+function pixel(pattern: readonly string[], row: number, col: number): boolean {
+  return pattern[row][col] === '#';
 }
 
 function packPair(top: boolean, bot: boolean): string {
@@ -69,7 +104,7 @@ function packPair(top: boolean, bot: boolean): string {
   return ' ';
 }
 
-function renderLetterRows(colorCode: string): string[] {
+function renderPatternRows(pattern: readonly string[], colorCode: string): string[] {
   // Pack pixel rows in pairs: (0,1), (2,3), (4,5), (6,7) -> 4 text rows.
   const rows: string[] = [];
   for (let textRow = 0; textRow < 4; textRow++) {
@@ -77,7 +112,7 @@ function renderLetterRows(colorCode: string): string[] {
     const botRow = textRow * 2 + 1;
     let line = '';
     for (let col = 0; col < WIDTH; col++) {
-      line += packPair(pixel(topRow, col), pixel(botRow, col));
+      line += packPair(pixel(pattern, topRow, col), pixel(pattern, botRow, col));
     }
     rows.push(`${colorCode}${line}${RST}`);
   }
@@ -88,10 +123,11 @@ function renderUnderline(colorCode: string): string {
   return `${colorCode}${'\u2584'.repeat(WIDTH)}${RST}`;
 }
 
-export function renderLogo(): string {
-  const [wordColor, bar1Color, bar2Color] = pickDistinctColors(3);
-  const letters = renderLetterRows(wordColor);
-  const accentBar = renderUnderline(bar1Color);
-  const amberBar = renderUnderline(bar2Color);
-  return [...letters, accentBar, amberBar].join('\n');
+// A fresh mark on every call. The pattern is drawn from `rng` before the
+// colors so a seeded rng reproduces the same shape in tests.
+export function renderLogo(rng: () => number = Math.random): string {
+  const pattern = generatePattern(rng);
+  const [markColor, bar1Color, bar2Color] = pickDistinctColors(3, rng);
+  const rows = renderPatternRows(pattern, markColor);
+  return [...rows, renderUnderline(bar1Color), renderUnderline(bar2Color)].join('\n');
 }
