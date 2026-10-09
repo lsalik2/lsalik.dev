@@ -116,6 +116,37 @@ describe('wrap', () => {
   });
 });
 
+describe('box with wrap: false', () => {
+  it('preserves leading whitespace on each line', () => {
+    const out = box(['   /\\_/\\', '  ( o.o )'], { width: 40, wrap: false });
+    const lines = stripAnsi(out).split('\n');
+    // Body lines are framed: "│ " + content + filler + " │"
+    expect(lines[1]).toBe('│    /\\_/\\' + ' '.repeat(40 - 2 - 2 - '   /\\_/\\'.length) + ' │');
+    expect(lines[2]).toBe('│   ( o.o )' + ' '.repeat(40 - 2 - 2 - '  ( o.o )'.length) + ' │');
+  });
+
+  it('still wraps long lines when wrap is not disabled (default)', () => {
+    const longLine = 'x'.repeat(100);
+    const out = box([longLine], { width: 40 });
+    const lines = stripAnsi(out).split('\n');
+    // Default behavior: long line is soft-wrapped onto multiple body lines.
+    expect(lines.length).toBeGreaterThan(3);
+  });
+
+  it('does not crash when a line exceeds the inner width (caller-owned overflow)', () => {
+    // wrap:false documents that callers guarantee width. If they don't,
+    // the line should still render without throwing — it just protrudes past
+    // the right border. Lock that in so the comment stays honest.
+    const longLine = 'y'.repeat(100);
+    expect(() => box([longLine], { width: 20, wrap: false })).not.toThrow();
+    const out = box([longLine], { width: 20, wrap: false });
+    const lines = stripAnsi(out).split('\n');
+    // Top border, one body row containing the full long line, bottom border.
+    expect(lines).toHaveLength(3);
+    expect(lines[1]).toContain(longLine);
+  });
+});
+
 describe('twoCol', () => {
   it('puts left and right on one line', () => {
     const result = twoCol('left', 'right', 40);
