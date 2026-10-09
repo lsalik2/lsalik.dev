@@ -13,7 +13,7 @@ export interface ChordState {
 }
 
 export type ChordAction =
-  | { type: 'navigate'; href: string }
+  | { type: 'navigate'; href: string; fullLoad?: true }
   | { type: 'toggle-help' }
   | { type: 'close-help' }
   | { type: 'none' };
@@ -33,7 +33,13 @@ const G_BINDINGS: Readonly<Record<string, string>> = {
   b: '/blog',
   c: '/contact',
   u: '/uses',
+  s: '/screensaver',
 };
+
+// Routes that must be entered with a full page load rather than a
+// ClientRouter swap (the screensaver page has no router and no persisted
+// background to hand over to).
+const FULL_LOAD_HREFS: ReadonlySet<string> = new Set(['/screensaver']);
 
 const CLEARED: ChordState = INITIAL_CHORD_STATE;
 
@@ -58,7 +64,12 @@ export function resolveChord(
   if (effective.leader === 'g') {
     const href = G_BINDINGS[key];
     if (href) {
-      return { next: CLEARED, action: { type: 'navigate', href } };
+      return {
+        next: CLEARED,
+        action: FULL_LOAD_HREFS.has(href)
+          ? { type: 'navigate', href, fullLoad: true }
+          : { type: 'navigate', href },
+      };
     }
     return { next: CLEARED, action: { type: 'none' } };
   }
