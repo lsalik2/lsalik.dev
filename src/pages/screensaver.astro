@@ -1,0 +1,207 @@
+---
+import Base from '../layouts/Base.astro';
+import {
+  PATTERN_CHOICES,
+  COLOR_ANIMS,
+  CLOCK_STYLES,
+  CLOCK_POSITIONS,
+  RANGES,
+} from '../lib/screensaver-settings';
+import { PALETTES } from '../lib/palettes';
+---
+<Base
+  title="screensaver"
+  description="The lsalik.dev ASCII background, full-screen, with a clock and custom colours."
+  background={false}
+  router={false}
+  noindex
+>
+  <div class="ss-wrapper" data-ss-wrapper>
+    <div class="ss-stage" data-ss-stage aria-hidden="true"></div>
+    <div class="ss-clock" data-ss-clock data-pos="center"></div>
+  </div>
+  <noscript><p class="ss-noscript">the screensaver needs JavaScript.</p></noscript>
+
+  <aside class="ss-panel" data-ss-panel aria-label="screensaver settings">
+    <p class="ss-title">── screensaver ──</p>
+
+    <label>pattern
+      <select data-setting="pattern">
+        {PATTERN_CHOICES.map(p => <option value={p}>{p}</option>)}
+      </select>
+    </label>
+    <label class="ss-when-cycle">cycle every <output data-for="cycleMinutes"></output> min
+      <input type="range" data-setting="cycleMinutes" min={RANGES.cycleMinutes.min} max={RANGES.cycleMinutes.max} step="1" />
+    </label>
+    <label>speed <output data-for="speed"></output>×
+      <input type="range" data-setting="speed" min={RANGES.speed.min} max={RANGES.speed.max} step="0.05" />
+    </label>
+    <label>cell size <output data-for="cellSize"></output>px
+      <input type="range" data-setting="cellSize" min={RANGES.cellSize.min} max={RANGES.cellSize.max} step="1" />
+    </label>
+    <label>brightness <output data-for="brightness"></output>
+      <input type="range" data-setting="brightness" min={RANGES.brightness.min} max={RANGES.brightness.max} step="0.05" />
+    </label>
+
+    <label>colours
+      <select data-setting="colorSource">
+        {PALETTES.map(p => <option value={p}>{p}</option>)}
+        <option value="custom">custom</option>
+      </select>
+    </label>
+    <div class="ss-when-custom ss-colors">
+      <label>bg <input type="color" data-setting="custom.bg" /></label>
+      <label>1 <input type="color" data-setting="custom.l1" /></label>
+      <label>2 <input type="color" data-setting="custom.l2" /></label>
+      <label>3 <input type="color" data-setting="custom.l3" /></label>
+    </div>
+    <label>animate colours
+      <select data-setting="colorAnim">
+        {COLOR_ANIMS.map(a => <option value={a}>{a}</option>)}
+      </select>
+    </label>
+    <label>cycle length <output data-for="colorAnimSeconds"></output>s
+      <input type="range" data-setting="colorAnimSeconds" min={RANGES.colorAnimSeconds.min} max={RANGES.colorAnimSeconds.max} step="5" />
+    </label>
+
+    <label>clock
+      <select data-setting="clock">
+        {CLOCK_STYLES.map(c => <option value={c}>{c}</option>)}
+      </select>
+    </label>
+    <label class="ss-when-clock">position
+      <select data-setting="clockPos">
+        {CLOCK_POSITIONS.map(c => <option value={c}>{c}</option>)}
+      </select>
+    </label>
+    <label class="ss-when-clock ss-check"><input type="checkbox" data-setting="clock24h" /> 24-hour</label>
+
+    <div class="ss-buttons">
+      <button type="button" data-action="fullscreen">[fullscreen]</button>
+      <button type="button" data-action="copy">[copy url]</button>
+      <button type="button" data-action="reset">[reset]</button>
+      <button type="button" data-action="exit">[exit]</button>
+    </div>
+    <p class="ss-status" data-ss-status aria-live="polite"></p>
+    <input class="ss-share" data-share-url type="text" readonly hidden aria-label="share link" />
+    <p class="ss-hint">f fullscreen · h pin panel · ←/→ pattern · esc exit</p>
+  </aside>
+
+  <script src="../islands/screensaver/index.ts"></script>
+</Base>
+
+<style is:global>
+  html, body {
+    background: var(--ss-bg, var(--bg));
+    overflow: hidden;
+    height: 100%;
+  }
+
+  body.ss-idle { cursor: none; }
+
+  .ss-wrapper {
+    position: fixed;
+    inset: 0;
+    filter: hue-rotate(var(--ss-hue, 0deg));
+  }
+
+  .ss-stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  /* Gradient + rainbow paint the text with a background clipped to glyphs.
+     !important beats the engine's inline layer colour. */
+  .ss-wrapper[data-color-anim="gradient"] .ascii-layer,
+  .ss-wrapper[data-color-anim="rainbow"] .ascii-layer {
+    color: transparent !important;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  .ss-wrapper[data-color-anim="gradient"] .ascii-layer-1 { background-image: linear-gradient(var(--ss-angle, 0deg), var(--ss-l1), var(--ss-l1b)); }
+  .ss-wrapper[data-color-anim="gradient"] .ascii-layer-2 { background-image: linear-gradient(var(--ss-angle, 0deg), var(--ss-l2), var(--ss-l2b)); }
+  .ss-wrapper[data-color-anim="gradient"] .ascii-layer-3 { background-image: linear-gradient(var(--ss-angle, 0deg), var(--ss-l3), var(--ss-l3b)); }
+  .ss-wrapper[data-color-anim="rainbow"] .ascii-layer {
+    /* Two full spectra across a 200%-wide background, so sliding it by 100%
+       lands on an identical frame and the loop is seamless. */
+    background-image: linear-gradient(90deg, #ff5f5f, #ffaf5f, #ffff5f, #5fff87, #5fd7ff, #875fff, #ff5fd7,
+      #ff5f5f, #ffaf5f, #ffff5f, #5fff87, #5fd7ff, #875fff, #ff5fd7, #ff5f5f);
+    background-size: 200% 100%;
+    background-position: var(--ss-rainbow, 0%) 0;
+  }
+
+  .ss-clock {
+    position: absolute;
+    color: var(--ss-l3);
+    text-shadow: 0 0 12px var(--ss-bg, #000);
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    text-align: center;
+    pointer-events: none;
+    transition: translate 2s ease;
+  }
+  .ss-clock[data-pos="center"] { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+  .ss-clock[data-pos="top-left"] { top: 4vh; left: 4vw; text-align: left; }
+  .ss-clock[data-pos="top-right"] { top: 4vh; right: 4vw; text-align: right; }
+  .ss-clock[data-pos="bottom-left"] { bottom: 4vh; left: 4vw; text-align: left; }
+  .ss-clock[data-pos="bottom-right"] { bottom: 4vh; right: 4vw; text-align: right; }
+  .ss-clock-big { margin: 0; font-size: clamp(10px, 2.2vw, 28px); line-height: 1; white-space: pre; }
+  .ss-clock-small { font-size: clamp(28px, 7vw, 96px); }
+  .ss-clock-date { margin-top: 0.75em; font-size: clamp(12px, 1.4vw, 20px); opacity: 0.8; }
+
+  .ss-noscript { position: fixed; top: 1rem; left: 1rem; color: var(--fg); }
+
+  .ss-panel {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    width: 300px;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem;
+    background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--fg);
+    font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
+    font-size: 0.8rem;
+    transition: opacity 0.4s ease;
+    z-index: 2;
+  }
+  body.ss-idle .ss-panel { opacity: 0; pointer-events: none; }
+  .ss-panel label { display: flex; flex-direction: column; gap: 0.25rem; color: var(--fg-muted); }
+  .ss-panel label.ss-check { flex-direction: row; align-items: center; }
+  .ss-panel select, .ss-panel input[type="text"] {
+    font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 3px; padding: 0.2rem 0.4rem;
+  }
+  .ss-panel input[type="range"] { accent-color: var(--accent); }
+  .ss-title { margin: 0; color: var(--accent); }
+  .ss-colors { display: flex; gap: 0.5rem; }
+  .ss-colors label { align-items: center; }
+  .ss-buttons { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .ss-buttons button {
+    font: inherit; color: var(--accent); background: transparent; border: 1px solid var(--border); border-radius: 3px; padding: 0.2rem 0.5rem; cursor: pointer;
+  }
+  .ss-buttons button:hover { border-color: var(--accent); color: var(--accent-bright); }
+  .ss-status, .ss-hint { margin: 0; color: var(--fg-muted); }
+  .ss-hint { font-size: 0.7rem; opacity: 0.8; }
+
+  .ss-panel:not([data-pattern="cycle"]) .ss-when-cycle,
+  .ss-panel:not([data-color-source="custom"]) .ss-when-custom,
+  .ss-panel[data-clock="off"] .ss-when-clock { display: none; }
+
+  @media (max-width: 600px) {
+    .ss-panel {
+      top: auto;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: auto;
+      max-height: 55vh;
+      border-radius: 6px 6px 0 0;
+    }
+  }
+</style>
