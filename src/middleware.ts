@@ -12,6 +12,7 @@ import {
   renderResume,
   renderUses,
   renderMan,
+  renderSsh,
 } from './curl/render';
 import { readingTime } from './lib/reading-time';
 import { CONTACT_SECTIONS } from './data/contact';
@@ -170,11 +171,12 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const extra: Record<string, string> = {};
     if (response.status === 200 && isHtml) {
       extra['Cache-Control'] = HTML_CACHE;
-      return await withHtmlHeaders(response, extra);
-    }
-    if (response.status === 404) {
+    } else if (response.status === 404) {
       extra['Cache-Control'] = NOT_FOUND_CACHE;
     }
+    // Every HTML page (the 404 page included) carries the layout's inline
+    // scripts, so every HTML page needs their hashes in its CSP — not just 200s.
+    if (isHtml) return await withHtmlHeaders(response, extra);
     return withHeaders(response, extra);
   }
 
@@ -294,6 +296,12 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
 
   if (pathname === '/man' || pathname === '/man/') {
     return textResponse(renderMan(MAN));
+  }
+
+  // Hidden easter egg: terminal clients only (browsers were already sent to
+  // next() above, so they get the normal 404).
+  if (pathname === '/ssh' || pathname === '/ssh/') {
+    return textResponse(renderSsh());
   }
 
   return notFoundResponse(pathname);
