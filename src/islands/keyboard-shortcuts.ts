@@ -111,6 +111,7 @@ function buildOverlay(): HTMLDivElement {
     [['g', 'b'], 'blog'],
     [['g', 'u'], 'uses'],
     [['g', 'c'], 'contact'],
+    [['g', 's'], 'screensaver'],
     [['?'], 'toggle this help'],
     [['Esc'], 'close this help'],
   ];
@@ -192,7 +193,8 @@ function applyAction(action: ReturnType<typeof resolveChord>['action'], event: K
       // Don't navigate if the overlay is open — close it first so the user
       // sees their context returning rather than a surprise page swap.
       if (isOverlayOpen()) closeOverlay();
-      navigate(action.href);
+      if (action.fullLoad) window.location.href = action.href;
+      else navigate(action.href);
       return;
     case 'toggle-help':
       event.preventDefault();
