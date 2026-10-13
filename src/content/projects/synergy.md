@@ -3,7 +3,6 @@ title: "Synergy"
 date: 2025-05-06
 stack: [Java, Fabric Mod Loader]
 status: "Concept"
-repo: "https://github.com/lsalik2/Synergy"
 description: "Synergy is a combat-focused magic mod for Minecraft currently in development, using Fabric."
 permissions: "drwx------"
 active: true
