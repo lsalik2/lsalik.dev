@@ -66,10 +66,10 @@ import { PALETTES } from '../lib/palettes';
       </select>
     </label>
     <div class="ss-when-custom ss-colors">
-      <label>bg <input type="color" data-setting="custom.bg" /></label>
-      <label>1 <input type="color" data-setting="custom.l1" /></label>
-      <label>2 <input type="color" data-setting="custom.l2" /></label>
-      <label>3 <input type="color" data-setting="custom.l3" /></label>
+      <label>bg <input type="color" data-setting="custom.bg" aria-label="background colour" /></label>
+      <label>1 <input type="color" data-setting="custom.l1" aria-label="layer 1 colour" /></label>
+      <label>2 <input type="color" data-setting="custom.l2" aria-label="layer 2 colour" /></label>
+      <label>3 <input type="color" data-setting="custom.l3" aria-label="layer 3 colour" /></label>
     </div>
     <label>animate colours
       <select data-setting="colorAnim">
@@ -118,6 +118,11 @@ import { PALETTES } from '../lib/palettes';
   .ss-wrapper {
     position: fixed;
     inset: 0;
+  }
+
+  /* Only while hue-cycling: an identity filter would still cost a full-screen
+     compositing pass every frame. */
+  .ss-wrapper[data-color-anim="hue"] {
     filter: hue-rotate(var(--ss-hue, 0deg));
   }
 
