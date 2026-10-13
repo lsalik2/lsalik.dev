@@ -265,7 +265,7 @@ describe('renderSsh', () => {
     // Integration guard: if box() ever regresses on the wrap:false path,
     // the indentation that holds the cat art together would be stripped.
     const plain = stripAnsi(renderSsh());
-    expect(plain).toContain('      /\\___/\\');
+    expect(plain).toContain('      /\\_____/\\');
   });
 });
 
