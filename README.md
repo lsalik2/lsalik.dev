@@ -64,9 +64,13 @@ npm test
 
 # Production build
 npm run build
+
+# Boot the built Vercel function in isolation and request the key routes
+# (catches deploy-only breakage that the dev server and build can't see)
+npm run check:function
 ```
 
-Requires Node 18+. No environment variables needed for local development.
+Requires Node 22.12+. No environment variables needed for local development.
 
 ## Deployment
 
