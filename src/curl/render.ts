@@ -1,5 +1,6 @@
 import { bold, dim, green, blue, amber, cyan, red, accentGreen, accentMagenta, bodyWarm, titleBright, borderDim, visibleWidth } from './ansi';
 import { renderLogo } from './logo';
+import { FINCH, RAVEN, FORTUNE_CAT } from './cats';
 import { NAV_LINKS } from '../lib/nav';
 import { box, hr, sectionHeader, twoCol, wrap, PAGE_WIDTH } from './box';
 import type { ContactSection } from '../data/contact';
@@ -355,22 +356,6 @@ export function renderUses(uses: Uses, width: number = PAGE_WIDTH): string {
 // The cat art is framed with `box(..., { wrap: false })` so its leading
 // indentation survives (the default soft-wrap path strips it).
 export function renderSsh(width: number = PAGE_WIDTH): string {
-  // Finch — oversized tuxedo Maine Coon. Drawn larger, warm-toned.
-  const finch = [
-    '      /\\___/\\',
-    '     /  o   o  \\',
-    '    ( ==  ^  == )',
-    '     )         (',
-    '    (  )  v  (  )',
-    '   (__(_______)__)',
-  ];
-  // Raven — small black cat. Drawn compact, dim.
-  const raven = [
-    '   /\\_/\\',
-    '  ( o.o )',
-    '   > ^ <',
-  ];
-
   const banner = [
     `${green('$')} ssh guest@lsalik.dev`,
     dim("The authenticity of host 'lsalik.dev (104.21.0.7)' can't be established."),
@@ -385,9 +370,10 @@ export function renderSsh(width: number = PAGE_WIDTH): string {
     [
       ...fit(`${bold(titleBright('Welcome to lsalik.dev'))}${dim('  —  last login: just now')}`, inner),
       '',
-      ...finch.map(line => bodyWarm(line)),
+      // Finch warm-toned, Raven dim.
+      ...FINCH.map(line => bodyWarm('   ' + line)),
       '',
-      ...raven.map(line => dim(line)),
+      ...RAVEN.map(line => dim('  ' + line)),
       '',
       dim('the maintainers:'),
       ...fit(`  ${bold(cyan('finch'))}  ·  oversized tuxedo maine coon`, inner),
@@ -441,11 +427,8 @@ export function renderNotFound(safePath: string, width: number = PAGE_WIDTH): st
 export function renderFortune(fortune: string, width: number = PAGE_WIDTH): string {
   const bubbleWidth = Math.min(width, visibleWidth(fortune) + 4);
   const bubble = box([bodyWarm(fortune)], { width: Math.max(bubbleWidth, 12) });
-  const cat = [
-    '   \\',
-    '    \\   /\\_/\\',
-    '        ( o.o )',
-    '         > ^ <',
-  ].map(line => dim(line));
-  return [bubble, ...cat].join('\n');
+  // The bubble's tail runs down-right into the cat's ear row.
+  const cat = FORTUNE_CAT.map(line => ' '.repeat(8) + line);
+  cat[0] = '    \\' + cat[0].slice(5);
+  return [bubble, ...['   \\', ...cat].map(line => dim(line))].join('\n');
 }
