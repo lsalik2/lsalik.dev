@@ -1,6 +1,6 @@
 # lsalik.dev
 
-My personal portfolio website, with some decent blog functionality. Built with Astro and deployed on Vercel.
+My personal website, built with Astro and deployed on Vercel.
 
 The site has two rendering modes baked in: a styled browser UI and a plain-text terminal view. Visiting any route with `curl`, `wget`, or `httpie` returns ANSI-formatted plain text instead of HTML. Still the same content, just a different skin.
 
