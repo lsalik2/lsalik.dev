@@ -1,0 +1,57 @@
+---
+// /fortune in the browser: the same speech bubble curl gets, as plain text.
+// A fresh fortune on every load (pages are server-rendered, no-store).
+import Page from '../layouts/Page.astro';
+import TerminalFrame from '../components/TerminalFrame.astro';
+import { renderFortune } from '../curl/render';
+import { stripAnsi } from '../curl/ansi';
+import { pickFortune } from '../data/fortunes';
+
+const fortune = pickFortune();
+const art = stripAnsi(renderFortune(fortune, 60));
+---
+<Page title="fortune" path="/fortune" description={fortune}>
+  <TerminalFrame title="$ fortune">
+    <pre class="fortune-art" aria-label={fortune}>{art}</pre>
+  </TerminalFrame>
+  <p class="fortune-actions">
+    <a href="/fortune" data-astro-reload class="fortune-again">[another]</a>
+    <span class="fortune-hint">or <code>curl -L lsalik.dev/fortune</code></span>
+  </p>
+</Page>
+
+<style>
+  .fortune-art {
+    margin: 0;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--fg);
+    font-size: 0.95rem;
+    line-height: 1.1;
+  }
+
+  .fortune-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 1rem;
+    font-size: 0.85rem;
+  }
+
+  .fortune-again {
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .fortune-again:hover {
+    color: var(--accent-bright);
+    border-color: var(--accent);
+  }
+
+  .fortune-hint {
+    color: var(--fg-muted);
+  }
+</style>

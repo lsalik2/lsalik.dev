@@ -9,6 +9,7 @@ import {
   renderResume,
   renderSsh,
   renderScreensaverNote,
+  renderFortune,
   type ContactSection,
 } from '../../src/curl/render';
 import type { BlogPostSummary, BlogPostFull, ProjectSummary } from '../../src/curl/render';
@@ -273,5 +274,41 @@ describe('renderScreensaverNote', () => {
     const plain = stripAnsi(renderScreensaverNote());
     expect(plain).toContain('screensaver');
     expect(plain).toContain('https://lsalik.dev/screensaver');
+  });
+});
+
+describe('active projects ("working on")', () => {
+  const base: ProjectSummary = {
+    slug: 'finch', title: 'Finch', date: '2026-09-15', stack: ['Rust'], status: 'Alpha',
+    description: 'A media player for the couch.', permissions: 'drwx------',
+  };
+
+  it('marks active projects in the projects index', () => {
+    const out = stripAnsi(renderProjectsIndex([{ ...base, active: true }]));
+    expect(out).toContain('● working on');
+  });
+
+  it('does not mark inactive projects', () => {
+    const out = stripAnsi(renderProjectsIndex([base]));
+    expect(out).not.toContain('working on');
+  });
+
+  it('marks an active project on its own page', () => {
+    const out = stripAnsi(renderProjectPost({ title: 'Finch', status: 'Alpha', stack: ['Rust'], content: 'x', active: true }));
+    expect(out).toContain('● working on');
+  });
+});
+
+describe('renderFortune', () => {
+  it('shows the fortune in a speech bubble with a cat', () => {
+    const out = stripAnsi(renderFortune('Talk is cheap. Show me the diff.'));
+    expect(out).toContain('Talk is cheap. Show me the diff.');
+    expect(out).toContain('┌');
+    expect(out).toContain('( o.o )');
+  });
+
+  it('sizes the bubble to a short fortune instead of the full width', () => {
+    const top = stripAnsi(renderFortune('Measure twice, cut once.', 120)).split('\n').find(l => l.includes('┌'))!;
+    expect([...top].length).toBeLessThan(40);
   });
 });

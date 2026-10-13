@@ -5,9 +5,9 @@ import PageHeader from '../../components/PageHeader.astro';
 import Pager from '../../components/Pager.astro';
 import statsMap from '../../data/github-stats.json';
 import { statsForRepo, formatStars, relativeTime, type StatsMap } from '../../lib/github-stats';
+import { sortProjects } from '../../lib/projects';
 
-const projects = await getCollection('projects');
-projects.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const projects = sortProjects(await getCollection('projects'));
 
 function formatDateRange(start: Date, end?: Date): string {
   const startYear = start.getFullYear().toString();
@@ -25,6 +25,7 @@ function formatDateRange(start: Date, end?: Date): string {
           <span class="permissions">{project.data.permissions}</span>
           {' '}
           <span class="owner">slk</span>
+          {project.data.active && <span class="working-on" title="currently working on this"><span class="working-dot" aria-hidden="true">●</span> working on</span>}
         </div>
         <div class="project-body">
           <div class="project-header">
@@ -91,6 +92,32 @@ function formatDateRange(start: Date, end?: Date): string {
 
   .owner {
     color: var(--green);
+  }
+
+  /* "Currently working on" badge, right-aligned in the card's titlebar. */
+  .project-titlebar {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5ch;
+  }
+
+  .working-on {
+    margin-left: auto;
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  .working-dot {
+    display: inline-block;
+    animation: working-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes working-pulse {
+    50% { opacity: 0.35; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .working-dot { animation: none; }
   }
 
   .project-body {

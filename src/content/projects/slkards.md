@@ -6,6 +6,7 @@ status: "Beta"
 url: "https://slkards.wiki"
 description: "Discord-based trading card game, featuring trades, battles, marketplaces, alliances and much, much more."
 permissions: "drwx------"
+active: true
 ---
 
 SLKARDS is a trading card game powered by a Discord bot. Players collect digital cards called **kards**, then trade, battle, sell, and evolve them within a Discord server. The ultimate goal is to build up a collection, prestige series, climb competitive ladders, and create an entirely custom 25-kard series of your own.

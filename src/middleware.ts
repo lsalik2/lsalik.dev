@@ -1,6 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
 import { getCollection } from 'astro:content';
-import { NAV_LINKS } from './lib/nav';
 import {
   renderHome,
   renderBlogIndex,
@@ -14,17 +13,21 @@ import {
   renderMan,
   renderSsh,
   renderScreensaverNote,
+  renderNotFound,
+  renderFortune,
 } from './curl/render';
+import { pickFortune } from './data/fortunes';
+import { parseCols } from './lib/terminal-width';
 import { readingTime } from './lib/reading-time';
 import { CONTACT_SECTIONS } from './data/contact';
 import { RESUME } from './data/resume';
 import { USES } from './data/uses';
 import { MAN } from './data/man';
-import { red, stripDangerousEscapes } from './curl/ansi';
-import { box } from './curl/box';
+import { stripDangerousEscapes } from './curl/ansi';
 import { BASE_SECURITY_HEADERS, buildCsp, inlineScriptHashes } from './lib/security-headers';
 import statsMap from './data/github-stats.json';
 import { statsForRepo, formatStatsText, type StatsMap } from './lib/github-stats';
+import { sortProjects } from './lib/projects';
 
 // Matches terminal/CLI HTTP clients by their product token at the start of the
 // User-Agent string. Anchoring to ^ prevents a crafted UA like
@@ -104,19 +107,8 @@ function sanitizePathnameForTerminal(pathname: string): string {
   return stripped.length > 120 ? stripped.slice(0, 117) + '...' : stripped;
 }
 
-function notFoundResponse(pathname: string): Response {
-  const safePath = sanitizePathnameForTerminal(pathname);
-  const navLines = NAV_LINKS.map(link => `  curl -L lsalik.dev${link.href}`);
-  const body = box(
-    [
-      red(`404: ${safePath} — not found`),
-      '',
-      'navigate:',
-      '  curl -L lsalik.dev',
-      ...navLines,
-    ],
-    { title: '404' },
-  );
+function notFoundResponse(pathname: string, cols?: number): Response {
+  const body = renderNotFound(sanitizePathnameForTerminal(pathname), cols);
   return withHeaders(
     new Response('\n' + body + '\n\n', {
       status: 404,
@@ -128,7 +120,9 @@ function notFoundResponse(pathname: string): Response {
 
 export const onRequest = defineMiddleware(async ({ request }, next) => {
   const ua = request.headers.get('user-agent');
-  const { pathname } = new URL(request.url);
+  const { pathname, search } = new URL(request.url);
+  // Terminal width for curl responses (?cols=$COLUMNS); 80 when absent.
+  const cols = parseCols(search);
 
   // Feed / crawler endpoints — served as-is to every client (curl included),
   // since RSS readers and search engines may send non-browser User-Agents
@@ -182,7 +176,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
   }
 
   if (pathname === '/' || pathname === '') {
-    return textResponse(renderHome());
+    return textResponse(renderHome(cols));
   }
 
   if (pathname === '/blog' || pathname === '/blog/') {
@@ -197,7 +191,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         tags: post.data.tags,
         description: stripDangerousEscapes(post.data.description),
       }));
-    return textResponse(renderBlogIndex(posts));
+    return textResponse(renderBlogIndex(posts, cols));
   }
 
   if (pathname === '/rss.xml' || pathname === '/rss' || pathname === '/rss/') {
@@ -212,7 +206,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         tags: post.data.tags,
         description: stripDangerousEscapes(post.data.description),
       }));
-    return textResponse(renderRSS(posts));
+    return textResponse(renderRSS(posts, cols));
   }
 
   const blogMatch = pathname.match(/^\/blog\/([^/]+)\/?$/);
@@ -223,7 +217,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
       .filter(post => !post.data.draft)
       .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
     const idx = published.findIndex(post => post.id === slug);
-    if (idx === -1) return notFoundResponse(pathname);
+    if (idx === -1) return notFoundResponse(pathname, cols);
     const entry = published[idx];
     // Descending sort: lower index = newer. `next` = newer (idx - 1),
     // `prev` = older (idx + 1).
@@ -238,14 +232,13 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         readingMinutes: readingTime(entry.body ?? ''),
         prev: older ? { slug: older.id, title: older.data.title } : undefined,
         next: newer ? { slug: newer.id, title: newer.data.title } : undefined,
-      })
+      }, cols)
     );
   }
 
   if (pathname === '/projects' || pathname === '/projects/') {
     const entries = await getCollection('projects');
-    const projects = entries
-      .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    const projects = sortProjects(entries)
       .map(project => {
         const s = statsForRepo(project.data.repo, statsMap as StatsMap);
         return {
@@ -259,9 +252,10 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
           repo: project.data.repo,
           url: project.data.url,
           stats: s ? formatStatsText(s, new Date()) : undefined,
+          active: project.data.active,
         };
       });
-    return textResponse(renderProjectsIndex(projects));
+    return textResponse(renderProjectsIndex(projects, cols));
   }
 
   const projectMatch = pathname.match(/^\/projects\/([^/]+)\/?$/);
@@ -269,7 +263,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const slug = projectMatch[1];
     const entries = await getCollection('projects');
     const entry = entries.find(p => p.id === slug);
-    if (!entry) return notFoundResponse(pathname);
+    if (!entry) return notFoundResponse(pathname, cols);
     const content = stripDangerousEscapes(entry.body ?? entry.data.description);
     const s = statsForRepo(entry.data.repo, statsMap as StatsMap);
     return textResponse(
@@ -279,35 +273,40 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         stack: entry.data.stack,
         content,
         stats: s ? formatStatsText(s, new Date()) : undefined,
-      })
+        active: entry.data.active,
+      }, cols)
     );
   }
 
   if (pathname === '/contact' || pathname === '/contact/') {
-    return textResponse(renderContact(CONTACT_SECTIONS));
+    return textResponse(renderContact(CONTACT_SECTIONS, cols));
   }
 
   if (pathname === '/uses' || pathname === '/uses/') {
-    return textResponse(renderUses(USES));
+    return textResponse(renderUses(USES, cols));
   }
 
   if (pathname === '/resume' || pathname === '/resume/') {
-    return textResponse(renderResume(RESUME));
+    return textResponse(renderResume(RESUME, cols));
   }
 
   if (pathname === '/man' || pathname === '/man/') {
-    return textResponse(renderMan(MAN));
+    return textResponse(renderMan(MAN, cols));
   }
 
   // Hidden easter egg: terminal clients only (browsers were already sent to
   // next() above, so they get the normal 404).
   if (pathname === '/ssh' || pathname === '/ssh/') {
-    return textResponse(renderSsh());
+    return textResponse(renderSsh(cols));
+  }
+
+  if (pathname === '/fortune' || pathname === '/fortune/') {
+    return textResponse(renderFortune(pickFortune(), cols));
   }
 
   if (pathname === '/screensaver' || pathname === '/screensaver/') {
-    return textResponse(renderScreensaverNote());
+    return textResponse(renderScreensaverNote(cols));
   }
 
-  return notFoundResponse(pathname);
+  return notFoundResponse(pathname, cols);
 });
