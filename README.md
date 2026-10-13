@@ -26,14 +26,15 @@ curl -L lsalik.dev
   - client-side pagination that pages the *filtered* results, with `?page=N` deep links;
   - reading times and copy buttons on code blocks;
   - an RSS feed (`/rss.xml`) and per-post OpenGraph images.
-- **Projects:** pagination, and live GitHub stars plus last-push recency, fetched at build time.
-- **`/uses`** (tools and setup), **`/man`** (a man page for the site itself), **`/contact`**, and a terminal-styled 404.
+- **Projects:** pagination, live GitHub stars plus last-push recency (fetched at build time), and a `● working on` badge for projects marked `active`, which are listed first.
+- **`/uses`** (tools and setup), **`/man`** (a man page for the site itself), **`/contact`**, **`/fortune`** (a random fortune in a speech bubble), and a terminal-styled 404.
 - **A braille CLI spinner** in the prompt (`⠋ lsalik@dev:~/blog$`), pure CSS. It holds still under reduced motion.
 - Client-side navigation via Astro's `ClientRouter`, with the background persisted across pages.
 
 **In the terminal** (`curl -L lsalik.dev/<route>`)
 
-- **Routes:** `/`, `/projects`, `/projects/<slug>`, `/blog`, `/blog/<slug>`, `/rss`, `/uses`, `/contact`, `/resume`, `/man`. Unknown routes get a terminal 404 with navigation hints.
+- **Routes:** `/`, `/projects`, `/projects/<slug>`, `/blog`, `/blog/<slug>`, `/rss`, `/uses`, `/contact`, `/resume`, `/man`, `/fortune`. Unknown routes get a terminal 404 with navigation hints.
+- **Fits your terminal:** add `?cols=$COLUMNS` to any route (`curl -L "lsalik.dev/blog?cols=$COLUMNS"`) to size boxes, headers and columns to your terminal, from 40 to 160 columns (80 by default).
 - **A logo generated per request:** a random, mirrored, identicon-style pixel mark drawn in half-block characters, in random colours. No two curls look the same.
 - **`/ssh`:** a hidden easter egg. It's a fake SSH login whose message of the day introduces the site's maintainers (two cats).
 - **`/screensaver`:** points you to the browser version.
@@ -91,7 +92,7 @@ Blog posts live in `src/content/blog/` and project entries in `src/content/proje
 
 **Blog:** `title`, `date`, `tags`, `description`, `draft` (default `false`)
 
-**Projects:** `title`, `date`, `endDate` (optional), `stack`, `status`, `description`, `permissions` (default `drwxr-xr-x`), `url` (optional), `repo` (optional; GitHub repos get stars and last-push info)
+**Projects:** `title`, `date`, `endDate` (optional), `stack`, `status`, `description`, `permissions` (default `drwxr-xr-x`), `url` (optional), `repo` (optional; GitHub repos get stars and last-push info), `active` (default `false`; shows the `● working on` badge and lists the project first)
 
 ## Build-time integrations
 
