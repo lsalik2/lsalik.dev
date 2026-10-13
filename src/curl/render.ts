@@ -434,3 +434,18 @@ export function renderNotFound(safePath: string, width: number = PAGE_WIDTH): st
     { title: '404', width },
   );
 }
+
+// curl -L lsalik.dev/fortune — `fortune | cowsay`, with a cat. The bubble is
+// sized to the fortune (capped at the terminal width) rather than always
+// spanning the full width, so short lines stay compact.
+export function renderFortune(fortune: string, width: number = PAGE_WIDTH): string {
+  const bubbleWidth = Math.min(width, visibleWidth(fortune) + 4);
+  const bubble = box([bodyWarm(fortune)], { width: Math.max(bubbleWidth, 12) });
+  const cat = [
+    '   \\',
+    '    \\   /\\_/\\',
+    '        ( o.o )',
+    '         > ^ <',
+  ].map(line => dim(line));
+  return [bubble, ...cat].join('\n');
+}

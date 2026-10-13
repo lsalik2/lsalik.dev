@@ -13,6 +13,7 @@ import {
   renderSsh,
   renderScreensaverNote,
   renderNotFound,
+  renderFortune,
   type BlogPostSummary,
   type ProjectSummary,
 } from '../../src/curl/render';
@@ -75,6 +76,7 @@ const VIEWS: Record<string, (w: number) => string> = {
   ssh: w => renderSsh(w),
   screensaver: w => renderScreensaverNote(w),
   notFound: w => renderNotFound('/some/missing/page', w),
+  fortune: w => renderFortune('Premature optimization is the root of all evil. Weekend optimization is a hobby.', w),
 };
 
 describe('width-aware terminal output', () => {

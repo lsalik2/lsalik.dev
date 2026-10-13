@@ -9,6 +9,7 @@ import {
   renderResume,
   renderSsh,
   renderScreensaverNote,
+  renderFortune,
   type ContactSection,
 } from '../../src/curl/render';
 import type { BlogPostSummary, BlogPostFull, ProjectSummary } from '../../src/curl/render';
@@ -295,5 +296,19 @@ describe('active projects ("working on")', () => {
   it('marks an active project on its own page', () => {
     const out = stripAnsi(renderProjectPost({ title: 'Finch', status: 'Alpha', stack: ['Rust'], content: 'x', active: true }));
     expect(out).toContain('● working on');
+  });
+});
+
+describe('renderFortune', () => {
+  it('shows the fortune in a speech bubble with a cat', () => {
+    const out = stripAnsi(renderFortune('Talk is cheap. Show me the diff.'));
+    expect(out).toContain('Talk is cheap. Show me the diff.');
+    expect(out).toContain('┌');
+    expect(out).toContain('( o.o )');
+  });
+
+  it('sizes the bubble to a short fortune instead of the full width', () => {
+    const top = stripAnsi(renderFortune('Measure twice, cut once.', 120)).split('\n').find(l => l.includes('┌'))!;
+    expect([...top].length).toBeLessThan(40);
   });
 });

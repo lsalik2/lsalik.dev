@@ -87,6 +87,7 @@ export const MAN: Man = {
             { term: '/contact', def: 'contact links and channels.' },
             { term: '/resume', def: 'browsers redirect to /resume.pdf; curl receives the terminal resume.' },
             { term: '/man', def: 'this page.' },
+            { term: '/fortune', def: 'a random fortune in a speech bubble, with a cat. Different every time.' },
             { term: '/rss.xml', def: 'RSS 2.0 feed of every published blog post.' },
           ],
         },
