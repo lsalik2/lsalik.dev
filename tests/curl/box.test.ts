@@ -163,3 +163,19 @@ describe('twoCol', () => {
     expect(result).toContain('\n');
   });
 });
+
+describe('box titles', () => {
+  it('truncates a title that would overflow the top border', () => {
+    const out = box(['x'], { title: 'A screensaver, an /ssh easter egg, and the rest of the roadmap', width: 40 });
+    const top = stripAnsi(out.split('\n')[0]);
+    expect([...top].length).toBe(40);
+    expect(top).toContain('…');
+    expect(top.endsWith('┐')).toBe(true);
+  });
+
+  it('leaves titles that fit untouched', () => {
+    const top = stripAnsi(box(['x'], { title: 'motd', width: 40 }).split('\n')[0]);
+    expect(top.startsWith('┌── motd ')).toBe(true);
+    expect([...top].length).toBe(40);
+  });
+});
