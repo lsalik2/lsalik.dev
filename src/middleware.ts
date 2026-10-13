@@ -25,6 +25,7 @@ import { box } from './curl/box';
 import { BASE_SECURITY_HEADERS, buildCsp, inlineScriptHashes } from './lib/security-headers';
 import statsMap from './data/github-stats.json';
 import { statsForRepo, formatStatsText, type StatsMap } from './lib/github-stats';
+import { sortProjects } from './lib/projects';
 
 // Matches terminal/CLI HTTP clients by their product token at the start of the
 // User-Agent string. Anchoring to ^ prevents a crafted UA like
@@ -244,8 +245,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
 
   if (pathname === '/projects' || pathname === '/projects/') {
     const entries = await getCollection('projects');
-    const projects = entries
-      .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+    const projects = sortProjects(entries)
       .map(project => {
         const s = statsForRepo(project.data.repo, statsMap as StatsMap);
         return {
@@ -259,6 +259,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
           repo: project.data.repo,
           url: project.data.url,
           stats: s ? formatStatsText(s, new Date()) : undefined,
+          active: project.data.active,
         };
       });
     return textResponse(renderProjectsIndex(projects));
@@ -279,6 +280,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
         stack: entry.data.stack,
         content,
         stats: s ? formatStatsText(s, new Date()) : undefined,
+        active: entry.data.active,
       })
     );
   }

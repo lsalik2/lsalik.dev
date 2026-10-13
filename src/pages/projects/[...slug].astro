@@ -27,6 +27,7 @@ const repoStats = statsForRepo(project.data.repo, statsMap as StatsMap);
       <div class="meta-row">
         <span class="meta-key">Status</span>
         <span class="meta-value status">{project.data.status}</span>
+        {project.data.active && <span class="meta-value working-on"><span class="working-dot" aria-hidden="true">●</span> working on</span>}
       </div>
       <div class="meta-row">
         <span class="meta-key">Stack</span>
@@ -88,6 +89,23 @@ const repoStats = statsForRepo(project.data.repo, statsMap as StatsMap);
 
   .meta-value.status {
     color: var(--amber);
+  }
+
+  .meta-value.working-on {
+    color: var(--green);
+  }
+
+  .working-dot {
+    display: inline-block;
+    animation: working-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes working-pulse {
+    50% { opacity: 0.35; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .working-dot { animation: none; }
   }
 
   .meta-value.muted {

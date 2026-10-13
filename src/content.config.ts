@@ -24,6 +24,8 @@ const projects = defineCollection({
     repo: z.string().url().optional(),
     description: z.string(),
     permissions: z.string().default('drwxr-xr-x'),
+    // Currently being worked on: badged and listed first on /projects.
+    active: z.boolean().default(false),
   }),
 });
 

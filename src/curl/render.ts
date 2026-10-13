@@ -37,6 +37,7 @@ export interface ProjectPostFull {
   stack: string[];
   content: string;
   stats?: string;
+  active?: boolean;
 }
 
 export interface ProjectSummary {
@@ -50,7 +51,10 @@ export interface ProjectSummary {
   repo?: string;
   url?: string;
   stats?: string;
+  active?: boolean;
 }
+
+const WORKING_ON = '● working on';
 
 export function renderHome(): string {
   const logo = renderLogo();
@@ -132,6 +136,7 @@ export function renderRSS(posts: BlogPostSummary[]): string {
 export function renderProjectPost(project: ProjectPostFull): string {
   const meta = `${dim(project.status)} · ${project.stack.join(' · ')}`;
   const headerLines = [bold(project.title), meta];
+  if (project.active) headerLines.push(accentGreen(WORKING_ON));
   if (project.stats) headerLines.push(dim(project.stats));
   const headerBox = box(headerLines, { title: project.title });
   return [headerBox, '', project.content].join('\n');
@@ -141,9 +146,12 @@ export function renderProjectsIndex(projects: ProjectSummary[]): string {
   const header = sectionHeader('~/projects');
 
   const projectBoxes = projects.map(project => {
+    const status = project.active
+      ? `${accentGreen(WORKING_ON)}  ${amber(project.status)}`
+      : amber(project.status);
     const topLine = twoCol(
       bold(blue(project.title)) + '  ' + dim(project.permissions),
-      amber(project.status),
+      status,
       PAGE_WIDTH - 4,
     );
     const stack = dim(project.stack.join(' · '));
