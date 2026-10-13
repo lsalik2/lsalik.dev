@@ -275,3 +275,25 @@ describe('renderScreensaverNote', () => {
     expect(plain).toContain('https://lsalik.dev/screensaver');
   });
 });
+
+describe('active projects ("working on")', () => {
+  const base: ProjectSummary = {
+    slug: 'finch', title: 'Finch', date: '2026-09-15', stack: ['Rust'], status: 'Alpha',
+    description: 'A media player for the couch.', permissions: 'drwx------',
+  };
+
+  it('marks active projects in the projects index', () => {
+    const out = stripAnsi(renderProjectsIndex([{ ...base, active: true }]));
+    expect(out).toContain('● working on');
+  });
+
+  it('does not mark inactive projects', () => {
+    const out = stripAnsi(renderProjectsIndex([base]));
+    expect(out).not.toContain('working on');
+  });
+
+  it('marks an active project on its own page', () => {
+    const out = stripAnsi(renderProjectPost({ title: 'Finch', status: 'Alpha', stack: ['Rust'], content: 'x', active: true }));
+    expect(out).toContain('● working on');
+  });
+});
