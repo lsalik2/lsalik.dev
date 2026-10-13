@@ -56,57 +56,67 @@ export interface ProjectSummary {
 
 const WORKING_ON = '● working on';
 
-export function renderHome(): string {
+// Lines that already fit are returned untouched (wrap() would drop their
+// leading indentation); only overflowing lines are re-wrapped to `max`.
+function fit(line: string, max: number): string[] {
+  return visibleWidth(line) <= max ? [line] : wrap(line, max).split('\n');
+}
+
+// Below this width the /uses logo stacks above the info instead of beside it.
+const USES_SIDE_BY_SIDE_MIN = 64;
+
+export function renderHome(width: number = PAGE_WIDTH): string {
   const logo = renderLogo();
   const title = bold(titleBright('lsalik.dev'));
   const description = dim('terminal-inspired personal website');
 
-  const headerBox = box(['', ...logo.split('\n'), '', title, description], { title: 'lsalik.dev' });
+  const headerBox = box(['', ...logo.split('\n'), '', title, description], { title: 'lsalik.dev', width });
 
   const navLines = NAV_LINKS.map(link => `  ${cyan('curl -L lsalik.dev' + link.href)}`);
-  const navBox = box([dim('navigate:'), ...navLines], { title: 'nav' });
+  const tip = dim('tip: add ?cols=$COLUMNS to any URL to fit your terminal');
+  const navBox = box([dim('navigate:'), ...navLines, '', tip], { title: 'nav', width });
 
-  const source = dim('source: https://github.com/lsalik2/lsalik.dev');
+  const source = fit(dim('source: https://github.com/lsalik2/lsalik.dev'), width);
 
-  return [headerBox, '', navBox, '', source].join('\n');
+  return [headerBox, '', navBox, '', ...source].join('\n');
 }
 
-export function renderBlogIndex(posts: BlogPostSummary[]): string {
-  const header = sectionHeader('~/blog');
+export function renderBlogIndex(posts: BlogPostSummary[], width: number = PAGE_WIDTH): string {
+  const header = sectionHeader('~/blog', width);
 
   if (posts.length === 0) {
-    return [header, '', box(['No posts yet.'])].join('\n');
+    return [header, '', box(['No posts yet.'], { width })].join('\n');
   }
 
   const postBoxes = posts.map(post => {
-    const topLine = twoCol(bold(post.title), dim(post.date), PAGE_WIDTH - 4);
+    const topLine = twoCol(bold(post.title), dim(post.date), width - 4);
     const tags = dim(`[${post.tags.join(', ')}]`);
     const url = cyan(`curl -L lsalik.dev/blog/${post.slug}`);
-    return box([topLine, post.description, tags, url]);
+    return box([topLine, post.description, tags, url], { width });
   });
 
   return [header, '', ...postBoxes].join('\n');
 }
 
-export function renderBlogPost(post: BlogPostFull): string {
-  const topLine = twoCol(bold(post.title), dim(post.date), PAGE_WIDTH - 4);
+export function renderBlogPost(post: BlogPostFull, width: number = PAGE_WIDTH): string {
+  const topLine = twoCol(bold(post.title), dim(post.date), width - 4);
   const meta = dim(
     `${post.tags.join(', ')} · ${post.readingMinutes} min read`,
   );
-  const headerBox = box([topLine, meta], { title: post.title });
+  const headerBox = box([topLine, meta], { title: post.title, width });
 
   const parts: string[] = [headerBox, '', post.content];
 
   if (post.prev || post.next) {
-    parts.push('', hr());
+    parts.push('', hr(width));
     if (post.prev) {
       parts.push(
-        `${dim('← prev:')} ${post.prev.title}  ${cyan(`curl -L lsalik.dev/blog/${post.prev.slug}`)}`,
+        ...fit(`${dim('← prev:')} ${post.prev.title}  ${cyan(`curl -L lsalik.dev/blog/${post.prev.slug}`)}`, width),
       );
     }
     if (post.next) {
       parts.push(
-        `${dim('→ next:')} ${post.next.title}  ${cyan(`curl -L lsalik.dev/blog/${post.next.slug}`)}`,
+        ...fit(`${dim('→ next:')} ${post.next.title}  ${cyan(`curl -L lsalik.dev/blog/${post.next.slug}`)}`, width),
       );
     }
   }
@@ -114,36 +124,36 @@ export function renderBlogPost(post: BlogPostFull): string {
   return parts.join('\n');
 }
 
-export function renderRSS(posts: BlogPostSummary[]): string {
-  const header = sectionHeader('~/rss');
+export function renderRSS(posts: BlogPostSummary[], width: number = PAGE_WIDTH): string {
+  const header = sectionHeader('~/rss', width);
   const sub = dim('lsalik.dev — blog feed');
 
   if (posts.length === 0) {
-    return [header, sub, '', box(['No posts yet.'])].join('\n');
+    return [header, sub, '', box(['No posts yet.'], { width })].join('\n');
   }
 
   const postBoxes = posts.map(post => {
-    const topLine = twoCol(bold(post.title), dim(post.date), PAGE_WIDTH - 4);
+    const topLine = twoCol(bold(post.title), dim(post.date), width - 4);
     const url = cyan(`curl -L lsalik.dev/blog/${post.slug}`);
-    return box([topLine, post.description, url]);
+    return box([topLine, post.description, url], { width });
   });
 
-  const footer = dim('(xml: curl -L lsalik.dev/rss.xml from a browser UA)');
+  const footer = fit(dim('(xml: curl -L lsalik.dev/rss.xml from a browser UA)'), width);
 
-  return [header, sub, '', ...postBoxes, '', hr(), footer].join('\n');
+  return [header, sub, '', ...postBoxes, '', hr(width), ...footer].join('\n');
 }
 
-export function renderProjectPost(project: ProjectPostFull): string {
+export function renderProjectPost(project: ProjectPostFull, width: number = PAGE_WIDTH): string {
   const meta = `${dim(project.status)} · ${project.stack.join(' · ')}`;
   const headerLines = [bold(project.title), meta];
   if (project.active) headerLines.push(accentGreen(WORKING_ON));
   if (project.stats) headerLines.push(dim(project.stats));
-  const headerBox = box(headerLines, { title: project.title });
+  const headerBox = box(headerLines, { title: project.title, width });
   return [headerBox, '', project.content].join('\n');
 }
 
-export function renderProjectsIndex(projects: ProjectSummary[]): string {
-  const header = sectionHeader('~/projects');
+export function renderProjectsIndex(projects: ProjectSummary[], width: number = PAGE_WIDTH): string {
+  const header = sectionHeader('~/projects', width);
 
   const projectBoxes = projects.map(project => {
     const status = project.active
@@ -152,7 +162,7 @@ export function renderProjectsIndex(projects: ProjectSummary[]): string {
     const topLine = twoCol(
       bold(blue(project.title)) + '  ' + dim(project.permissions),
       status,
-      PAGE_WIDTH - 4,
+      width - 4,
     );
     const stack = dim(project.stack.join(' · '));
     const repoLink = project.repo ? `${cyan('→')} ${project.repo}` : dim('→ closed source');
@@ -160,33 +170,33 @@ export function renderProjectsIndex(projects: ProjectSummary[]): string {
     const lines = [topLine, project.description, stack];
     if (project.stats) lines.push(dim(project.stats));
     lines.push(repoLink, url);
-    return box(lines);
+    return box(lines, { width });
   });
 
   return [header, '', ...projectBoxes].join('\n');
 }
 
-export function renderContact(sections: readonly ContactSection[]): string {
-  const header = sectionHeader('~/contact');
+export function renderContact(sections: readonly ContactSection[], width: number = PAGE_WIDTH): string {
+  const header = sectionHeader('~/contact', width);
 
   const sectionBoxes = sections.map(section => {
     const links = section.links.map(link => `  ${link.label}  ${cyan(link.url)}`);
-    return box(links, { title: section.heading });
+    return box(links, { title: section.heading, width });
   });
 
   return [header, '', ...sectionBoxes].join('\n');
 }
 
-export function renderResume(resume: Resume): string {
-  const inner = PAGE_WIDTH - 4;
+export function renderResume(resume: Resume, width: number = PAGE_WIDTH): string {
+  const inner = width - 4;
 
   const nameLines = [
     bold(titleBright(resume.name)),
     bodyWarm(`${resume.location}  |  ${resume.links.map(l => cyan(l.url)).join('  |  ')}`),
   ];
-  const headerBox = box(nameLines, { title: '~/resume' });
+  const headerBox = box(nameLines, { title: '~/resume', width });
 
-  const expHeader = sectionHeader('WORK EXPERIENCE');
+  const expHeader = sectionHeader('WORK EXPERIENCE', width);
   const expBoxes = resume.experience.map(job => {
     const topLine = twoCol(
       bold(job.title) + ', ' + accentMagenta(job.company) + dim(' — ' + job.location),
@@ -194,23 +204,23 @@ export function renderResume(resume: Resume): string {
       inner,
     );
     const bullets = job.bullets.map(b => `  ${accentGreen('●')} ${bodyWarm(b)}`);
-    return box([topLine, '', ...bullets]);
+    return box([topLine, '', ...bullets], { width });
   });
 
-  const eduHeader = sectionHeader('EDUCATION');
+  const eduHeader = sectionHeader('EDUCATION', width);
   const eduBoxes = resume.education.map(edu => {
     const topLine = bold(edu.degree) + ', ' + accentMagenta(edu.school);
     const bullets = edu.bullets.map(b => `  ${accentGreen('●')} ${bodyWarm(b)}`);
-    return box([topLine, '', ...bullets]);
+    return box([topLine, '', ...bullets], { width });
   });
 
-  const skillsHeader = sectionHeader('SKILLS & LANGUAGES');
+  const skillsHeader = sectionHeader('SKILLS & LANGUAGES', width);
   const skillLines = resume.skills.map(cat =>
     `${bold(cat.label + ':')} ${bodyWarm(cat.items.join(', '))}`,
   );
-  const skillsBox = box(skillLines);
+  const skillsBox = box(skillLines, { width });
 
-  const footer = dim(`pdf: curl -LO lsalik.dev/resume.pdf`);
+  const footer = fit(dim(`pdf: curl -LO lsalik.dev/resume.pdf`), width);
 
   return [
     headerBox,
@@ -224,8 +234,8 @@ export function renderResume(resume: Resume): string {
     skillsHeader,
     skillsBox,
     '',
-    hr(),
-    footer,
+    hr(width),
+    ...footer,
   ].join('\n');
 }
 
@@ -256,7 +266,7 @@ function renderManBlock(block: ManBlock, indent: number, contentWidth: number): 
       return wrapped.map(line => pad + bodyWarm(line));
     }
     case 'lines':
-      return block.lines.map(line => pad + line);
+      return block.lines.flatMap(line => fit(line, contentWidth).map(l => pad + l));
     case 'definitions': {
       // Tagged paragraph style:
       //   term
@@ -275,8 +285,7 @@ function renderManBlock(block: ManBlock, indent: number, contentWidth: number): 
   }
 }
 
-export function renderMan(man: Man): string {
-  const width = PAGE_WIDTH;
+export function renderMan(man: Man, width: number = PAGE_WIDTH): string {
   const tag = `${man.name.toUpperCase()}(${man.section})`;
   const header = manBar(tag, man.category, tag, width);
   const footer = manBar(man.version, man.date, tag, width);
@@ -297,7 +306,7 @@ export function renderMan(man: Man): string {
   return out.join('\n');
 }
 
-export function renderUses(uses: Uses): string {
+export function renderUses(uses: Uses, width: number = PAGE_WIDTH): string {
   const logoLines = renderLogo().split('\n');
 
   // Build right-side info lines. Each category produces a dim heading
@@ -322,6 +331,11 @@ export function renderUses(uses: Uses): string {
   );
   const blankLogo = ' '.repeat(logoVisibleWidth);
 
+  // Narrow terminals: logo on top, info underneath, so neither gets squeezed.
+  if (width < USES_SIDE_BY_SIDE_MIN) {
+    return box(['', ...logoLines, '', ...infoLines], { title: '~/uses', width });
+  }
+
   const rows: string[] = [''];
   for (let r = 0; r < logoLines.length; r++) {
     rows.push(logoLines[r] + gap + (infoLines[r] ?? ''));
@@ -331,7 +345,7 @@ export function renderUses(uses: Uses): string {
     rows.push(blankLogo + gap + infoLines[r]);
   }
 
-  return box(rows, { title: '~/uses' });
+  return box(rows, { title: '~/uses', width });
 }
 
 // curl -L lsalik.dev/ssh — a hidden easter egg. Mimics an SSH login session
@@ -340,7 +354,7 @@ export function renderUses(uses: Uses): string {
 //
 // The cat art is framed with `box(..., { wrap: false })` so its leading
 // indentation survives (the default soft-wrap path strips it).
-export function renderSsh(): string {
+export function renderSsh(width: number = PAGE_WIDTH): string {
   // Finch — oversized tuxedo Maine Coon. Drawn larger, warm-toned.
   const finch = [
     '      /\\___/\\',
@@ -364,33 +378,36 @@ export function renderSsh(): string {
     amber("Warning: Permanently added 'lsalik.dev' to the list of known hosts."),
   ];
 
+  // The box frames lines verbatim (wrap: false) to keep the art's indentation,
+  // so the text lines are fitted to the inner width here instead.
+  const inner = width - 4;
   const motd = box(
     [
-      `${bold(titleBright('Welcome to lsalik.dev'))}${dim('  —  last login: just now')}`,
+      ...fit(`${bold(titleBright('Welcome to lsalik.dev'))}${dim('  —  last login: just now')}`, inner),
       '',
       ...finch.map(line => bodyWarm(line)),
       '',
       ...raven.map(line => dim(line)),
       '',
       dim('the maintainers:'),
-      `  ${bold(cyan('finch'))}  ·  oversized tuxedo maine coon`,
-      `  ${bold(cyan('raven'))}  ·  small black cat, runs ops`,
+      ...fit(`  ${bold(cyan('finch'))}  ·  oversized tuxedo maine coon`, inner),
+      ...fit(`  ${bold(cyan('raven'))}  ·  small black cat, runs ops`, inner),
     ],
-    { title: 'motd', wrap: false },
+    { title: 'motd', wrap: false, width },
   );
 
   const footer = [
     '',
-    `${dim('hint: the rest of the site →')} ${cyan('curl -L lsalik.dev')}`,
-    dim('Connection to lsalik.dev closed.'),
+    ...fit(`${dim('hint: the rest of the site →')} ${cyan('curl -L lsalik.dev')}`, width),
+    ...fit(dim('Connection to lsalik.dev closed.'), width),
   ];
 
-  return [...banner, '', motd, ...footer].join('\n');
+  return [...banner.flatMap(line => fit(line, width)), '', motd, ...footer].join('\n');
 }
 
 // curl -L lsalik.dev/screensaver — the screensaver is browser-only; say so
 // instead of serving the generic 404.
-export function renderScreensaverNote(): string {
+export function renderScreensaverNote(width: number = PAGE_WIDTH): string {
   return box(
     [
       dim('the screensaver is a browser thing — it runs the site background full-screen'),
@@ -398,6 +415,22 @@ export function renderScreensaverNote(): string {
       '',
       `${dim('open')} ${cyan('https://lsalik.dev/screensaver')}`,
     ],
-    { title: 'screensaver' },
+    { title: 'screensaver', width },
+  );
+}
+
+// The terminal 404: what was asked for, and where to go instead.
+// `safePath` must already be sanitized for the terminal by the caller.
+export function renderNotFound(safePath: string, width: number = PAGE_WIDTH): string {
+  const navLines = NAV_LINKS.map(link => `  curl -L lsalik.dev${link.href}`);
+  return box(
+    [
+      red(`404: ${safePath} — not found`),
+      '',
+      'navigate:',
+      '  curl -L lsalik.dev',
+      ...navLines,
+    ],
+    { title: '404', width },
   );
 }

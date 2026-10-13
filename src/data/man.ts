@@ -103,7 +103,12 @@ export const MAN: Man = {
             'curl -L lsalik.dev/uses         # neofetch-style /uses page',
             'curl -LO lsalik.dev/resume.pdf  # download the resume',
             'curl -L lsalik.dev/man          # render this manual page',
+            'curl -L "lsalik.dev/blog?cols=$COLUMNS"  # fit output to your terminal',
           ],
+        },
+        {
+          type: 'prose',
+          text: 'Every terminal route accepts ?cols=N (40 to 160, default 80) to size boxes, headers and columns to your terminal. Pass $COLUMNS from your shell, quoted, so the ? survives.',
         },
       ],
     },
