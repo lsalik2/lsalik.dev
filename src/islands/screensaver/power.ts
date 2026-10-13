@@ -106,7 +106,8 @@ export function isStandalone(): boolean {
     (navigator as Navigator & { standalone?: boolean }).standalone === true;
 }
 
-interface WakeLockSentinelLike {
+interface WakeLockSentinelLike extends EventTarget {
+  readonly released: boolean;
   release(): Promise<void>;
 }
 
@@ -117,13 +118,26 @@ export function keepScreenAwake(): () => void {
   }).wakeLock;
   if (!wl) return () => {};
   let sentinel: WakeLockSentinelLike | null = null;
+  let pending = false;
 
+  // One request at a time, and none while a lock is still held: rapid
+  // visibility changes used to stack requests and leak sentinels. The browser
+  // releases the lock when the tab is hidden; the 'release' event clears it so
+  // the next visible state acquires a fresh one.
   async function acquire(): Promise<void> {
-    if (document.visibilityState !== 'visible') return;
+    if (document.visibilityState !== 'visible' || pending) return;
+    if (sentinel && !sentinel.released) return;
+    pending = true;
     try {
-      sentinel = await wl!.request('screen');
+      const s = await wl!.request('screen');
+      s.addEventListener('release', () => {
+        if (sentinel === s) sentinel = null;
+      });
+      sentinel = s;
     } catch {
       sentinel = null;
+    } finally {
+      pending = false;
     }
   }
 

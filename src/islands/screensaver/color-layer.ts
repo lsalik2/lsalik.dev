@@ -5,6 +5,7 @@
 
 import type { ScreensaverSettings } from '../../lib/screensaver-settings';
 import { hueAngle, shiftHue, gradientAngle, rainbowOffset } from '../../lib/color-anim';
+import { advanceTime } from '../ascii-bg';
 
 export interface ColorController {
   apply(s: ScreensaverSettings): void;
@@ -24,16 +25,23 @@ export function createColorController(
 ): ColorController {
   let raf: number | null = null;
   let settings: ScreensaverSettings | null = null;
-  const start = performance.now();
+  // Animation time advances by clamped frame steps (like the background
+  // engine), so a hidden or stalled tab resumes smoothly instead of jumping.
+  let elapsed = 0;
+  let last: number | null = null;
 
   function stop(): void {
     if (raf !== null) cancelAnimationFrame(raf);
     raf = null;
+    last = null;
   }
 
   function tick(now: number): void {
     if (!settings) return;
-    const t = reduceMotion ? 0 : (now - start) / 1000;
+    const dt = last === null ? 0 : (now - last) / 1000;
+    last = now;
+    elapsed = advanceTime(elapsed, dt, 1);
+    const t = reduceMotion ? 0 : elapsed;
     const period = settings.colorAnimSeconds;
     if (settings.colorAnim === 'hue') {
       wrapper.style.setProperty('--ss-hue', `${hueAngle(t, period)}deg`);
