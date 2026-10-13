@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { FORTUNES, pickFortune } from '../../src/data/fortunes';
 
 describe('FORTUNES', () => {
-  it('has the 19 approved lines, no duplicates, no empties', () => {
-    expect(FORTUNES).toHaveLength(19);
+  it('has the 43 approved lines, no duplicates, no empties', () => {
+    expect(FORTUNES).toHaveLength(43);
     expect(new Set(FORTUNES).size).toBe(FORTUNES.length);
     for (const f of FORTUNES) expect(f.trim().length).toBeGreaterThan(0);
   });
