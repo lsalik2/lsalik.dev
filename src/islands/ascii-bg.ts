@@ -473,18 +473,16 @@ export function createAsciiEngine(container: HTMLElement, initial: EngineOptions
   return {
     container,
     update(partial) {
-      const prevReduce = opts.reduceMotion;
+      const prev = opts;
       opts = { ...opts, ...partial };
-      if (
-        partial.fontSize !== undefined ||
-        partial.lineHeight !== undefined ||
-        partial.layerColors !== undefined
-      ) {
-        styleLayers();
-        measure();
-      }
+      // Callers pass the full size on every settings change and resize; only
+      // touch the DOM (and run the width probe) when something really changed.
+      const sizeChanged = opts.fontSize !== prev.fontSize || opts.lineHeight !== prev.lineHeight;
+      const colorsChanged = opts.layerColors !== prev.layerColors;
+      if (sizeChanged || colorsChanged) styleLayers();
+      if (sizeChanged) measure();
       if (partial.interactive !== undefined) setInteractive(opts.interactive);
-      if (opts.reduceMotion !== prevReduce) startLoop();
+      if (opts.reduceMotion !== prev.reduceMotion) startLoop();
       else if (opts.reduceMotion) draw();
     },
     destroy() {
