@@ -71,7 +71,11 @@ function buildTop(width: number, title?: string): string {
     return borderDim(TL + H.repeat(width - 2) + TR);
   }
   // ┌─ title ──...──┐
-  const label = ` ${title} `;
+  // Titles longer than the border can hold are cut with an ellipsis so the
+  // frame never overflows (2 corners + 2 leading dashes + 2 padding spaces).
+  const maxTitle = width - 6;
+  const shown = [...title].length > maxTitle ? [...title].slice(0, Math.max(0, maxTitle - 1)).join('') + '…' : title;
+  const label = ` ${shown} `;
   const labelWidth = visibleWidth(label);
   const remaining = width - 2 - 2 - labelWidth; // 2 corners + 2 leading dashes
   const leading = H.repeat(2);
