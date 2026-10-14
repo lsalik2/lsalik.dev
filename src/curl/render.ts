@@ -1,6 +1,7 @@
 import { bold, dim, green, blue, amber, cyan, red, accentGreen, accentMagenta, bodyWarm, titleBright, borderDim, visibleWidth } from './ansi';
 import { renderLogo } from './logo';
-import { FINCH, RAVEN, FORTUNE_CAT } from './cats';
+import { FINCH, FINCH_MASK, RAVEN, RAVEN_MASK, FORTUNE_CAT, paintCat } from './cats';
+import { maintainerLines, type MaintainerLines } from '../data/maintainers';
 import { NAV_LINKS } from '../lib/nav';
 import { box, hr, sectionHeader, twoCol, wrap, PAGE_WIDTH } from './box';
 import type { ContactSection } from '../data/contact';
@@ -349,17 +350,29 @@ export function renderUses(uses: Uses, width: number = PAGE_WIDTH): string {
   return box(rows, { title: '~/uses', width });
 }
 
+// The /ssh cats as in their photo: Raven sits beside Finch, bottoms aligned.
+function sideBySide(): string[] {
+  const finch = paintCat(FINCH, FINCH_MASK);
+  const raven = paintCat(RAVEN, RAVEN_MASK);
+  const finchWidth = Math.max(...FINCH.map(row => row.length));
+  const offset = FINCH.length - RAVEN.length;
+  return finch.map((row, i) => {
+    const beside = i >= offset ? ' '.repeat(finchWidth - FINCH[i].length + 5) + raven[i - offset] : '';
+    return '   ' + row + beside;
+  });
+}
+
 // curl -L lsalik.dev/ssh — a hidden easter egg. Mimics an SSH login session
 // whose message-of-the-day introduces the site's two "maintainers", Finch and
 // Raven. Terminal-clients only; browsers hitting /ssh get the normal 404.
 //
 // The cat art is framed with `box(..., { wrap: false })` so its leading
 // indentation survives (the default soft-wrap path strips it).
-export function renderSsh(width: number = PAGE_WIDTH): string {
+export function renderSsh(width: number = PAGE_WIDTH, maintainers: MaintainerLines = maintainerLines()): string {
   const banner = [
     `${green('$')} ssh guest@lsalik.dev`,
     dim("The authenticity of host 'lsalik.dev (104.21.0.7)' can't be established."),
-    dim('ED25519 key fingerprint is SHA256:9faSn0w+ba11sm30wmix...purr='),
+    dim('ED25519 key fingerprint is SHA256:9faSn0w+ba11sm30wmix...bl3p'),
     amber("Warning: Permanently added 'lsalik.dev' to the list of known hosts."),
   ];
 
@@ -370,14 +383,11 @@ export function renderSsh(width: number = PAGE_WIDTH): string {
     [
       ...fit(`${bold(titleBright('Welcome to lsalik.dev'))}${dim('  —  last login: just now')}`, inner),
       '',
-      // Finch warm-toned, Raven dim.
-      ...FINCH.map(line => bodyWarm('   ' + line)),
-      '',
-      ...RAVEN.map(line => dim('  ' + line)),
+      ...sideBySide(),
       '',
       dim('the maintainers:'),
-      ...fit(`  ${bold(cyan('finch'))}  ·  oversized tuxedo maine coon`, inner),
-      ...fit(`  ${bold(cyan('raven'))}  ·  small black cat, runs ops`, inner),
+      ...fit(`  ${bold(cyan('finch'))}  ·  ${maintainers.finch}`, inner),
+      ...fit(`  ${bold(cyan('raven'))}  ·  ${maintainers.raven}`, inner),
     ],
     { title: 'motd', wrap: false, width },
   );

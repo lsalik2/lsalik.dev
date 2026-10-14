@@ -36,7 +36,7 @@ curl -L lsalik.dev
 - **Routes:** `/`, `/projects`, `/projects/<slug>`, `/blog`, `/blog/<slug>`, `/rss`, `/uses`, `/contact`, `/resume`, `/man`, `/fortune`. Unknown routes get a terminal 404 with navigation hints.
 - **Fits your terminal:** add `?cols=$COLUMNS` to any route (`curl -L "lsalik.dev/blog?cols=$COLUMNS"`) to size boxes, headers and columns to your terminal, from 40 to 160 columns (80 by default).
 - **A logo generated per request:** a random, mirrored, identicon-style pixel mark drawn in half-block characters, in random colours. No two curls look the same.
-- **`/ssh`:** a hidden easter egg. It's a fake SSH login whose message of the day introduces the site's maintainers (two cats).
+- **`/ssh`:** a hidden easter egg. It's a fake SSH login whose message of the day introduces the site's maintainers (two cats, drawn in colour), with new descriptions every day.
 - **`/screensaver`:** points you to the browser version.
 - **`/resume`:** in the terminal it renders as text; in a browser it redirects to the PDF.
 
