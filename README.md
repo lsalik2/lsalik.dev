@@ -17,7 +17,7 @@ curl -L lsalik.dev
   - a settings panel for pattern (the six background patterns plus two screensaver-only ones, matrix rain and a warp starfield), speed, cell size, brightness, colours (any palette or custom) and colour animation (hue, gradient, rainbow);
   - a clock (big block digits, minimal, or date);
   - settings saved per browser and shareable via **copy url**;
-  - a panel and cursor that auto-hide;
+  - a panel and cursor that auto-hide, plus a **[hide]** button (moving the mouse won't bring the panel back; a click or key does). On phones, tapping the screen toggles the panel;
   - a screen wake lock, OLED burn-in drift for the clock, and fullscreen. On iPhone, where Safari can't fullscreen a page, it offers an add-to-home-screen hint instead.
 - **8 colour palettes:** dark terminal, amber CRT, green phosphor, synthwave, mocha, solarized, gruvbox, nord. The choice is remembered and applied before first paint.
 - **Vim-style keyboard shortcuts:** `g h` / `g p` / `g b` / `g u` / `g c` jump to home, projects, blog, uses and contact, and `g s` opens the screensaver. `?` toggles the help overlay.
@@ -27,7 +27,7 @@ curl -L lsalik.dev
   - reading times and copy buttons on code blocks;
   - an RSS feed (`/rss.xml`) and per-post OpenGraph images.
 - **Projects:** pagination, live GitHub stars plus last-push recency (fetched at build time), and a `● working on` badge for projects marked `active`, which are listed first.
-- **`/uses`** (tools and setup), **`/man`** (a man page for the site itself), **`/contact`**, **`/fortune`** (a random fortune in a speech bubble), and a terminal-styled 404.
+- **`/uses`** (tools and setup), **`/man`** (a man page for the site itself), **`/contact`**, **`/fortune`** (a random fortune in a speech bubble, also dealt fresh in a `$ fortune` frame on the home page), and a terminal-styled 404.
 - **A braille CLI spinner** in the prompt (`⠋ lsalik@dev:~/blog$`), pure CSS. It holds still under reduced motion.
 - Client-side navigation via Astro's `ClientRouter`, with the background persisted across pages.
 
@@ -36,6 +36,7 @@ curl -L lsalik.dev
 - **Routes:** `/`, `/projects`, `/projects/<slug>`, `/blog`, `/blog/<slug>`, `/rss`, `/uses`, `/contact`, `/resume`, `/man`, `/fortune`. Unknown routes get a terminal 404 with navigation hints.
 - **Fits your terminal:** add `?cols=$COLUMNS` to any route (`curl -L "lsalik.dev/blog?cols=$COLUMNS"`) to size boxes, headers and columns to your terminal, from 40 to 160 columns (80 by default).
 - **A logo generated per request:** a random, mirrored, identicon-style pixel mark drawn in half-block characters, in random colours. No two curls look the same.
+- **A fortune to finish:** `curl lsalik.dev` ends with a random fortune in a speech bubble, with the cat.
 - **`/ssh`:** a hidden easter egg. It's a fake SSH login whose message of the day introduces the site's maintainers (two cats, drawn in colour), with new descriptions every day.
 - **`/screensaver`:** points you to the browser version.
 - **`/resume`:** in the terminal it renders as text; in a browser it redirects to the PDF.
