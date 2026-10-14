@@ -3,9 +3,8 @@ title: "SLKBOT (currently Chroma)"
 date: 2025-04-01
 stack: [Python, discord.py]
 status: "Alpha"
-repo: "https://github.com/lsalik2/Chroma"
 description: "The all-purpose, general utility bot to kill server bot bloat."
-permissions: "drwxr-xr-x"
+permissions: "drwx------"
 ---
 
 SLKBOT takes the complete opposite appoach of most bots in Discord. Generally, most bots try to cram as many features as possible, but inevitably leave some gaps that end up needing to be filled by other bots, which also cram in many features. This ends up in a **"bot bloat"**, where multiple bots are added with overlapping functionalities. This can confuse end-users on which bot does what.
