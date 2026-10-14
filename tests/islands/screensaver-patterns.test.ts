@@ -5,6 +5,7 @@ import {
   drizzle,
   stars,
   dust,
+  starOnRay,
   matrix,
   starfield,
   AMBIENT_MIN,
@@ -71,9 +72,10 @@ describe.each(FIELDS)('%s', (_, field) => {
 });
 
 describe.each([
-  ['matrix', matrix, rain, drizzle],
-  ['starfield', starfield, stars, dust],
-] as [string, Field, Field, Field][])('%s, composed', (_, field, feature, texture) => {
+  // [name, pattern, feature, texture, does the muted layer also carry the feature?]
+  ['matrix', matrix, rain, drizzle, true],
+  ['starfield', starfield, stars, dust, false],
+] as [string, Field, Field, Field, boolean][])('%s, composed', (_, field, feature, texture, mutedFeature) => {
   it('never leaves a cell blank', () => {
     for (const t of [0, 3.3, 61]) {
       for (let y = 0; y < ctx.rows; y++) {
@@ -85,13 +87,14 @@ describe.each([
     }
   });
 
-  it('draws the texture only on the muted layer, under the feature', () => {
+  it('draws the texture only on the muted layer', () => {
     for (let x = 0; x < ctx.cols; x += 5) {
       for (let y = 0; y < ctx.rows; y += 3) {
         for (const t of [1.7, 9]) {
           for (const phase of LAYER_PHASES) {
             const f = feature(x, y, t, phase, ctx);
-            const expected = phase === MUTED ? Math.max(f, texture(x, y, t, phase, ctx)) : f;
+            const tex = texture(x, y, t, phase, ctx);
+            const expected = phase !== MUTED ? f : mutedFeature ? Math.max(f, tex) : tex;
             expect(field(x, y, t, phase, ctx)).toBe(expected);
           }
         }
@@ -188,27 +191,16 @@ describe('rain', () => {
 });
 
 describe('stars', () => {
+  const BRIGHT = [LAYER_PHASES[0], LAYER_PHASES[2]]; // the layers starfield draws stars on
   const cx = ctx.cols / 2;
   const cy = ctx.rows / 2;
-  const AXES = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-  // Distance (vertical counts double) of the outermost lit cell along an axis from the centre.
-  const outermost = (ax: number, ay: number, t: number, phase: number) => {
-    let best = -1;
-    for (let k = 2; ; k++) {
-      const x = cx + ax * k;
-      const y = cy + ay * k;
-      if (x < 0 || x >= ctx.cols || y < 0 || y >= ctx.rows) break;
-      if (stars(x, y, t, phase, ctx) > 0) best = Math.max(best, Math.hypot(x - cx, (y - cy) * 2));
-    }
-    return best;
-  };
-  // Share of cells (all layers) with a star, overall and within the core.
+  // Share of cells with a star (bright layers), overall and within the core.
   const coverage = () => {
     let all = 0, core = 0, n = 0, coreN = 0;
     for (const t of [1, 4.2, 9.9, 30]) {
       for (let y = 0; y < ctx.rows; y++) {
         for (let x = 0; x < ctx.cols; x++) {
-          const lit = LAYER_PHASES.some(p => stars(x, y, t, p, ctx) > 0);
+          const lit = BRIGHT.some(p => stars(x, y, t, p, ctx) > 0);
           n++;
           if (lit) all++;
           if (Math.hypot(x - cx, (y - cy) * 2) < 15) {
@@ -221,28 +213,81 @@ describe('stars', () => {
     return { all: all / n, core: core / coreN };
   };
 
-  it('moves stars outward, only jumping back when a new star starts near the centre', () => {
-    let increased = 0;
-    for (const phase of LAYER_PHASES) {
-      for (const [ax, ay] of AXES) {
-        let prev = outermost(ax, ay, 4.2, phase);
-        for (let k = 1; k <= 40; k++) {
-          const r = outermost(ax, ay, 4.2 + k * 0.05, phase);
-          if (prev > 0 && r > 0) {
-            if (r < prev) expect(r).toBeLessThanOrEqual(6);
-            if (r > prev) increased++;
-          }
-          prev = r;
+  it('moves every star outward, never inward', () => {
+    // The outer ends of the lit stretches along one ray, finely sampled.
+    const heads = (t: number, speed: number, offset: number) => {
+      const out: number[] = [];
+      let prev = false;
+      for (let i = 20; i <= 3000; i++) {
+        const r = i / 10;
+        const lit = starOnRay(r, t, speed, offset, 1) > 0;
+        if (prev && !lit) out.push(r);
+        prev = lit;
+      }
+      return out;
+    };
+    let checked = 0, moved = 0;
+    for (const [speed, offset] of [[0.15, 0.1], [0.25, 0.6], [0.3, 0.33]]) {
+      for (const t of [1, 3.7, 8.2]) {
+        const now = heads(t, speed, offset);
+        const next = heads(t + 0.02, speed, offset);
+        for (const h of now) {
+          if (h >= 250) continue;
+          checked++;
+          expect(next.some(h2 => h2 >= h && h2 < h + 40)).toBe(true);
+          if (next.some(h2 => h2 > h && h2 < h + 40)) moved++;
         }
       }
     }
-    expect(increased).toBeGreaterThan(5);
+    expect(checked).toBeGreaterThanOrEqual(6);
+    expect(moved / checked).toBeGreaterThanOrEqual(0.6);
   });
 
-  it('draws a busy field: about a tenth of the cells', () => {
+  it('draws streaks as continuous lines, not dots', () => {
+    // Away from the core, lit cells (nearest layer) should sit in 8-connected runs of 3 or more.
+    const g = { cols: 160, rows: 50 };
+    let inRuns = 0, far = 0;
+    for (const t of [3.1, 7.3, 12.9, 20.4]) {
+      const lit = new Uint8Array(g.cols * g.rows);
+      for (let y = 0; y < g.rows; y++) {
+        for (let x = 0; x < g.cols; x++) if (stars(x, y, t, LAYER_PHASES[0], g) > 0) lit[y * g.cols + x] = 1;
+      }
+      const seen = new Uint8Array(lit.length);
+      for (let i = 0; i < lit.length; i++) {
+        if (!lit[i] || seen[i]) continue;
+        const run: number[] = [];
+        const stack = [i];
+        seen[i] = 1;
+        while (stack.length) {
+          const j = stack.pop()!;
+          run.push(j);
+          const x = j % g.cols, y = Math.floor(j / g.cols);
+          for (let oy = -1; oy <= 1; oy++) {
+            for (let ox = -1; ox <= 1; ox++) {
+              const X = x + ox, Y = y + oy;
+              if (X < 0 || Y < 0 || X >= g.cols || Y >= g.rows) continue;
+              const k = Y * g.cols + X;
+              if (lit[k] && !seen[k]) { seen[k] = 1; stack.push(k); }
+            }
+          }
+        }
+        for (const j of run) {
+          const x = j % g.cols, y = Math.floor(j / g.cols);
+          if (Math.hypot(x - g.cols / 2, (y - g.rows / 2) * 2) > 30) {
+            far++;
+            if (run.length >= 3) inRuns++;
+          }
+        }
+      }
+    }
+    expect(far).toBeGreaterThan(100);
+    expect(inRuns / far).toBeGreaterThanOrEqual(0.9);
+  });
+
+  it('draws plenty of streaks', () => {
     const { all } = coverage();
-    expect(all).toBeGreaterThan(0.08);
-    expect(all).toBeLessThan(0.25);
+    expect(all).toBeGreaterThan(0.15);
+    expect(all).toBeLessThan(0.4);
   });
 
   it('fills the core', () => {
