@@ -3,9 +3,8 @@ title: "Glyphling"
 date: 2026-06-13
 stack: [Python, Textual]
 status: "Alpha"
-repo: "https://github.com/lsalik2/glyphling"
 description: "A procedurally generated ASCII pet that lives in your terminal and grows from egg to elder."
-permissions: "drwxr-xr-x"
+permissions: "drwx------"
 active: true
 ---
 

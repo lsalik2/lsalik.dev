@@ -66,6 +66,11 @@ export function accentGreen(text: string): string {
   return `\x1b[38;5;120m${text}\x1b[39m`;
 }
 
+// Any 256-color foreground, for art that brings its own palette.
+export function color256(code: number, text: string): string {
+  return `\x1b[38;5;${code}m${text}\x1b[39m`;
+}
+
 // Matches any SGR sequence: ESC [ <params> m, where params is digits
 // optionally separated by semicolons (covers `31m`, `38;5;87m`, `0m`, etc).
 const ANSI_SGR_RE = /\x1b\[[\d;]*m/g;

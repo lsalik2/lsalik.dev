@@ -21,7 +21,10 @@ const art = stripAnsi(renderFortune(fortune, 60));
 </Page>
 
 <style>
+  /* Same stack as the home page curl demo: fonts with box-drawing glyphs, so
+     the bubble's border lines up with the text inside it. */
   .fortune-art {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Cascadia Mono", "DejaVu Sans Mono", "Liberation Mono", monospace;
     margin: 0;
     white-space: pre;
     overflow-x: auto;
