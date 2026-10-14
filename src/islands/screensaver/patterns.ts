@@ -89,6 +89,7 @@ const RAYS = 360;            // angular slots around the centre
 const STAR_RAYS = 0.85;      // share of rays carrying stars, per layer
 const STARS_PER_RAY = 2;     // evenly spaced in depth
 const R0 = 2;                // radius (cells) where a star appears
+const MIN_Z = 0.02;          // nearest depth, so a star's head reaches R0 / MIN_Z = 100 cells
 const STREAK_SECONDS = 0.12; // streak length = radial speed × this
 const GLOW_FLOOR = 0.3;      // so stars near the core show, not just near the edge
 const GLOW_GAIN = 1.0;
@@ -128,17 +129,24 @@ function rayTable(seed: number): RayTable {
   return table;
 }
 
+// Screens bigger than a star's reach (R0 / MIN_Z) scale the radial sizes up,
+// so stars still run off the edges; smaller screens are unchanged.
+function radialScale(cols: number, rows: number): number {
+  const rMax = Math.sqrt((cols / 2) ** 2 + ((rows / 2) * CELL_ASPECT) ** 2);
+  return Math.max(1, rMax / (R0 / MIN_Z));
+}
+
 // Brightness at radius r along a ray whose stars move at `speed` depth cycles
-// per second. Depth z runs from 1 to 0; perspective draws a star at R0 / z,
+// per second. Depth z runs from 1 to 0; perspective draws a star at r0 / z,
 // so it accelerates outward, and its streak (a fading tail behind the head)
 // grows with its radial speed.
-export function starOnRay(r: number, t: number, speed: number, offset: number, depth: number): number {
+export function starOnRay(r: number, t: number, speed: number, offset: number, depth: number, r0: number = R0): number {
   let best = 0;
   for (let k = 0; k < STARS_PER_RAY; k++) {
-    const z = Math.max(1 - ((t * speed + offset + k / STARS_PER_RAY) % 1), 0.02);
-    const behind = R0 / z - r;
+    const z = Math.max(1 - ((t * speed + offset + k / STARS_PER_RAY) % 1), MIN_Z);
+    const behind = r0 / z - r;
     if (behind < -1) continue;
-    const streak = ((R0 * speed) / (z * z)) * STREAK_SECONDS;
+    const streak = ((r0 * speed) / (z * z)) * STREAK_SECONDS;
     if (behind > streak + 1) continue;
     const fade = 1 - Math.max(0, behind) / (streak + 2);
     const v = (GLOW_FLOOR + (1 - z) * GLOW_GAIN) * depth * fade;
@@ -149,22 +157,24 @@ export function starOnRay(r: number, t: number, speed: number, offset: number, d
 
 // The star on one ray as seen from a cell: only cells within half a cell of
 // the ray's centre line, measured in cells on each axis (vertical doubled).
-function starOnLine(ray: number, dx: number, dy: number, r: number, t: number, table: RayTable, depth: number): number {
+function starOnLine(ray: number, dx: number, dy: number, r: number, t: number, table: RayTable, depth: number, r0: number): number {
   if (!table.active[ray]) return 0;
   const sin = RAY_SIN[ray];
   const cos = RAY_COS[ray];
   const s = dx * sin - dy * cos;
   if (Math.abs(s * sin) > 0.5 || Math.abs(s * cos) / CELL_ASPECT > 0.5) return 0;
-  return starOnRay(r, t, table.speed[ray] * depth, table.offset[ray], depth);
+  return starOnRay(r, t, table.speed[ray] * depth, table.offset[ray], depth, r0);
 }
 
-// Given a cell's offset from the centre (vertical doubled), distance and angle.
-function starAt(dx: number, dy: number, r: number, angle: number, t: number, phase: number): number {
-  if (r < R0) return 0;
+// Given a cell's offset from the centre (vertical doubled), distance, angle,
+// and the grid's radialScale.
+function starAt(dx: number, dy: number, r: number, angle: number, t: number, phase: number, scale: number): number {
+  const r0 = R0 * scale;
+  if (r < r0) return 0;
   const table = rayTable(seedOf(phase));
   const depth = depthOf(phase);
   const slot = ((angle + Math.PI) / TAU) * RAYS;
-  if (r < CONTINUOUS_FROM) return starOnLine(Math.floor(slot) % RAYS, dx, dy, r, t, table, depth);
+  if (r < CONTINUOUS_FROM * scale) return starOnLine(Math.floor(slot) % RAYS, dx, dy, r, t, table, depth, r0);
   // Farther out, slots are narrower than a cell, so a streak's cells can fall
   // in the neighbouring slot. Check both rays whose centre lines bracket the
   // cell, or the streak comes out dotted.
@@ -172,7 +182,7 @@ function starAt(dx: number, dy: number, r: number, angle: number, t: number, pha
   let hi = lo + 1;
   if (lo < 0) lo += RAYS;
   if (hi >= RAYS) hi -= RAYS;
-  return Math.max(starOnLine(lo, dx, dy, r, t, table, depth), starOnLine(hi, dx, dy, r, t, table, depth));
+  return Math.max(starOnLine(lo, dx, dy, r, t, table, depth, r0), starOnLine(hi, dx, dy, r, t, table, depth, r0));
 }
 
 // Dust streaming outward along fine rays, like flying through it.
@@ -184,7 +194,7 @@ function dustAt(r: number, angle: number, t: number): number {
 export const stars: Field = (x, y, t, phase, ctx) => {
   const dx = x - ctx.cols / 2;
   const dy = (y - ctx.rows / 2) * CELL_ASPECT;
-  return starAt(dx, dy, Math.sqrt(dx * dx + dy * dy), Math.atan2(dy, dx), t, phase);
+  return starAt(dx, dy, Math.sqrt(dx * dx + dy * dy), Math.atan2(dy, dx), t, phase, radialScale(ctx.cols, ctx.rows));
 };
 
 export const dust: Field = (x, y, t, _phase, ctx) => {
@@ -204,6 +214,7 @@ let memoDx = 0;
 let memoDy = 0;
 let memoR = 0;
 let memoAngle = 0;
+let memoScale = 1;
 
 // Stars on the bright layers, dust on the muted one, so streaks stand out
 // against the texture.
@@ -217,10 +228,11 @@ export const starfield: Field = (x, y, t, phase, ctx) => {
     memoDy = (y - ctx.rows / 2) * CELL_ASPECT;
     memoR = Math.sqrt(memoDx * memoDx + memoDy * memoDy);
     memoAngle = Math.atan2(memoDy, memoDx);
+    memoScale = radialScale(ctx.cols, ctx.rows);
   }
   return phase === MUTED_PHASE
     ? dustAt(memoR, memoAngle, t)
-    : starAt(memoDx, memoDy, memoR, memoAngle, t, phase);
+    : starAt(memoDx, memoDy, memoR, memoAngle, t, phase, memoScale);
 };
 
 export const SCREENSAVER_PRESETS: readonly AnimationPreset[] = [

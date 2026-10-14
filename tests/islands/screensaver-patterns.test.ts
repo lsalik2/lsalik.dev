@@ -284,6 +284,21 @@ describe('stars', () => {
     expect(inRuns / far).toBeGreaterThanOrEqual(0.9);
   });
 
+  it('reaches the edges of big screens (1920×1080 and 2560×1440 grids)', () => {
+    for (const g of [{ cols: 292, rows: 84 }, { cols: 400, rows: 112 }]) {
+      const rMax = Math.hypot(g.cols / 2, (g.rows / 2) * 2);
+      let reach = 0;
+      for (let t = 0; t < 30; t += 0.37) {
+        for (let y = 0; y < g.rows; y += 2) {
+          for (let x = 0; x < g.cols; x += 2) {
+            if (stars(x, y, t, LAYER_PHASES[0], g) > 0) reach = Math.max(reach, Math.hypot(x - g.cols / 2, (y - g.rows / 2) * 2));
+          }
+        }
+      }
+      expect(reach).toBeGreaterThanOrEqual(0.9 * rMax);
+    }
+  });
+
   it('draws plenty of streaks', () => {
     const { all } = coverage();
     expect(all).toBeGreaterThan(0.15);
