@@ -61,7 +61,7 @@ describe('sanitize', () => {
   });
 
   it('drops unknown enum values and non-numeric numbers', () => {
-    const s = sanitize({ pattern: 'starfield', clock: 'sundial', speed: 'fast', colorSource: 'neon' }, D);
+    const s = sanitize({ pattern: 'plasma', clock: 'sundial', speed: 'fast', colorSource: 'neon' }, D);
     expect(s).toEqual(D);
   });
 
@@ -160,10 +160,27 @@ describe('resolveSettings', () => {
 });
 
 describe('stepPattern', () => {
-  it('walks the six patterns in order and wraps', () => {
+  it('walks all eight patterns in order and wraps', () => {
     expect(stepPattern('drift', 1)).toBe('cascade');
-    expect(stepPattern('interference', 1)).toBe('drift');
-    expect(stepPattern('drift', -1)).toBe('interference');
-    expect(PATTERN_NAMES).toHaveLength(6);
+    expect(stepPattern('interference', 1)).toBe('matrix');
+    expect(stepPattern('matrix', 1)).toBe('starfield');
+    expect(stepPattern('starfield', 1)).toBe('drift');
+    expect(stepPattern('drift', -1)).toBe('starfield');
+    expect(PATTERN_NAMES).toHaveLength(8);
+  });
+});
+
+describe('screensaver-only patterns in URLs', () => {
+  it('honours p=matrix and p=starfield', () => {
+    expect(resolveSettings(D, null, '?p=matrix').pattern).toBe('matrix');
+    expect(resolveSettings(D, null, '?p=starfield').pattern).toBe('starfield');
+  });
+
+  it('writes them back out', () => {
+    expect(toSearchParams({ ...D, pattern: 'starfield' }, D).get('p')).toBe('starfield');
+  });
+
+  it('still falls back on an unknown pattern', () => {
+    expect(resolveSettings(D, null, '?p=rain').pattern).toBe(D.pattern);
   });
 });

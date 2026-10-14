@@ -2,7 +2,8 @@
 // plus the colour, clock, panel, and power modules, and keeps them in sync.
 // The page has no ClientRouter, so this runs once per full page load.
 
-import { createAsciiEngine, PRESETS } from '../ascii-bg';
+import { createAsciiEngine } from '../ascii-bg';
+import { SCREENSAVER_PRESETS } from './patterns';
 import {
   defaultSettings,
   resolveSettings,
@@ -41,7 +42,7 @@ function writeStorage(s: ScreensaverSettings): void {
 }
 
 function presetFor(name: PatternName) {
-  return PRESETS.find(p => p.name === name) ?? PRESETS[0];
+  return SCREENSAVER_PRESETS.find(p => p.name === name) ?? SCREENSAVER_PRESETS[0];
 }
 
 function isTypingTarget(t: EventTarget | null): boolean {
