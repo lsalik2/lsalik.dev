@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { hash01, matrix, starfield } from '../../src/islands/screensaver/patterns';
-import { LAYER_PHASES, type Field } from '../../src/islands/ascii-bg';
+import { hash01, matrix, starfield, SCREENSAVER_PRESETS } from '../../src/islands/screensaver/patterns';
+import { LAYER_PHASES, PRESETS, type Field } from '../../src/islands/ascii-bg';
+import { PATTERN_NAMES } from '../../src/lib/screensaver-settings';
 
 const ctx = { cols: 120, rows: 40 };
 const inRange = (v: number) => Number.isFinite(v) && v >= 0 && v <= 1;
@@ -168,5 +169,16 @@ describe('starfield', () => {
         }
       }
     }
+  });
+});
+
+describe('SCREENSAVER_PRESETS', () => {
+  it('has a preset for every pattern name, in picker order', () => {
+    expect(SCREENSAVER_PRESETS.map(p => p.name)).toEqual([...PATTERN_NAMES]);
+  });
+
+  it('adds only the two new patterns to the site six', () => {
+    expect(SCREENSAVER_PRESETS.slice(0, PRESETS.length)).toEqual(PRESETS);
+    expect(PRESETS).toHaveLength(6);
   });
 });
