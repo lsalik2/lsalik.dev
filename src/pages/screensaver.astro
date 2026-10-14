@@ -39,7 +39,10 @@ import { PALETTES } from '../lib/palettes';
   </p>
 
   <aside class="ss-panel" data-ss-panel aria-label="screensaver settings">
-    <p class="ss-title">── screensaver ──</p>
+    <div class="ss-head">
+      <p class="ss-title">── screensaver ──</p>
+      <button type="button" class="ss-hide" data-action="hide" aria-label="hide settings">[hide]</button>
+    </div>
 
     <label>pattern
       <select data-setting="pattern">
@@ -197,7 +200,8 @@ import { PALETTES } from '../lib/palettes';
     transition: opacity 0.4s ease;
     z-index: 2;
   }
-  body.ss-idle .ss-panel { opacity: 0; pointer-events: none; }
+  body.ss-idle .ss-panel,
+  body.ss-dismissed .ss-panel { opacity: 0; pointer-events: none; }
 
   /* Always-reachable fullscreen control, outside the (scrolling) panel. */
   .ss-fs {
@@ -244,6 +248,10 @@ import { PALETTES } from '../lib/palettes';
   }
   .ss-panel input[type="range"] { accent-color: var(--accent); }
   .ss-title { margin: 0; color: var(--accent); }
+  .ss-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+  .ss-hide { font: inherit; color: var(--fg-muted); background: transparent; border: none; padding: 0; cursor: pointer; }
+  .ss-hide:hover,
+  .ss-hide:focus-visible { color: var(--accent-bright); }
   .ss-colors { display: flex; gap: 0.5rem; }
   .ss-colors label { align-items: center; }
   .ss-buttons { display: flex; flex-wrap: wrap; gap: 0.4rem; }

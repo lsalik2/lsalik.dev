@@ -185,6 +185,7 @@ function boot(): void {
     const action = (e.target as HTMLElement).closest<HTMLElement>('[data-action]')?.dataset.action;
     if (action === 'fullscreen') await toggleFullscreen();
     if (action === 'exit') exit();
+    if (action === 'hide') autoHide.hide();
     if (action === 'reset') {
       const prev = settings;
       settings = defaults;
@@ -239,8 +240,7 @@ function boot(): void {
         if (isTypingTarget(e.target)) (e.target as HTMLElement).blur();
         if (autoHide.visible()) {
           // An open panel closes first, pinned or not; Esc again exits.
-          if (panel.dataset.pinned === 'true') autoHide.togglePin();
-          autoHide.hideNow();
+          autoHide.close();
         } else {
           exit();
         }
