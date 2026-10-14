@@ -8,7 +8,7 @@ const { path } = Astro.props;
 const segments = path === '/' ? [] : path.split('/').filter(Boolean);
 ---
 <div class="breadcrumb">
-  <span class="prompt-logo" aria-hidden="true" transition:persist="header-mark"></span>
+  <a href="/screensaver" class="prompt-logo" data-astro-reload aria-label="screensaver" title="screensaver (g s)" transition:persist="header-mark"></a>
   <a href="/" class="prompt-user">lsalik@dev</a><span class="prompt-sep">:</span><span class="prompt-root">~</span>{segments.map((seg, i) => {
     const href = '/' + segments.slice(0, i + 1).join('/');
     const isCurrent = i === segments.length - 1;
@@ -25,17 +25,39 @@ const segments = path === '/' ? [] : path.split('/').filter(Boolean);
 
   /* A braille "working…" spinner, like a long-running CLI command. Pure CSS:
      the frames are stepped through `content`, so no script is needed. Fixed
-     at 1ch so the prompt never shifts between frames. */
+     width so the prompt never shifts between frames. It's also the way into
+     the screensaver (a full page load: that page has no ClientRouter). */
   .prompt-logo {
     display: inline-block;
+    box-sizing: content-box;
     width: 0.7em;
     color: var(--accent);
+    text-decoration: none;
     /* Braille glyphs come from a fallback font and render small next to the
        prompt; scale them up so the spinner reads at a glance. */
     font-size: 1.5em;
     line-height: 1;
     vertical-align: -0.2em;
     user-select: none;
+    /* A tap area of at least 24×24 px; the negative margin cancels the
+       padding so the prompt doesn't move. */
+    padding: 0.2em;
+    margin: -0.2em;
+    border-radius: 3px;
+  }
+
+  .prompt-logo:hover,
+  .prompt-logo:focus-visible {
+    color: var(--accent-bright);
+  }
+
+  .prompt-logo:hover::before,
+  .prompt-logo:focus-visible::before {
+    animation-duration: 0.45s;
+  }
+
+  .prompt-logo:focus-visible {
+    outline: 1px solid var(--accent);
   }
 
   .prompt-logo::before {
