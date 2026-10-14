@@ -5,7 +5,7 @@
 
 import { PALETTES, type PaletteName } from './palettes';
 
-export const PATTERN_NAMES = ['drift', 'cascade', 'pulse', 'ripple', 'vortex', 'interference'] as const;
+export const PATTERN_NAMES = ['drift', 'cascade', 'pulse', 'ripple', 'vortex', 'interference', 'matrix', 'starfield'] as const;
 export const PATTERN_CHOICES = [...PATTERN_NAMES, 'cycle'] as const;
 export const COLOR_ANIMS = ['none', 'hue', 'gradient', 'rainbow'] as const;
 export const CLOCK_STYLES = ['off', 'digital', 'minimal', 'date'] as const;
