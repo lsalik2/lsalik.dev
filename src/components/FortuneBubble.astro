@@ -1,0 +1,43 @@
+---
+// A fortune in its speech bubble with the cat: the same art curl gets, as
+// plain text. Used by /fortune and the homepage's $ fortune frame.
+//
+// A text bubble can't reflow, so with `narrowWidth` it's rendered twice and
+// CSS shows the one that fits (display: none also hides the other copy from
+// screen readers).
+import { renderFortune } from '../curl/render';
+import { stripAnsi } from '../curl/ansi';
+
+interface Props {
+  fortune: string;
+  width: number;        // the bubble's maximum width, in columns
+  narrowWidth?: number; // the same, for screens up to 480px wide
+}
+
+const { fortune, width, narrowWidth } = Astro.props;
+const art = stripAnsi(renderFortune(fortune, width));
+const narrowArt = narrowWidth === undefined ? null : stripAnsi(renderFortune(fortune, narrowWidth));
+---
+<pre class:list={['fortune-art', { 'fortune-wide': narrowArt !== null }]} aria-label={fortune}>{art}</pre>
+{narrowArt !== null && <pre class="fortune-art fortune-narrow" aria-label={fortune}>{narrowArt}</pre>}
+
+<style>
+  /* Same stack as the home page curl demo: fonts with box-drawing glyphs, so
+     the bubble's border lines up with the text inside it. */
+  .fortune-art {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Cascadia Mono", "DejaVu Sans Mono", "Liberation Mono", monospace;
+    margin: 0;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--fg);
+    font-size: 0.95rem;
+    line-height: 1.1;
+  }
+
+  .fortune-narrow { display: none; }
+
+  @media (max-width: 480px) {
+    .fortune-wide { display: none; }
+    .fortune-narrow { display: block; }
+  }
+</style>
