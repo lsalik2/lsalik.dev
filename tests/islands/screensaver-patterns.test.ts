@@ -1,0 +1,172 @@
+import { describe, it, expect } from 'vitest';
+import { hash01, matrix, starfield } from '../../src/islands/screensaver/patterns';
+import { LAYER_PHASES, type Field } from '../../src/islands/ascii-bg';
+
+const ctx = { cols: 120, rows: 40 };
+const inRange = (v: number) => Number.isFinite(v) && v >= 0 && v <= 1;
+
+describe('hash01', () => {
+  it('is deterministic, in [0, 1), and spread out', () => {
+    expect(hash01(3, 7)).toBe(hash01(3, 7));
+    expect(hash01(3, 7)).not.toBe(hash01(7, 3));
+    let sum = 0;
+    for (let i = 0; i < 1000; i++) {
+      const h = hash01(i, 7);
+      expect(h >= 0 && h < 1).toBe(true);
+      sum += h;
+    }
+    expect(Math.abs(sum / 1000 - 0.5)).toBeLessThan(0.05);
+  });
+});
+
+describe.each([['matrix', matrix], ['starfield', starfield]] as [string, Field][])('%s', (_, field) => {
+  it('stays within [0, 1] and is deterministic', () => {
+    for (let x = 0; x < ctx.cols; x += 3) {
+      for (let y = 0; y < ctx.rows; y += 2) {
+        for (const t of [0, 2.5, 61.3]) {
+          for (const phase of LAYER_PHASES) {
+            const v = field(x, y, t, phase, ctx);
+            expect(inRange(v)).toBe(true);
+            expect(field(x, y, t, phase, ctx)).toBe(v);
+          }
+        }
+      }
+    }
+  });
+
+  it('handles odd inputs: negative and fractional coordinates (cursor parallax), long uptime', () => {
+    for (const [x, y] of [[-3.5, 2.25], [0.4, -1.7], [119.9, 39.9]]) {
+      for (const t of [0, 1e7]) {
+        for (const phase of LAYER_PHASES) expect(inRange(field(x, y, t, phase, ctx))).toBe(true);
+      }
+    }
+  });
+
+  it('handles odd grids (resize, zoom)', () => {
+    for (const g of [{ cols: 1, rows: 1 }, { cols: 2, rows: 200 }, { cols: 400, rows: 1 }]) {
+      for (let x = 0; x < g.cols; x += Math.max(1, g.cols >> 3)) {
+        for (let y = 0; y < g.rows; y += Math.max(1, g.rows >> 3)) {
+          for (const phase of LAYER_PHASES) expect(inRange(field(x, y, 5, phase, g))).toBe(true);
+        }
+      }
+    }
+  });
+});
+
+describe('matrix', () => {
+  // The nearest layer (phase 0) draws its stream head at exactly 1.
+  const headRow = (c: number, t: number) => {
+    for (let y = 0; y < ctx.rows; y++) if (matrix(c, y, t, 0, ctx) === 1) return y;
+    return -1;
+  };
+
+  it('moves each stream head down', () => {
+    let checked = 0;
+    for (let c = 0; c < ctx.cols; c++) {
+      const a = headRow(c, 3.3);
+      const b = headRow(c, 3.8);
+      if (a >= 0 && b >= 0) {
+        checked++;
+        expect(b).toBeGreaterThan(a);
+      }
+    }
+    expect(checked).toBeGreaterThanOrEqual(5);
+  });
+
+  it('still moves after days of uptime', () => {
+    let checked = 0;
+    for (let c = 0; c < ctx.cols; c++) {
+      const a = headRow(c, 1e7);
+      const b = headRow(c, 1e7 + 0.5);
+      if (a >= 0 && b >= 0) {
+        checked++;
+        expect(b).toBeGreaterThan(a);
+      }
+    }
+    expect(checked).toBeGreaterThanOrEqual(3);
+  });
+
+  it('fades the tail behind the head', () => {
+    const avg = (a: number[]) => a.reduce((s, v) => s + v, 0) / a.length;
+    let checked = 0;
+    for (let c = 0; c < ctx.cols; c++) {
+      const h = headRow(c, 3.3);
+      if (h < 8) continue;
+      checked++;
+      const near = [1, 2, 3].map(k => matrix(c, h - k, 3.3, 0, ctx));
+      const far = [6, 7].map(k => matrix(c, h - k, 3.3, 0, ctx));
+      expect(avg(near)).toBeGreaterThan(avg(far));
+    }
+    expect(checked).toBeGreaterThanOrEqual(3);
+  });
+
+  it('rains in some columns and leaves others dark', () => {
+    let raining = 0;
+    for (let c = 0; c < ctx.cols; c++) {
+      let any = false;
+      for (let t = 0; t <= 40 && !any; t += 2) {
+        for (let y = 0; y < ctx.rows && !any; y++) if (matrix(c, y, t, 0, ctx) > 0) any = true;
+      }
+      if (any) raining++;
+    }
+    expect(raining / ctx.cols).toBeGreaterThanOrEqual(0.25);
+    expect(raining / ctx.cols).toBeLessThanOrEqual(0.6);
+  });
+});
+
+describe('starfield', () => {
+  const cx = ctx.cols / 2;
+  const cy = ctx.rows / 2;
+  const AXES = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  // Distance (vertical counts double) of the outermost lit cell along an axis from the centre.
+  const outermost = (ax: number, ay: number, t: number, phase: number) => {
+    let best = -1;
+    for (let k = 3; ; k++) {
+      const x = cx + ax * k;
+      const y = cy + ay * k;
+      if (x < 0 || x >= ctx.cols || y < 0 || y >= ctx.rows) break;
+      if (starfield(x, y, t, phase, ctx) > 0) best = Math.max(best, Math.hypot(x - cx, (y - cy) * 2));
+    }
+    return best;
+  };
+
+  it('moves stars outward, only jumping back when a new star starts near the centre', () => {
+    let increased = 0;
+    for (const phase of LAYER_PHASES) {
+      for (const [ax, ay] of AXES) {
+        let prev = outermost(ax, ay, 4.2, phase);
+        for (let k = 1; k <= 40; k++) {
+          const r = outermost(ax, ay, 4.2 + k * 0.05, phase);
+          if (prev > 0 && r > 0) {
+            if (r < prev) expect(r).toBeLessThanOrEqual(6);
+            if (r > prev) increased++;
+          }
+          prev = r;
+        }
+      }
+    }
+    expect(increased).toBeGreaterThan(5);
+  });
+
+  it('stays sparse', () => {
+    for (const t of [1, 4.2, 9.9, 30]) {
+      let lit = 0;
+      for (let y = 0; y < ctx.rows; y++) {
+        for (let x = 0; x < ctx.cols; x++) if (LAYER_PHASES.some(p => starfield(x, y, t, p, ctx) > 0)) lit++;
+      }
+      const share = lit / (ctx.cols * ctx.rows);
+      expect(share).toBeGreaterThan(0.01);
+      expect(share).toBeLessThan(0.1);
+    }
+  });
+
+  it('keeps the centre dark', () => {
+    for (const t of [1, 4.2, 9.9]) {
+      for (const phase of LAYER_PHASES) {
+        for (let y = cy - 1; y <= cy + 1; y++) {
+          for (let x = cx - 2; x <= cx + 2; x++) expect(starfield(x, y, t, phase, ctx)).toBe(0);
+        }
+      }
+    }
+  });
+});

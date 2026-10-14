@@ -21,7 +21,7 @@ export interface AnimationPreset {
 
 // Characters are roughly twice as tall as they are wide, so vertical cell
 // distances count double — otherwise rings render as wide ovals.
-const CELL_ASPECT = 2;
+export const CELL_ASPECT = 2;
 
 function clamp01(v: number): number {
   return v < 0 ? 0 : v > 1 ? 1 : v;
