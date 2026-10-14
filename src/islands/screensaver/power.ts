@@ -2,66 +2,88 @@
 // screen wake lock. Every browser API here is feature-detected; missing or
 // denied APIs degrade silently.
 
+import { INITIAL_PANEL, nextPanelState, panelShowing, type PanelState } from '../../lib/panel-visibility';
+
 export interface AutoHide {
   togglePin(): boolean;
-  show(): void;
-  hideNow(): void;
-  visible(): boolean;
+  hide(): void;      // the [hide] button: hidden until a click, tap or key
+  close(): void;     // Esc with the panel open
+  visible(): boolean; // is the panel showing?
   destroy(): void;
 }
 
+// What a press counts as: anything on the panel, a button or a link keeps
+// things awake but never toggles the panel; anywhere else is the screen.
+function onControl(target: EventTarget | null): boolean {
+  return target instanceof Element
+    && target.closest('[data-ss-panel], [data-ss-install-hint], button, a, input, select, label') !== null;
+}
+
 export function createAutoHide(panel: HTMLElement, idleMs: number): AutoHide {
-  let pinned = false;
+  let state: PanelState = INITIAL_PANEL;
   let timer: ReturnType<typeof setTimeout> | null = null;
 
-  function hide(): void {
+  function apply(next: PanelState): void {
+    state = next;
+    document.body.classList.toggle('ss-idle', state.idle);
+    document.body.classList.toggle('ss-dismissed', state.dismissed);
+    panel.dataset.pinned = String(state.pinned);
+    if (timer !== null) clearTimeout(timer);
+    timer = state.idle ? null : setTimeout(onTimeout, idleMs);
+  }
+
+  function onTimeout(): void {
     // Never hide under the user's hand or while a control has focus.
-    if (pinned || panel.matches(':hover') || panel.matches(':focus-within')) {
-      arm();
+    if (panelShowing(state) && (panel.matches(':hover') || panel.matches(':focus-within'))) {
+      apply(state);
       return;
     }
-    document.body.classList.add('ss-idle');
+    apply(nextPanelState(state, 'timeout'));
   }
 
-  function arm(): void {
-    if (timer !== null) clearTimeout(timer);
-    timer = setTimeout(hide, idleMs);
+  function onPointerMove(e: PointerEvent): void {
+    // Touch moves come with taps and panel scrolling; only a mouse wakes things.
+    if (e.pointerType !== 'touch') apply(nextPanelState(state, 'activity'));
   }
 
-  function show(): void {
-    document.body.classList.remove('ss-idle');
-    arm();
+  function onPointerDown(e: PointerEvent): void {
+    if (onControl(e.target)) apply(nextPanelState(state, 'activity'));
+    else apply(nextPanelState(state, e.pointerType === 'touch' ? 'screen-tap' : 'screen-click'));
   }
 
   // Escape is not "activity": it's how the user closes the panel, so it
   // must not re-show it before the screensaver's own key handler runs.
-  function onActivity(e: Event): void {
-    if (e instanceof KeyboardEvent && e.key === 'Escape') return;
-    show();
+  function onKeyDown(e: KeyboardEvent): void {
+    if (e.key !== 'Escape') apply(nextPanelState(state, 'key'));
   }
 
-  const events = ['pointermove', 'pointerdown', 'keydown'] as const;
-  for (const e of events) window.addEventListener(e, onActivity, { passive: true });
-  arm();
+  window.addEventListener('pointermove', onPointerMove, { passive: true });
+  window.addEventListener('pointerdown', onPointerDown, { passive: true });
+  window.addEventListener('keydown', onKeyDown);
+  apply(state);
 
   return {
     togglePin() {
-      pinned = !pinned;
-      panel.dataset.pinned = String(pinned);
-      show();
-      return pinned;
+      apply(nextPanelState(state, 'toggle-pin'));
+      return state.pinned;
     },
-    show,
-    hideNow() {
-      if (timer !== null) clearTimeout(timer);
-      if (!pinned) document.body.classList.add('ss-idle');
+    hide() {
+      // A focused control would keep the panel from hiding (see onTimeout),
+      // and a hidden panel shouldn't hold the keyboard focus anyway.
+      if (panel.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
+      apply(nextPanelState(state, 'hide'));
+    },
+    close() {
+      apply(nextPanelState(state, 'close'));
     },
     visible() {
-      return !document.body.classList.contains('ss-idle');
+      return panelShowing(state);
     },
     destroy() {
       if (timer !== null) clearTimeout(timer);
-      for (const e of events) window.removeEventListener(e, onActivity);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('keydown', onKeyDown);
     },
   };
 }
