@@ -16,6 +16,7 @@ import type { BlogPostSummary, BlogPostFull, ProjectSummary } from '../../src/cu
 import { stripAnsi } from '../../src/curl/ansi';
 import { RESUME } from '../../src/data/resume';
 import { maintainerLines } from '../../src/data/maintainers';
+import { FORTUNES } from '../../src/data/fortunes';
 
 describe('renderHome', () => {
   it('contains ANSI escape codes', () => {
@@ -26,6 +27,19 @@ describe('renderHome', () => {
   it('contains lsalik.dev title', () => {
     const result = renderHome();
     expect(result).toContain('lsalik.dev');
+  });
+
+  it('ends with the given fortune, after the nav', () => {
+    const plain = stripAnsi(renderHome(80, 'Clear is better than clever.'));
+    expect(plain).toContain('$ fortune');
+    expect(plain).toContain('│ Clear is better than clever. │');
+    expect(plain).toContain('( o.o )');
+    expect(plain.indexOf('$ fortune')).toBeGreaterThan(plain.indexOf('navigate:'));
+  });
+
+  it('deals a fortune of its own by default', () => {
+    const plain = stripAnsi(renderHome());
+    expect(FORTUNES.some(f => plain.replace(/[│\s]+/g, ' ').includes(f))).toBe(true);
   });
 
   // Drift guard: the homepage curl-demo island must stream the exact
