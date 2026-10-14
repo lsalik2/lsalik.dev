@@ -14,7 +14,7 @@ curl -L lsalik.dev
 
 - **Animated ASCII background:** a per-cell flow field with six patterns (drift, cascade, pulse, ripple, vortex, interference). One is picked at random on each page load. It brightens under the cursor and drifts as you scroll.
 - **Screensaver mode** at `/screensaver` (press `g s`, or click or tap the braille spinner in the prompt). It runs only the background, full screen, with:
-  - a settings panel for pattern, speed, cell size, brightness, colours (any palette or custom) and colour animation (hue, gradient, rainbow);
+  - a settings panel for pattern (the six background patterns plus two screensaver-only ones, matrix rain and a warp starfield), speed, cell size, brightness, colours (any palette or custom) and colour animation (hue, gradient, rainbow);
   - a clock (big block digits, minimal, or date);
   - settings saved per browser and shareable via **copy url**;
   - a panel and cursor that auto-hide;
