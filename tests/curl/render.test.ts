@@ -15,6 +15,7 @@ import {
 import type { BlogPostSummary, BlogPostFull, ProjectSummary } from '../../src/curl/render';
 import { stripAnsi } from '../../src/curl/ansi';
 import { RESUME } from '../../src/data/resume';
+import { maintainerLines } from '../../src/data/maintainers';
 
 describe('renderHome', () => {
   it('contains ANSI escape codes', () => {
@@ -259,6 +260,25 @@ describe('renderSsh', () => {
 
   it('points the visitor back to the homepage', () => {
     expect(stripAnsi(renderSsh())).toContain('curl -L lsalik.dev');
+  });
+
+  it('shows the blep fingerprint', () => {
+    const plain = stripAnsi(renderSsh());
+    expect(plain).toContain('ED25519 key fingerprint is SHA256:9faSn0w+ba11sm30wmix...bl3p');
+    expect(plain).not.toContain('purr');
+  });
+
+  it('shows the given maintainer descriptions', () => {
+    const plain = stripAnsi(renderSsh(80, { finch: 'line for finch', raven: 'line for raven' }));
+    expect(plain).toContain('finch  ·  line for finch');
+    expect(plain).toContain('raven  ·  line for raven');
+  });
+
+  it("defaults to today's maintainer descriptions", () => {
+    const today = maintainerLines();
+    const plain = stripAnsi(renderSsh());
+    expect(plain).toContain(`finch  ·  ${today.finch}`);
+    expect(plain).toContain(`raven  ·  ${today.raven}`);
   });
 
   it('preserves the Finch art indentation through box(wrap:false)', () => {
