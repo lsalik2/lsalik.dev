@@ -113,4 +113,10 @@ describe('MAN shortcuts section', () => {
     const defs = section.blocks.flatMap(b => (b.type === 'definitions' ? b.items : []));
     expect(defs).toContainEqual({ term: 'g s', def: 'open the screensaver' });
   });
+
+  it('documents the spinner as the way into the screensaver', () => {
+    const section = MAN.sections.find(s => s.heading === 'shortcuts')!;
+    const defs = section.blocks.flatMap(b => (b.type === 'definitions' ? b.items : []));
+    expect(defs).toContainEqual({ term: 'spinner', def: 'click or tap the ⠋ in the prompt to open the screensaver' });
+  });
 });
