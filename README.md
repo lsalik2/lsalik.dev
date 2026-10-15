@@ -21,23 +21,24 @@ curl -L lsalik.dev
   - keys: `←` / `→` switch pattern, `↑` / `↓` switch palette, `f` toggles fullscreen and `h` pins the panel. `esc` or **[exit]** (top-left, beside fullscreen, and in the panel) goes back to the page you came from;
   - a screen wake lock, OLED burn-in drift for the clock, and fullscreen. On iPhone, where Safari can't fullscreen a page, it offers an add-to-home-screen hint instead.
 - **8 colour palettes:** dark terminal, amber CRT, green phosphor, synthwave, mocha, solarized, gruvbox, nord. The choice is remembered and applied before first paint.
-- **Vim-style keyboard shortcuts:** `g h` / `g p` / `g b` / `g u` / `g c` jump to home, projects, blog, uses and contact, and `g s` opens the screensaver. `?` toggles the help overlay.
+- **Vim-style keyboard shortcuts:** `g h` / `g p` / `g b` / `g u` / `g c` / `g f` jump to home, projects, blog, uses, contact and fun, and `g s` opens the screensaver. `?` toggles the help overlay.
 - **Blog:**
   - search and tag filtering (tags intersect);
   - client-side pagination that pages the *filtered* results, with `?page=N` deep links;
   - reading times and copy buttons on code blocks;
   - an RSS feed (`/rss.xml`) and per-post OpenGraph images.
 - **Projects:** pagination, live GitHub stars plus last-push recency (fetched at build time), and a `● working on` badge for projects marked `active`, which are listed first.
-- **`/uses`** (tools and setup), **`/man`** (a man page for the site itself), **`/contact`**, **`/fortune`** (a random fortune in a speech bubble, also dealt fresh in a `$ fortune` frame on the home page), and a terminal-styled 404.
+- **`/uses`** (tools and setup), **`/contact`**, and a terminal-styled 404.
+- **`~/fun`** (`/fun`): the playful side, kept off the professional pages. It holds a fresh fortune (also at **`/fortune`**), the click-to-run curl demo, the screensaver, the `/ssh` cats (terminal only) and **`/man`**, a man page for the site itself.
 - **A braille CLI spinner** in the prompt (`⠋ lsalik@dev:~/blog$`), pure CSS. It holds still under reduced motion.
 - Client-side navigation via Astro's `ClientRouter`, with the background persisted across pages.
 
 **In the terminal** (`curl -L lsalik.dev/<route>`)
 
-- **Routes:** `/`, `/projects`, `/projects/<slug>`, `/blog`, `/blog/<slug>`, `/rss`, `/uses`, `/contact`, `/resume`, `/man`, `/fortune`. Unknown routes get a terminal 404 with navigation hints.
+- **Routes:** `/`, `/projects`, `/projects/<slug>`, `/blog`, `/blog/<slug>`, `/rss`, `/uses`, `/contact`, `/resume`, `/fun`, `/man`, `/fortune`. Unknown routes get a terminal 404 with navigation hints.
 - **Fits your terminal:** add `?cols=$COLUMNS` to any route (`curl -L "lsalik.dev/blog?cols=$COLUMNS"`) to size boxes, headers and columns to your terminal, from 40 to 160 columns (80 by default).
 - **A logo generated per request:** a random, mirrored, identicon-style pixel mark drawn in half-block characters, in random colours. No two curls look the same.
-- **A fortune to finish:** `curl lsalik.dev` ends with a random fortune in a speech bubble, with the cat.
+- **`curl lsalik.dev/fun`** lists the extras and deals a fortune in a speech bubble, with the cat.
 - **`/ssh`:** a hidden easter egg. It's a fake SSH login whose message of the day introduces the site's maintainers (two cats, drawn in colour), with new descriptions every day.
 - **`/screensaver`:** points you to the browser version.
 - **`/resume`:** in the terminal it renders as text; in a browser it redirects to the PDF.
@@ -82,7 +83,7 @@ tests/              # Vitest test suite
 
 `src/middleware.ts` checks the `User-Agent` header on every request. Clients matching `curl/`, `wget/`, `httpie/`, `fetch/` or `libfetch/` receive a `text/plain` response built by `src/curl/render.ts`, using the ANSI helpers in `src/curl/ansi.ts` and the box layout in `src/curl/box.ts`. All other clients pass through to the normal Astro SSR pipeline. Every browser route has a terminal equivalent, and the two share their data (content collections, `src/data/`) so they never drift apart.
 
-The homepage also ships a browser-side curl demo (`src/islands/curl-demo.ts`) that replays the terminal output inline. It converts ANSI escape codes to DOM nodes via `src/lib/ansi-to-dom.ts`, so there's no `innerHTML` and no sanitizer needed.
+The ~/fun page also ships a browser-side curl demo (`src/islands/curl-demo.ts`) that replays the terminal output inline. It converts ANSI escape codes to DOM nodes via `src/lib/ansi-to-dom.ts`, so there's no `innerHTML` and no sanitizer needed.
 
 ## The background engine
 
