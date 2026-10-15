@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { box, hr, sectionHeader, wrap, twoCol, PAGE_WIDTH } from '../../src/curl/box';
-import { stripAnsi, visibleWidth, bold, cyan } from '../../src/curl/ansi';
+import { stripAnsi, visibleWidth, bold, cyan, dim } from '../../src/curl/ansi';
 
 describe('PAGE_WIDTH', () => {
   it('is 80', () => {
@@ -106,6 +106,31 @@ describe('wrap', () => {
     const result = wrap(long, 10);
     for (const line of result.split('\n')) {
       expect(line.length).toBeLessThanOrEqual(10);
+    }
+  });
+
+  it('closes styling at each break and reopens it on the next line', () => {
+    const text = 'tip: add ?cols=$COLUMNS to any URL to fit your terminal';
+    const lines = wrap(dim(text), 36).split('\n');
+    expect(lines.length).toBe(2);
+    // Each line carries its own styling, so a frame drawn after it (or a
+    // browser converting one line at a time) neither inherits nor loses it.
+    expect(lines[0]).toBe('\x1b[2mtip: add ?cols=$COLUMNS to any URL \x1b[0m');
+    expect(lines[1]).toBe('\x1b[2mto fit your terminal\x1b[22m');
+  });
+
+  it('leaves text that fits on one line byte-for-byte unchanged', () => {
+    const line = `${cyan('curl -L lsalik.dev')}  ${dim('a fortune')}`;
+    expect(wrap(line, 80)).toBe(line);
+  });
+
+  it('keeps a box border out of a wrapped line\'s styling', () => {
+    const body = box([dim('tip: add ?cols=$COLUMNS to any URL to fit your terminal')], { width: 40 }).split('\n').slice(1, -1);
+    for (const line of body) {
+      const beforeBorder = line.slice(0, line.lastIndexOf('│'));
+      const opened = beforeBorder.lastIndexOf('\x1b[2m');
+      const closed = Math.max(beforeBorder.lastIndexOf('\x1b[22m'), beforeBorder.lastIndexOf('\x1b[0m'));
+      expect(opened === -1 || closed > opened, JSON.stringify(line)).toBe(true);
     }
   });
 
