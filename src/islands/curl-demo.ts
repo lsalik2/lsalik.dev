@@ -21,12 +21,21 @@ function columnWidth(container: HTMLElement): number {
   return width;
 }
 
-async function runCurlDemo(container: HTMLElement): Promise<void> {
-  const COMMAND = '$ curl -L lsalik.dev';
-  // Render at the width that fits the box, like a terminal that size would
-  // (?cols=), shrinking the font on phones where even 40 columns don't fit.
+interface DemoLayout {
+  cols: number;
+  fontPx: number;
+  baseFont: number;
+}
+
+// The width that fits the box right now, like a terminal that size would
+// (?cols=), and the font size: smaller on phones where even 40 columns don't fit.
+function fit(container: HTMLElement): DemoLayout {
   const baseFont = parseFloat(getComputedStyle(container).fontSize);
-  const { cols, fontPx } = fitDemo(container.clientWidth, columnWidth(container), baseFont);
+  return { ...fitDemo(container.clientWidth, columnWidth(container), baseFont), baseFont };
+}
+
+async function runCurlDemo(container: HTMLElement, { cols, fontPx, baseFont }: DemoLayout): Promise<void> {
+  const COMMAND = '$ curl -L lsalik.dev';
   if (fontPx !== baseFont) container.style.fontSize = `${fontPx}px`;
   const response = renderHome(cols);
 
@@ -120,6 +129,20 @@ function init(): void {
   };
 
   let started = false;
+
+  // The title bar shows the terminal size the demo will render at. It follows
+  // the box until the demo runs; after that the printed output keeps its width.
+  const size = teaser.querySelector<HTMLElement>('[data-curl-size]');
+  const showSize = (cols: number) => {
+    if (size) size.textContent = `${cols}x24`;
+  };
+  showSize(fit(container).cols);
+  const resize = new ResizeObserver(() => {
+    if (started || !container.isConnected) resize.disconnect();
+    else showSize(fit(container).cols);
+  });
+  resize.observe(container);
+
   teaser.addEventListener('click', () => {
     const isExpanded = wrapper.classList.contains('expanded');
     if (isExpanded) {
@@ -131,8 +154,11 @@ function init(): void {
       teaser.setAttribute('aria-expanded', 'true');
       if (!started) {
         started = true;
+        resize.disconnect();
+        const layout = fit(container);
+        showSize(layout.cols);
         // Sizes the body before its first await, so fitHeight sees the full height.
-        void runCurlDemo(container).then(fitHeight);
+        void runCurlDemo(container, layout).then(fitHeight);
       }
       fitHeight();
     }
