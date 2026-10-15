@@ -52,3 +52,11 @@ export function pickFortune(rng: () => number = Math.random): string {
   const i = Math.min(FORTUNES.length - 1, Math.floor(rng() * FORTUNES.length));
   return FORTUNES[i];
 }
+
+// A fortune other than `current`, so [another] always changes the saying.
+export function pickAnotherFortune(current: string, rng: () => number = Math.random): string {
+  const others = FORTUNES.filter(f => f !== current);
+  if (others.length === 0) return current;
+  const i = Math.min(others.length - 1, Math.floor(rng() * others.length));
+  return others[i];
+}

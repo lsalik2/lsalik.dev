@@ -361,6 +361,14 @@ describe('renderFun', () => {
     ]) expect(plain).toContain(s);
   });
 
+  it('lists them in the same order as the ~/fun page: fortune, man, screensaver, ssh', () => {
+    const plain = stripAnsi(renderFun(80, FORTUNE));
+    const at = (s: string) => plain.indexOf(s);
+    expect(at('lsalik.dev/fortune')).toBeLessThan(at('lsalik.dev/man'));
+    expect(at('lsalik.dev/man')).toBeLessThan(at('lsalik.dev/screensaver'));
+    expect(at('lsalik.dev/screensaver')).toBeLessThan(at('lsalik.dev/ssh'));
+  });
+
   it('puts each command and its description on one line when they fit', () => {
     expect(stripAnsi(renderFun(80, FORTUNE))).toMatch(/curl -L lsalik\.dev\/ssh +meet the maintainers/);
   });
