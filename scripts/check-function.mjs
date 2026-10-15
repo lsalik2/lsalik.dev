@@ -21,6 +21,7 @@ const ROUTES = [
   ['/', 'Mozilla/5.0', 200],
   ['/blog', 'Mozilla/5.0', 200],
   ['/projects', 'Mozilla/5.0', 200],
+  ['/fun', 'Mozilla/5.0', 200],
   ['/screensaver', 'Mozilla/5.0', 200],
   ['/sitemap.xml', 'Mozilla/5.0', 200],
   ['/definitely-not-a-page', 'Mozilla/5.0', 404],

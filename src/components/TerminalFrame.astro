@@ -1,11 +1,12 @@
 ---
 interface Props {
   title: string;
+  id?: string;
 }
 
-const { title } = Astro.props;
+const { title, id } = Astro.props;
 ---
-<div class="terminal-frame">
+<div class="terminal-frame" id={id}>
   <div class="terminal-titlebar">
     <span class="terminal-title">── {title} ──</span>
   </div>
