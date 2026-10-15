@@ -18,6 +18,7 @@ curl -L lsalik.dev
   - a clock (big block digits, minimal, or date);
   - settings saved per browser and shareable via **copy url**;
   - a panel and cursor that auto-hide, plus a **[hide]** button (moving the mouse won't bring the panel back; a click or key does). On phones, tapping the screen toggles the panel;
+  - keys: `←` / `→` switch pattern, `↑` / `↓` switch palette, `f` toggles fullscreen and `h` pins the panel. `esc` or **[exit]** (top-left, beside fullscreen, and in the panel) goes back to the page you came from;
   - a screen wake lock, OLED burn-in drift for the clock, and fullscreen. On iPhone, where Safari can't fullscreen a page, it offers an add-to-home-screen hint instead.
 - **8 colour palettes:** dark terminal, amber CRT, green phosphor, synthwave, mocha, solarized, gruvbox, nord. The choice is remembered and applied before first paint.
 - **Vim-style keyboard shortcuts:** `g h` / `g p` / `g b` / `g u` / `g c` jump to home, projects, blog, uses and contact, and `g s` opens the screensaver. `?` toggles the help overlay.
