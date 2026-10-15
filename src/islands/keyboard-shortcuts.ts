@@ -111,6 +111,7 @@ function buildOverlay(): HTMLDivElement {
     [['g', 'b'], 'blog'],
     [['g', 'u'], 'uses'],
     [['g', 'c'], 'contact'],
+    [['g', 'f'], 'fun'],
     [['g', 's'], 'screensaver'],
     [['?'], 'toggle this help'],
     [['Esc'], 'close this help'],

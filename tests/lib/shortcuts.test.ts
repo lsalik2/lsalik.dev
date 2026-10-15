@@ -95,3 +95,10 @@ describe('g s → screensaver', () => {
     expect(resolveChord(after_g.next, 'b', 1500, TIMEOUT).action).toEqual({ type: 'navigate', href: '/blog' });
   });
 });
+
+describe('g f → fun', () => {
+  it('navigates to /fun as a client-side navigation', () => {
+    const after_g = resolveChord(INITIAL_CHORD_STATE, 'g', 1000, TIMEOUT);
+    expect(resolveChord(after_g.next, 'f', 1500, TIMEOUT).action).toEqual({ type: 'navigate', href: '/fun' });
+  });
+});
