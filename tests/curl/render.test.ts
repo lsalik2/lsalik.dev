@@ -67,6 +67,12 @@ describe('renderHome', () => {
     expect(out).toContain('curl -L lsalik.dev/resume');
   });
 
+  it('lists /fun in the nav, and not /man', () => {
+    const plain = stripAnsi(renderHome());
+    expect(plain).toContain('curl -L lsalik.dev/fun');
+    expect(plain).not.toContain('curl -L lsalik.dev/man');
+  });
+
   it('does not still advertise the old /links path', () => {
     const out = stripAnsi(renderHome());
     expect(out).not.toContain('curl -L lsalik.dev/links');

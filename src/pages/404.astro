@@ -1,6 +1,7 @@
 ---
 import Page from '../layouts/Page.astro';
 import PageHeader from '../components/PageHeader.astro';
+import { BROWSER_NAV_LINKS } from '../lib/nav';
 
 const requestedPath = Astro.url.pathname.replace(/^\//, '') || '/';
 ---
@@ -11,12 +12,7 @@ const requestedPath = Astro.url.pathname.replace(/^\//, '') || '/';
     <p class="error-msg">cannot access '{requestedPath}': No such file or directory</p>
     <p class="nav-hint">navigate to:</p>
     <ul class="nav-list">
-      <li><a href="/">~/home</a></li>
-      <li><a href="/projects">~/projects</a></li>
-      <li><a href="/blog">~/blog</a></li>
-      <li><a href="/uses">~/uses</a></li>
-      <li><a href="/contact">~/contact</a></li>
-      <li><a href="/man">~/man</a></li>
+      {BROWSER_NAV_LINKS.map(link => <li><a href={link.href}>{link.label}</a></li>)}
     </ul>
   </div>
 </Page>
