@@ -1,8 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
-import { SITE_URL } from '../lib/site';
-
-const STATIC_PATHS = ['/', '/blog', '/projects', '/contact'];
+import { SITE_URL, STATIC_PATHS } from '../lib/site';
 
 function escapeXml(value: string): string {
   return value
