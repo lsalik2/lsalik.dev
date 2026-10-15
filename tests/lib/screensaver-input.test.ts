@@ -9,11 +9,13 @@ describe('keyAction', () => {
     expect(keyAction('Escape', false)).toBe('escape');
     expect(keyAction('ArrowLeft', false)).toBe('prev-pattern');
     expect(keyAction('ArrowRight', false)).toBe('next-pattern');
+    expect(keyAction('ArrowUp', false)).toBe('prev-palette');
+    expect(keyAction('ArrowDown', false)).toBe('next-palette');
     expect(keyAction('x', false)).toBe('none');
   });
 
   it('ignores everything but Escape while typing in a panel control (Review Focus #3)', () => {
-    for (const key of ['f', 'h', 'ArrowLeft', 'ArrowRight', 'a']) {
+    for (const key of ['f', 'h', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'a']) {
       expect(keyAction(key, true)).toBe('none');
     }
     expect(keyAction('Escape', true)).toBe('escape');

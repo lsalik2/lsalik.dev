@@ -6,6 +6,8 @@ export type ScreensaverKeyAction =
   | 'escape'
   | 'prev-pattern'
   | 'next-pattern'
+  | 'prev-palette'
+  | 'next-palette'
   | 'none';
 
 // `typingTarget` is true when focus is in a panel control (input, select,
@@ -25,6 +27,10 @@ export function keyAction(key: string, typingTarget: boolean): ScreensaverKeyAct
       return 'prev-pattern';
     case 'ArrowRight':
       return 'next-pattern';
+    case 'ArrowUp':
+      return 'prev-palette';
+    case 'ArrowDown':
+      return 'next-palette';
     default:
       return 'none';
   }

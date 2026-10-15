@@ -1,6 +1,7 @@
 import { bold, dim, green, blue, amber, cyan, red, accentGreen, accentMagenta, bodyWarm, titleBright, borderDim, visibleWidth } from './ansi';
 import { renderLogo } from './logo';
 import { FINCH, FINCH_MASK, RAVEN, RAVEN_MASK, FORTUNE_CAT, paintCat } from './cats';
+import { pickFortune } from '../data/fortunes';
 import { maintainerLines, type MaintainerLines } from '../data/maintainers';
 import { NAV_LINKS } from '../lib/nav';
 import { box, hr, sectionHeader, twoCol, wrap, PAGE_WIDTH } from './box';
@@ -67,7 +68,7 @@ function fit(line: string, max: number): string[] {
 // Below this width the /uses logo stacks above the info instead of beside it.
 const USES_SIDE_BY_SIDE_MIN = 64;
 
-export function renderHome(width: number = PAGE_WIDTH): string {
+export function renderHome(width: number = PAGE_WIDTH, fortune: string = pickFortune()): string {
   const logo = renderLogo();
   const title = bold(titleBright('lsalik.dev'));
   const description = dim('terminal-inspired personal website');
@@ -80,7 +81,10 @@ export function renderHome(width: number = PAGE_WIDTH): string {
 
   const source = fit(dim('source: https://github.com/lsalik2/lsalik.dev'), width);
 
-  return [headerBox, '', navBox, '', ...source].join('\n');
+  // Every visit deals a fortune, like the $ fortune frame on the web homepage.
+  const fortuneBlock = [`${green('$')} fortune`, renderFortune(fortune, width)];
+
+  return [headerBox, '', navBox, '', ...fortuneBlock, '', ...source].join('\n');
 }
 
 export function renderBlogIndex(posts: BlogPostSummary[], width: number = PAGE_WIDTH): string {

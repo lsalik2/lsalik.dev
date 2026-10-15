@@ -7,6 +7,7 @@ import {
   toSearchParams,
   resolveSettings,
   stepPattern,
+  stepPalette,
   PATTERN_NAMES,
   type ScreensaverSettings,
 } from '../../src/lib/screensaver-settings';
@@ -167,6 +168,20 @@ describe('stepPattern', () => {
     expect(stepPattern('starfield', 1)).toBe('drift');
     expect(stepPattern('drift', -1)).toBe('starfield');
     expect(PATTERN_NAMES).toHaveLength(8);
+  });
+});
+
+describe('stepPalette', () => {
+  it('walks the eight palettes in the dropdown order and wraps', () => {
+    expect(stepPalette('dark-terminal', 1)).toBe('amber-crt');
+    expect(stepPalette('amber-crt', -1)).toBe('dark-terminal');
+    expect(stepPalette('nord', 1)).toBe('dark-terminal');
+    expect(stepPalette('dark-terminal', -1)).toBe('nord');
+  });
+
+  it('steps from custom colours onto the ends of the palette list', () => {
+    expect(stepPalette('custom', 1)).toBe('dark-terminal');
+    expect(stepPalette('custom', -1)).toBe('nord');
   });
 });
 
