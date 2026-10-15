@@ -2,6 +2,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { getCollection } from 'astro:content';
 import {
   renderHome,
+  renderFun,
   renderBlogIndex,
   renderBlogPost,
   renderProjectsIndex,
@@ -292,6 +293,10 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
 
   if (pathname === '/man' || pathname === '/man/') {
     return textResponse(renderMan(MAN, cols));
+  }
+
+  if (pathname === '/fun' || pathname === '/fun/') {
+    return textResponse(renderFun(cols));
   }
 
   // Hidden easter egg: terminal clients only (browsers were already sent to

@@ -26,6 +26,7 @@ const ROUTES = [
   ['/definitely-not-a-page', 'Mozilla/5.0', 404],
   ['/', 'curl/8.0', 200],
   ['/ssh', 'curl/8.0', 200],
+  ['/fun', 'curl/8.0', 200],
 ];
 
 const dir = await mkdtemp(join(tmpdir(), 'lsalik-func-'));
