@@ -29,7 +29,7 @@ curl -L lsalik.dev
   - an RSS feed (`/rss.xml`) and per-post OpenGraph images.
 - **Projects:** pagination, live GitHub stars plus last-push recency (fetched at build time), and a `● working on` badge for projects marked `active`, which are listed first.
 - **`/uses`** (tools and setup), **`/contact`**, and a terminal-styled 404.
-- **`~/fun`** (`/fun`): the playful side, kept off the professional pages. It holds a fresh fortune (also at **`/fortune`**), the click-to-run curl demo, the screensaver, the `/ssh` cats (terminal only) and **`/man`**, a man page for the site itself.
+- **`~/fun`** (`/fun`): the playful side, kept off the professional pages. It holds the click-to-run curl demo, a fortune (**[another]** deals a new one in place; also at **`/fortune`**), **`/man`** (a man page for the site itself), the screensaver, and the `/ssh` cats (terminal only).
 - **A braille CLI spinner** in the prompt (`⠋ lsalik@dev:~/blog$`), pure CSS. It holds still under reduced motion.
 - Client-side navigation via Astro's `ClientRouter`, with the background persisted across pages.
 
