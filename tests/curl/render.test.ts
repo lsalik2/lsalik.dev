@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   renderHome,
+  renderFun,
   renderBlogIndex,
   renderBlogPost,
   renderProjectsIndex,
@@ -29,17 +30,10 @@ describe('renderHome', () => {
     expect(result).toContain('lsalik.dev');
   });
 
-  it('ends with the given fortune, after the nav', () => {
-    const plain = stripAnsi(renderHome(80, 'Clear is better than clever.'));
-    expect(plain).toContain('$ fortune');
-    expect(plain).toContain('│ Clear is better than clever. │');
-    expect(plain).toContain('( o.o )');
-    expect(plain.indexOf('$ fortune')).toBeGreaterThan(plain.indexOf('navigate:'));
-  });
-
-  it('deals a fortune of its own by default', () => {
+  it('ends after the nav and the source line, with no fortune (that moved to /fun)', () => {
     const plain = stripAnsi(renderHome());
-    expect(FORTUNES.some(f => plain.replace(/[│\s]+/g, ' ').includes(f))).toBe(true);
+    expect(plain).not.toContain('$ fortune');
+    expect(plain.trimEnd().endsWith('source: https://github.com/lsalik2/lsalik.dev')).toBe(true);
   });
 
   // Drift guard: the homepage curl-demo island must stream the exact
@@ -350,5 +344,43 @@ describe('renderFortune', () => {
   it('sizes the bubble to a short fortune instead of the full width', () => {
     const top = stripAnsi(renderFortune('Measure twice, cut once.', 120)).split('\n').find(l => l.includes('┌'))!;
     expect([...top].length).toBeLessThan(40);
+  });
+});
+
+describe('renderFun', () => {
+  const FORTUNE = 'Clear is better than clever.';
+
+  it('lists every extra with its command', () => {
+    const plain = stripAnsi(renderFun(80, FORTUNE));
+    expect(plain).toContain('~/fun');
+    for (const s of [
+      'curl -L lsalik.dev/fortune', 'a fortune, with a cat',
+      'curl -L lsalik.dev/ssh', 'meet the maintainers',
+      'curl -L lsalik.dev/man', "the site's man page",
+      'lsalik.dev/screensaver', 'the screensaver (browser only)',
+    ]) expect(plain).toContain(s);
+  });
+
+  it('puts each command and its description on one line when they fit', () => {
+    expect(stripAnsi(renderFun(80, FORTUNE))).toMatch(/curl -L lsalik\.dev\/ssh +meet the maintainers/);
+  });
+
+  it('stacks the description under the command on narrow terminals', () => {
+    const lines = stripAnsi(renderFun(40, FORTUNE)).split('\n');
+    const i = lines.findIndex(l => l.includes('curl -L lsalik.dev/ssh'));
+    expect(lines[i]).not.toContain('meet the maintainers');
+    expect(lines[i + 1]).toContain('meet the maintainers');
+  });
+
+  it('ends with the given fortune, after the box', () => {
+    const plain = stripAnsi(renderFun(80, FORTUNE));
+    expect(plain.indexOf('$ fortune')).toBeGreaterThan(plain.indexOf('lsalik.dev/screensaver'));
+    expect(plain).toContain('│ Clear is better than clever. │');
+    expect(plain).toContain('( o.o )');
+  });
+
+  it('deals a fortune of its own by default', () => {
+    const plain = stripAnsi(renderFun());
+    expect(FORTUNES.some(f => plain.replace(/[│\s]+/g, ' ').includes(f))).toBe(true);
   });
 });
