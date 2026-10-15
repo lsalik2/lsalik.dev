@@ -1,6 +1,11 @@
 ---
 import Page from '../layouts/Page.astro';
 import TerminalFrame from '../components/TerminalFrame.astro';
+import FortuneBubble from '../components/FortuneBubble.astro';
+import { pickFortune } from '../data/fortunes';
+
+// A fresh one on every visit (pages are server-rendered, no-store).
+const fortune = pickFortune();
 ---
 <Page title="Home" path="/">
   <section class="hero">
@@ -50,6 +55,11 @@ import TerminalFrame from '../components/TerminalFrame.astro';
     </a>
   </TerminalFrame>
 
+  <TerminalFrame title="$ fortune">
+    <FortuneBubble fortune={fortune} width={40} narrowWidth={26} />
+    <a href="/fortune" class="fortune-more">[another]</a>
+  </TerminalFrame>
+
   <section class="curl-easter-egg">
     <button class="curl-teaser" id="curl-teaser" type="button" aria-expanded="false">
       <div class="curl-teaser-titlebar">~ &mdash; bash &mdash; 80x24</div>
@@ -67,6 +77,22 @@ import TerminalFrame from '../components/TerminalFrame.astro';
 </Page>
 
 <style>
+  .fortune-more {
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .fortune-more:hover {
+    color: var(--accent-bright);
+    border-color: var(--accent);
+  }
+
   .hero {
     margin: 0 0 1.5rem;
   }

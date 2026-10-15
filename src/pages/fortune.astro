@@ -3,16 +3,14 @@
 // A fresh fortune on every load (pages are server-rendered, no-store).
 import Page from '../layouts/Page.astro';
 import TerminalFrame from '../components/TerminalFrame.astro';
-import { renderFortune } from '../curl/render';
-import { stripAnsi } from '../curl/ansi';
+import FortuneBubble from '../components/FortuneBubble.astro';
 import { pickFortune } from '../data/fortunes';
 
 const fortune = pickFortune();
-const art = stripAnsi(renderFortune(fortune, 60));
 ---
 <Page title="fortune" path="/fortune" description={fortune}>
   <TerminalFrame title="$ fortune">
-    <pre class="fortune-art" aria-label={fortune}>{art}</pre>
+    <FortuneBubble fortune={fortune} width={60} />
   </TerminalFrame>
   <p class="fortune-actions">
     <a href="/fortune" data-astro-reload class="fortune-again">[another]</a>
@@ -21,18 +19,6 @@ const art = stripAnsi(renderFortune(fortune, 60));
 </Page>
 
 <style>
-  /* Same stack as the home page curl demo: fonts with box-drawing glyphs, so
-     the bubble's border lines up with the text inside it. */
-  .fortune-art {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Cascadia Mono", "DejaVu Sans Mono", "Liberation Mono", monospace;
-    margin: 0;
-    white-space: pre;
-    overflow-x: auto;
-    color: var(--fg);
-    font-size: 0.95rem;
-    line-height: 1.1;
-  }
-
   .fortune-actions {
     display: flex;
     flex-wrap: wrap;
