@@ -194,3 +194,13 @@ export function stepPattern(current: PatternName, dir: 1 | -1): PatternName {
   const n = PATTERN_NAMES.length;
   return PATTERN_NAMES[(((i + dir) % n) + n) % n];
 }
+
+// Up and down the colours dropdown, over the eight palettes. Custom colours
+// aren't a stop (by default they match dark-terminal, so the key would seem
+// dead); stepping from custom lands on either end of the list.
+export function stepPalette(current: ColorSource, dir: 1 | -1): PaletteName {
+  const n = PALETTES.length;
+  const i = PALETTES.indexOf(current as PaletteName);
+  if (i < 0) return dir === 1 ? PALETTES[0] : PALETTES[n - 1];
+  return PALETTES[(((i + dir) % n) + n) % n];
+}

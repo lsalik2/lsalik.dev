@@ -9,6 +9,7 @@ import {
   resolveSettings,
   toSearchParams,
   stepPattern,
+  stepPalette,
   STORAGE_KEY,
   PATTERN_NAMES,
   type ScreensaverSettings,
@@ -180,6 +181,7 @@ function boot(): void {
     flushSave();
     location.href = exitTarget(document.referrer, location.origin);
   };
+  document.querySelector<HTMLButtonElement>('[data-ss-exit]')?.addEventListener('click', exit);
 
   panel.addEventListener('click', async e => {
     const action = (e.target as HTMLElement).closest<HTMLElement>('[data-action]')?.dataset.action;
@@ -213,7 +215,8 @@ function boot(): void {
 
   // Keys.
   window.addEventListener('keydown', e => {
-    switch (keyAction(e.key, isTypingTarget(e.target))) {
+    const action = keyAction(e.key, isTypingTarget(e.target));
+    switch (action) {
       case 'fullscreen':
         void toggleFullscreen();
         break;
@@ -222,7 +225,7 @@ function boot(): void {
         break;
       case 'prev-pattern':
       case 'next-pattern': {
-        const next = stepPattern(shown, e.key === 'ArrowLeft' ? -1 : 1);
+        const next = stepPattern(shown, action === 'prev-pattern' ? -1 : 1);
         if (settings.pattern === 'cycle') {
           showPattern(next);
           restartCycle();
@@ -233,6 +236,16 @@ function boot(): void {
           applyAll(prev);
           save();
         }
+        break;
+      }
+      case 'prev-palette':
+      case 'next-palette': {
+        e.preventDefault(); // with focus in the (scrollable) panel, ↑/↓ would scroll it too
+        const prev = settings;
+        settings = { ...settings, colorSource: stepPalette(settings.colorSource, action === 'prev-palette' ? -1 : 1) };
+        panelApi.set(settings);
+        applyAll(prev);
+        save();
         break;
       }
       case 'escape':

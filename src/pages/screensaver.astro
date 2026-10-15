@@ -32,7 +32,10 @@ import { PALETTES } from '../lib/palettes';
   </div>
   <noscript><p class="ss-noscript">the screensaver needs JavaScript.</p></noscript>
 
-  <button type="button" class="ss-fs" data-ss-fs data-mode="none" hidden>[fullscreen]</button>
+  <div class="ss-float">
+    <button type="button" data-ss-exit aria-label="exit the screensaver">[exit]</button>
+    <button type="button" data-ss-fs data-mode="none" hidden>[fullscreen]</button>
+  </div>
   <p class="ss-install-hint" data-ss-install-hint hidden>
     iPhone can't go fullscreen in Safari. Tap <strong>Share</strong> → <strong>Add to Home Screen</strong>,
     then open the screensaver from your home screen.
@@ -96,14 +99,14 @@ import { PALETTES } from '../lib/palettes';
     <label class="ss-when-clock ss-check"><input type="checkbox" data-setting="clock24h" /> 24-hour</label>
 
     <div class="ss-buttons">
+      <button type="button" data-action="exit">[exit]</button>
       <button type="button" data-action="fullscreen">[fullscreen]</button>
       <button type="button" data-action="copy">[copy url]</button>
       <button type="button" data-action="reset">[reset]</button>
-      <button type="button" data-action="exit">[exit]</button>
     </div>
     <p class="ss-status" data-ss-status aria-live="polite"></p>
     <input class="ss-share" data-share-url type="text" readonly hidden aria-label="share link" />
-    <p class="ss-hint">f fullscreen · h pin panel · ←/→ pattern · esc exit</p>
+    <p class="ss-hint"><span>f fullscreen</span> · <span>h pin panel</span> · <span>←/→ pattern</span> · <span>↑/↓ colours</span> · <span>esc exit</span></p>
   </aside>
 
   <script src="../islands/screensaver/index.ts"></script>
@@ -203,12 +206,18 @@ import { PALETTES } from '../lib/palettes';
   body.ss-idle .ss-panel,
   body.ss-dismissed .ss-panel { opacity: 0; pointer-events: none; }
 
-  /* Always-reachable fullscreen control, outside the (scrolling) panel. */
-  .ss-fs {
+  /* Always-reachable [exit] and fullscreen controls, outside the (scrolling,
+     hideable) panel. */
+  .ss-float {
     position: fixed;
     top: 1rem;
     left: 1rem;
     z-index: 3;
+    display: flex;
+    gap: 0.5rem;
+    transition: opacity 0.4s ease;
+  }
+  .ss-float button {
     font-family: "Roboto Mono", "JetBrains Mono", "Fira Code", monospace;
     font-size: 1rem;
     color: var(--accent);
@@ -217,10 +226,13 @@ import { PALETTES } from '../lib/palettes';
     border-radius: 4px;
     padding: 0.45rem 0.7rem;
     cursor: pointer;
-    transition: opacity 0.4s ease;
   }
-  .ss-fs:hover { border-color: var(--accent); color: var(--accent-bright); }
-  body.ss-idle .ss-fs { opacity: 0; pointer-events: none; }
+  .ss-float button:hover { border-color: var(--accent); color: var(--accent-bright); }
+  body.ss-idle .ss-float { opacity: 0; pointer-events: none; }
+  /* So [exit] and [add to home screen] still fit side by side on a 320px phone. */
+  @media (max-width: 359px) {
+    .ss-float button { font-size: 0.85rem; padding: 0.45rem 0.55rem; }
+  }
 
   .ss-install-hint {
     position: fixed;
@@ -261,6 +273,7 @@ import { PALETTES } from '../lib/palettes';
   .ss-buttons button:hover { border-color: var(--accent); color: var(--accent-bright); }
   .ss-status, .ss-hint { margin: 0; color: var(--fg-muted); }
   .ss-hint { font-size: 0.7rem; opacity: 0.8; }
+  .ss-hint span { white-space: nowrap; }
 
   .ss-panel:not([data-pattern="cycle"]) .ss-when-cycle,
   .ss-panel:not([data-color-source="custom"]) .ss-when-custom,
