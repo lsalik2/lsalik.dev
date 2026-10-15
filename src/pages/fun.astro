@@ -18,7 +18,7 @@ const ENTRIES = ['fortune', 'curl', 'screensaver', 'ssh', 'man'] as const;
 
   <TerminalFrame title="$ fortune" id="fortune">
     <FortuneBubble fortune={fortune} width={40} narrowWidth={26} />
-    <a href="/fortune" class="fun-button">[another]</a>
+    <a href="/fortune" class="fun-button fun-another">[another]</a>
   </TerminalFrame>
 
   <section class="curl-easter-egg" id="curl">
@@ -88,6 +88,12 @@ const ENTRIES = ['fortune', 'curl', 'screensaver', 'ssh', 'man'] as const;
     font-size: 0.85rem;
   }
 
+  /* <code> otherwise falls back to the browser's default monospace. */
+  .fun-cmd,
+  .fun-hint code {
+    font-family: inherit;
+  }
+
   .fun-button {
     display: inline-block;
     margin-top: 0.25rem;
@@ -104,7 +110,7 @@ const ENTRIES = ['fortune', 'curl', 'screensaver', 'ssh', 'man'] as const;
     border-color: var(--accent);
   }
 
-  #fortune .fun-button {
+  .fun-another {
     margin-top: 0.75rem;
   }
 
