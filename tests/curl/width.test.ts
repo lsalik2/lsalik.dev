@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   renderHome,
+  renderFun,
   renderBlogIndex,
   renderBlogPost,
   renderRSS,
@@ -76,6 +77,7 @@ const VIEWS: Record<string, (w: number) => string> = {
   ssh: w => renderSsh(w),
   screensaver: w => renderScreensaverNote(w),
   notFound: w => renderNotFound('/some/missing/page', w),
+  fun: w => renderFun(w, 'Premature optimization is the root of all evil. Weekend optimization is a hobby.'),
   fortune: w => renderFortune('Premature optimization is the root of all evil. Weekend optimization is a hobby.', w),
 };
 

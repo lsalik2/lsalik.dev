@@ -1,11 +1,6 @@
 ---
 import Page from '../layouts/Page.astro';
 import TerminalFrame from '../components/TerminalFrame.astro';
-import FortuneBubble from '../components/FortuneBubble.astro';
-import { pickFortune } from '../data/fortunes';
-
-// A fresh one on every visit (pages are server-rendered, no-store).
-const fortune = pickFortune();
 ---
 <Page title="Home" path="/">
   <section class="hero">
@@ -55,44 +50,13 @@ const fortune = pickFortune();
     </a>
   </TerminalFrame>
 
-  <TerminalFrame title="$ fortune">
-    <FortuneBubble fortune={fortune} width={40} narrowWidth={26} />
-    <a href="/fortune" class="fortune-more">[another]</a>
-  </TerminalFrame>
-
-  <section class="curl-easter-egg">
-    <button class="curl-teaser" id="curl-teaser" type="button" aria-expanded="false">
-      <div class="curl-teaser-titlebar">~ &mdash; bash &mdash; 80x24</div>
-      <div class="curl-teaser-body">
-        <span class="curl-prompt">$</span> curl -L lsalik.dev<span class="curl-cursor" aria-hidden="true"></span>
-        <span class="curl-hint">click to run</span>
-      </div>
-    </button>
-    <div class="curl-demo-wrapper" id="curl-demo-wrapper">
-      <div class="curl-demo-body">
-        <pre id="curl-demo-output"></pre>
-      </div>
-    </div>
-  </section>
+  <p class="terminal-note">
+    this site also works in your terminal: <code class="terminal-cmd">curl -L lsalik.dev</code>
+    <a href="/fun#curl" class="terminal-note-link">[see it run]</a>
+  </p>
 </Page>
 
 <style>
-  .fortune-more {
-    display: inline-block;
-    margin-top: 0.75rem;
-    font-size: 0.85rem;
-    color: var(--accent);
-    text-decoration: none;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 0.2rem 0.6rem;
-  }
-
-  .fortune-more:hover {
-    color: var(--accent-bright);
-    border-color: var(--accent);
-  }
-
   .hero {
     margin: 0 0 1.5rem;
   }
@@ -173,125 +137,26 @@ const fortune = pickFortune();
     color: var(--accent-bright);
   }
 
-  .curl-easter-egg {
-    margin-top: 1rem;
-  }
-
-  .curl-teaser {
-    display: block;
-    width: 100%;
-    text-align: left;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0;
-    color: var(--fg-muted);
-    font-family: inherit;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: border-color 0.15s;
-    overflow: hidden;
-  }
-
-  .curl-teaser:hover {
-    border-color: var(--accent);
-  }
-
-  .curl-teaser-titlebar {
-    background-color: var(--bg-surface);
-    padding: 0.5rem 1rem;
+  .terminal-note {
+    margin: 1.25rem 0 0;
     font-size: 0.85rem;
     color: var(--fg-muted);
-    border-bottom: 1px solid var(--border);
   }
 
-  .curl-teaser-body {
-    background-color: var(--bg);
-    padding: 0.75rem 1rem;
-  }
-
-  .curl-prompt {
-    color: var(--green);
-    margin-right: 0.25ch;
-  }
-
-  .curl-cursor {
-    display: inline-block;
-    width: 0.8ch;
-    height: 1.1em;
-    background-color: var(--cursor);
-    margin-left: 0.25ch;
-    vertical-align: text-bottom;
-    animation: cursor-blink 1s step-end infinite;
-  }
-
-  @keyframes cursor-blink {
-    50% { opacity: 0; }
-  }
-
-  .curl-hint {
-    float: right;
-    font-size: 0.75rem;
-    color: var(--fg-muted);
-    opacity: 0.5;
-  }
-
-  .curl-teaser:hover .curl-hint {
-    opacity: 0.8;
+  .terminal-cmd {
     color: var(--accent);
+    font-family: inherit; /* not the browser's default monospace */
   }
 
-  .curl-demo-wrapper {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease;
+  .terminal-note-link {
+    color: var(--accent);
+    text-decoration: none;
+    white-space: nowrap;
   }
 
-  .curl-demo-wrapper.expanded {
-    max-height: 600px;
+  .terminal-note-link:hover {
+    color: var(--accent-bright);
   }
 
-  .curl-demo-body {
-    background-color: var(--bg);
-    border: 1px solid var(--border);
-    border-top: none;
-    border-radius: 0 0 4px 4px;
-    min-height: 380px;
-    padding: 0.75rem 1rem;
-  }
-
-  #curl-demo-output {
-    font: inherit;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Cascadia Mono", "DejaVu Sans Mono", "Liberation Mono", monospace;
-    line-height: 1;
-    letter-spacing: 0;
-    white-space: pre-wrap;
-    margin: 0;
-  }
 </style>
 
-<style is:global>
-  .ansi-bold { font-weight: bold; }
-  .ansi-dim { opacity: 0.6; }
-  .ansi-underline { text-decoration: underline; }
-  .ansi-red { color: var(--ansi-red, #e06c75); }
-  .ansi-green { color: var(--ansi-green, #98c379); }
-  .ansi-amber { color: var(--ansi-amber, #e5c07b); }
-  .ansi-blue { color: var(--ansi-blue, #61afef); }
-  .ansi-cyan { color: var(--ansi-cyan, #56b6c2); }
-  .ansi-border-dim { color: var(--ansi-border-dim, #626262); }
-  .ansi-title-bright { color: var(--ansi-title-bright, #5fd7ff); }
-  .ansi-body-warm { color: var(--ansi-body-warm, #ffd7af); }
-  .ansi-accent-magenta { color: var(--ansi-accent-magenta, #ff87af); }
-  .ansi-accent-green { color: var(--ansi-accent-green, #87ff87); }
-
-  .cursor-inline {
-    color: var(--cursor, var(--accent, #98c379));
-    animation: blink 1s step-end infinite;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-</style>

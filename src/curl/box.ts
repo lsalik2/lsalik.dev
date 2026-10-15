@@ -110,9 +110,45 @@ export function wrap(text: string, width: number): string {
       output.push('');
       continue;
     }
-    output.push(...wrapParagraph(paragraph, width));
+    output.push(...carryStyles(wrapParagraph(paragraph, width)));
   }
   return output.join('\n');
+}
+
+const SGR_RE = /\x1b\[[\d;]*m/g;
+const RESET = '\x1b[0m';
+
+// The SGR attributes in effect after `seq`, one escape per attribute (the
+// helpers in ./ansi emit one attribute per escape).
+function applySgr(state: Map<string, string>, seq: string): void {
+  const head = seq.slice(2, -1).split(';')[0];
+  if (head === '' || head === '0') state.clear();
+  else if (head === '1') state.set('bold', seq);
+  else if (head === '2') state.set('dim', seq);
+  else if (head === '22') { state.delete('bold'); state.delete('dim'); }
+  else if (head === '3') state.set('italic', seq);
+  else if (head === '23') state.delete('italic');
+  else if (head === '4') state.set('underline', seq);
+  else if (head === '24') state.delete('underline');
+  else if (head === '39') state.delete('fg');
+  else if (head === '49') state.delete('bg');
+  else if (head === '38' || /^(3[0-7]|9[0-7])$/.test(head)) state.set('fg', seq);
+  else if (head === '48' || /^(4[0-7]|10[0-7])$/.test(head)) state.set('bg', seq);
+}
+
+// When styled text wraps, close whatever is still open at the end of each
+// line and reopen it at the start of the next. Otherwise a box border drawn
+// after the line inherits the style, and a renderer that converts one line
+// at a time (the browser curl demo) drops it from the continuation.
+function carryStyles(lines: string[]): string[] {
+  if (lines.length < 2) return lines;
+  const state = new Map<string, string>();
+  return lines.map((line, i) => {
+    const reopen = [...state.values()].join('');
+    for (const seq of line.match(SGR_RE) ?? []) applySgr(state, seq);
+    const close = state.size > 0 && i < lines.length - 1 ? RESET : '';
+    return reopen + line + close;
+  });
 }
 
 function wrapParagraph(text: string, width: number): string[] {

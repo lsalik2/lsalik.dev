@@ -1,5 +1,6 @@
 import { ansiToNodes } from '../lib/ansi-to-dom';
 import { renderHome } from '../curl/render';
+import { fitDemo } from '../lib/demo-layout';
 
 function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -9,9 +10,34 @@ function randomBetween(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-async function runCurlDemo(container: HTMLElement): Promise<void> {
+// Width of one column of the output's monospace font, in px.
+function columnWidth(container: HTMLElement): number {
+  const probe = document.createElement('span');
+  probe.style.whiteSpace = 'pre';
+  probe.textContent = '0'.repeat(80);
+  container.appendChild(probe);
+  const width = probe.getBoundingClientRect().width / 80;
+  probe.remove();
+  return width;
+}
+
+interface DemoLayout {
+  cols: number;
+  fontPx: number;
+  baseFont: number;
+}
+
+// The width that fits the box right now, like a terminal that size would
+// (?cols=), and the font size: smaller on phones where even 40 columns don't fit.
+function fit(container: HTMLElement): DemoLayout {
+  const baseFont = parseFloat(getComputedStyle(container).fontSize);
+  return { ...fitDemo(container.clientWidth, columnWidth(container), baseFont), baseFont };
+}
+
+async function runCurlDemo(container: HTMLElement, { cols, fontPx, baseFont }: DemoLayout): Promise<void> {
   const COMMAND = '$ curl -L lsalik.dev';
-  const response = renderHome();
+  if (fontPx !== baseFont) container.style.fontSize = `${fontPx}px`;
+  const response = renderHome(cols);
 
   // Pre-measure the full content to set the container height before animation starts.
   // This prevents the block from expanding as content streams in. We only GROW the
@@ -25,7 +51,7 @@ async function runCurlDemo(container: HTMLElement): Promise<void> {
     ghost.style.cssText =
       'position:absolute;visibility:hidden;pointer-events:none;' +
       'font:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Cascadia Mono","DejaVu Sans Mono","Liberation Mono",monospace;' +
-      'line-height:1;letter-spacing:0;white-space:pre-wrap;margin:0;' +
+      `font-size:${fontPx}px;line-height:1;letter-spacing:0;white-space:pre;margin:0;` +
       `width:${container.offsetWidth}px`;
     ghost.textContent =
       COMMAND + '\n\n' + response.replace(/\x1b\[[\d;]*m/g, '');
@@ -96,19 +122,45 @@ function init(): void {
   const container = document.getElementById('curl-demo-output');
   if (!teaser || !wrapper || !container) return;
 
+  // The wrapper opens to its content's real height (a fixed cap would clip
+  // the output on narrow screens, where it's taller).
+  const fitHeight = () => {
+    if (wrapper.classList.contains('expanded')) wrapper.style.maxHeight = `${wrapper.scrollHeight}px`;
+  };
+
   let started = false;
+
+  // The title bar shows the terminal size the demo will render at. It follows
+  // the box until the demo runs; after that the printed output keeps its width.
+  const size = teaser.querySelector<HTMLElement>('[data-curl-size]');
+  const showSize = (cols: number) => {
+    if (size) size.textContent = `${cols}x24`;
+  };
+  showSize(fit(container).cols);
+  const resize = new ResizeObserver(() => {
+    if (started || !container.isConnected) resize.disconnect();
+    else showSize(fit(container).cols);
+  });
+  resize.observe(container);
+
   teaser.addEventListener('click', () => {
     const isExpanded = wrapper.classList.contains('expanded');
     if (isExpanded) {
       wrapper.classList.remove('expanded');
+      wrapper.style.maxHeight = '';
       teaser.setAttribute('aria-expanded', 'false');
     } else {
       wrapper.classList.add('expanded');
       teaser.setAttribute('aria-expanded', 'true');
       if (!started) {
         started = true;
-        runCurlDemo(container);
+        resize.disconnect();
+        const layout = fit(container);
+        showSize(layout.cols);
+        // Sizes the body before its first await, so fitHeight sees the full height.
+        void runCurlDemo(container, layout).then(fitHeight);
       }
+      fitHeight();
     }
   });
 }

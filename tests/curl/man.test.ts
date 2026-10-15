@@ -120,3 +120,14 @@ describe('MAN shortcuts section', () => {
     expect(defs).toContainEqual({ term: 'spinner', def: 'click or tap the ⠋ in the prompt to open the screensaver' });
   });
 });
+
+describe('the site man page', () => {
+  it('documents /fun and g f', () => {
+    const plain = stripAnsi(renderMan(MAN));
+    expect(plain).toContain('/fun');
+    // Definitions wrap to the page width, so compare with whitespace collapsed.
+    expect(plain.replace(/\s+/g, ' ')).toContain('the fun side: fortunes, the curl demo, the screensaver and cats in your terminal.');
+    expect(plain).toContain('g f');
+    expect(plain).toContain('go to fun');
+  });
+});

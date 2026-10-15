@@ -33,6 +33,7 @@ const G_BINDINGS: Readonly<Record<string, string>> = {
   b: '/blog',
   c: '/contact',
   u: '/uses',
+  f: '/fun',
   s: '/screensaver',
 };
 

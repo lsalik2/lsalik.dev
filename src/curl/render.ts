@@ -68,7 +68,7 @@ function fit(line: string, max: number): string[] {
 // Below this width the /uses logo stacks above the info instead of beside it.
 const USES_SIDE_BY_SIDE_MIN = 64;
 
-export function renderHome(width: number = PAGE_WIDTH, fortune: string = pickFortune()): string {
+export function renderHome(width: number = PAGE_WIDTH): string {
   const logo = renderLogo();
   const title = bold(titleBright('lsalik.dev'));
   const description = dim('terminal-inspired personal website');
@@ -81,10 +81,7 @@ export function renderHome(width: number = PAGE_WIDTH, fortune: string = pickFor
 
   const source = fit(dim('source: https://github.com/lsalik2/lsalik.dev'), width);
 
-  // Every visit deals a fortune, like the $ fortune frame on the web homepage.
-  const fortuneBlock = [`${green('$')} fortune`, renderFortune(fortune, width)];
-
-  return [headerBox, '', navBox, '', ...fortuneBlock, '', ...source].join('\n');
+  return [headerBox, '', navBox, '', ...source].join('\n');
 }
 
 export function renderBlogIndex(posts: BlogPostSummary[], width: number = PAGE_WIDTH): string {
@@ -445,4 +442,30 @@ export function renderFortune(fortune: string, width: number = PAGE_WIDTH): stri
   const cat = FORTUNE_CAT.map(line => ' '.repeat(8) + line);
   cat[0] = '    \\' + cat[0].slice(5);
   return [bubble, ...['   \\', ...cat].map(line => dim(line))].join('\n');
+}
+
+// curl -L lsalik.dev/fun — the extras, kept off the professional pages, and
+// a fortune to finish (it used to end curl home).
+const FUN_ENTRIES: ReadonlyArray<readonly [command: string, description: string]> = [
+  ['curl -L lsalik.dev/fortune', 'a fortune, with a cat'],
+  ['curl -L lsalik.dev/man', "the site's man page"],
+  ['lsalik.dev/screensaver', 'the screensaver (browser only)'],
+  ['curl -L lsalik.dev/ssh', 'meet the maintainers'],
+];
+
+export function renderFun(width: number = PAGE_WIDTH, fortune: string = pickFortune()): string {
+  const inner = width - 4; // the box's borders and padding
+  const commandCol = Math.max(...FUN_ENTRIES.map(([command]) => command.length));
+  const descriptionCol = Math.max(...FUN_ENTRIES.map(([, description]) => description.length));
+  // Side by side when every row fits; otherwise each description goes under its command.
+  const sideBySide = commandCol + 2 + descriptionCol <= inner;
+  const rows = sideBySide
+    ? FUN_ENTRIES.map(([command, description]) => `${cyan(command.padEnd(commandCol))}  ${dim(description)}`)
+    : FUN_ENTRIES.flatMap(([command, description], i) => [
+        ...(i > 0 ? [''] : []),
+        cyan(command),
+        dim(description),
+      ]);
+  const funBox = box(rows, { title: '~/fun', width });
+  return [funBox, '', `${green('$')} fortune`, renderFortune(fortune, width)].join('\n');
 }
