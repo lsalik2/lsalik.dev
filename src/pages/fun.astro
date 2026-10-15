@@ -177,10 +177,6 @@ const fortune = pickFortune();
     transition: max-height 0.4s ease;
   }
 
-  .curl-demo-wrapper.expanded {
-    max-height: 600px;
-  }
-
   .curl-demo-body {
     background-color: var(--bg);
     border: 1px solid var(--border);
@@ -188,6 +184,7 @@ const fortune = pickFortune();
     border-radius: 0 0 4px 4px;
     min-height: 380px;
     padding: 0.75rem 1rem;
+    overflow-x: auto; /* a safety net: the island sizes the output to fit */
   }
 
   #curl-demo-output {
@@ -195,7 +192,7 @@ const fortune = pickFortune();
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Cascadia Mono", "DejaVu Sans Mono", "Liberation Mono", monospace;
     line-height: 1;
     letter-spacing: 0;
-    white-space: pre-wrap;
+    white-space: pre; /* rendered to fit; wrapping would break the box art */
     margin: 0;
   }
 </style>

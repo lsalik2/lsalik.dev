@@ -44,7 +44,7 @@ describe('renderHome', () => {
       fs.readFileSync('src/islands/curl-demo.ts', 'utf8'),
     );
     expect(demoSource).toContain("import { renderHome } from '../curl/render'");
-    expect(demoSource).toContain('renderHome()');
+    expect(demoSource).toContain('renderHome(cols)'); // at the width that fits the box
     // No private nav list allowed in the island.
     expect(demoSource).not.toContain("curl -L lsalik.dev/blog'");
     expect(demoSource).not.toContain("curl -L lsalik.dev/links");
