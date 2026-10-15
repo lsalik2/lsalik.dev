@@ -448,9 +448,9 @@ export function renderFortune(fortune: string, width: number = PAGE_WIDTH): stri
 // a fortune to finish (it used to end curl home).
 const FUN_ENTRIES: ReadonlyArray<readonly [command: string, description: string]> = [
   ['curl -L lsalik.dev/fortune', 'a fortune, with a cat'],
-  ['curl -L lsalik.dev/ssh', 'meet the maintainers'],
   ['curl -L lsalik.dev/man', "the site's man page"],
   ['lsalik.dev/screensaver', 'the screensaver (browser only)'],
+  ['curl -L lsalik.dev/ssh', 'meet the maintainers'],
 ];
 
 export function renderFun(width: number = PAGE_WIDTH, fortune: string = pickFortune()): string {

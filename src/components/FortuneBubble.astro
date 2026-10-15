@@ -1,6 +1,7 @@
 ---
 // A fortune in its speech bubble with the cat: the same art curl gets, as
-// plain text. Used by /fortune and the homepage's $ fortune frame.
+// plain text. Used by /fortune and the $ fortune frame on ~/fun, whose
+// [another] redraws it at each copy's data-width.
 //
 // A text bubble can't reflow, so with `narrowWidth` it's rendered twice and
 // CSS shows the one that fits (display: none also hides the other copy from
@@ -18,8 +19,8 @@ const { fortune, width, narrowWidth } = Astro.props;
 const art = stripAnsi(renderFortune(fortune, width));
 const narrowArt = narrowWidth === undefined ? null : stripAnsi(renderFortune(fortune, narrowWidth));
 ---
-<pre class:list={['fortune-art', { 'fortune-wide': narrowArt !== null }]} aria-label={fortune}>{art}</pre>
-{narrowArt !== null && <pre class="fortune-art fortune-narrow" aria-label={fortune}>{narrowArt}</pre>}
+<pre class:list={['fortune-art', { 'fortune-wide': narrowArt !== null }]} aria-label={fortune} data-width={width}>{art}</pre>
+{narrowArt !== null && <pre class="fortune-art fortune-narrow" aria-label={fortune} data-width={narrowWidth}>{narrowArt}</pre>}
 
 <style>
   /* Same stack as the home page curl demo: fonts with box-drawing glyphs, so

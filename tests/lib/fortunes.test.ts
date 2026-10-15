@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FORTUNES, pickFortune } from '../../src/data/fortunes';
+import { FORTUNES, pickFortune, pickAnotherFortune } from '../../src/data/fortunes';
 import { renderFortune } from '../../src/curl/render';
 import { visibleWidth } from '../../src/curl/ansi';
 
@@ -27,6 +27,24 @@ describe('pickFortune', () => {
     expect(pickFortune(() => 0)).toBe(FORTUNES[0]);
     expect(pickFortune(() => 0.999999)).toBe(FORTUNES[FORTUNES.length - 1]);
     for (let i = 0; i < 50; i++) expect(FORTUNES).toContain(pickFortune());
+  });
+});
+
+describe('pickAnotherFortune', () => {
+  it('never deals the fortune already showing', () => {
+    for (const current of FORTUNES) {
+      for (const r of [0, 0.5, 0.999999]) {
+        const next = pickAnotherFortune(current, () => r);
+        expect(next).not.toBe(current);
+        expect(FORTUNES).toContain(next);
+      }
+    }
+  });
+
+  it('can deal every other fortune', () => {
+    const n = FORTUNES.length;
+    const seen = new Set(Array.from({ length: n - 1 }, (_, i) => pickAnotherFortune(FORTUNES[0], () => i / (n - 1))));
+    expect(seen.size).toBe(n - 1);
   });
 });
 
