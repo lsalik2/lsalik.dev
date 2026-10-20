@@ -130,4 +130,10 @@ describe('the site man page', () => {
     expect(plain).toContain('g f');
     expect(plain).toContain('go to fun');
   });
+
+  it('credits the author by handle', () => {
+    const plain = stripAnsi(renderMan(MAN));
+    expect(plain).toContain('Written by lsalik2.');
+    expect(plain).not.toContain('Luis Salik');
+  });
 });
