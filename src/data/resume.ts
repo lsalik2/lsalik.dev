@@ -54,8 +54,8 @@ export const RESUME: Resume = {
       dates: 'December 2025 - June 2026',
       bullets: [
         'Engineered time-series forecasting pipelines using ARIMA and Random Forest models, identifying 200 anomalies in manufacturing data, improving predictive accuracy by 30%.',
-        'Designed and deployed an interactive Streamlit dashboard to deliver key insights to the Executive Leadership Team, streamlining reports and eliminating past-due orders by 80%.',
-        'Refactored website architecture and integrated Typesense for optimized search indexing, accelerating page load speeds by 40% and boosting organic SEO traffic by 25%.',
+        'Built SQL data models and ELT integrations in Amazon Redshift connecting ERP, PIM (Akeneo), CMS, and CRM (HubSpot) systems, streamlining reports and eliminating past-due orders by 80%.',
+        'Refactored website architecture and integrated Typesense for optimized search indexing, accelerating page load speeds and content retrieval by 30%.',
       ],
     },
     {
@@ -64,9 +64,20 @@ export const RESUME: Resume = {
       location: 'Remote',
       dates: 'December 2023 - December 2025',
       bullets: [
-        'Created and led high-performance programs and interactive workshops, driving global client acquisition, with over 100 clients from North America, Europe, Oceania and the Middle East.',
         "Integrated REST APIs to process 1000+ gameplay hours using Python on robust backend pipelines, leveraging Pandas to produce classification models on athletes' playstyles.",
         'Designed 16+ metrics using data science frameworks (scikit-learn, XGBoost) for insights on player capabilities, improving performances by 40% over three months.',
+        'Created and led high-performance programs and interactive workshops, driving global client acquisition, with over 100 clients internationally.',
+      ],
+    },
+    {
+      title: 'Aerospace Engineer Intern',
+      company: 'Trimas Aerospace',
+      location: 'CA',
+      dates: 'June 2023 - August 2023',
+      bullets: [
+        'Developed an Ollama-based LLM using LangChain with retrieval-augmented generation (RAG) to optimize search and summarization across 150+ technical documents and engineering standards.',
+        'Utilized SolidWorks for component modeling on blind fasteners adhering to FAA and AS9100 standards.',
+        'Conducted detailed failure analysis using non-destructive testing methods to evaluate fatigue, stress, corrosion, and grain structure abnormalities in band-annealed steel parts.',
       ],
     },
   ],
@@ -77,14 +88,14 @@ export const RESUME: Resume = {
       bullets: [
         'Designed and implemented autonomous collision avoidance systems for drones in C.',
         'Manufactured and tested carbon fiber paneling created with prepreg lamination techniques.',
-        'Proceed, analyzed and managed big data for weather patterns via Pandas and Dask.',
+        'Processed, analyzed and managed big data for weather patterns via Pandas and Dask.',
       ],
     },
   ],
   skills: [
     {
       label: 'Programming',
-      items: ['Python', 'C', 'C++', 'Rust', 'TypeScript', 'JavaScript', 'Astro', 'Git', 'Docker', 'AWS', 'CI/CD'],
+      items: ['Python', 'C', 'C++', 'Rust', 'TypeScript', 'SQL', 'Git', 'Docker', 'AWS', 'CI/CD', 'Redshift'],
     },
     {
       label: 'Mechanical Design & Testing',

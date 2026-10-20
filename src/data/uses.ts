@@ -18,7 +18,6 @@ export interface Uses {
   readonly categories: readonly UsesCategory[];
 }
 
-// Placeholder values — edit before shipping.
 export const USES: Uses = {
   categories: [
     {
@@ -41,8 +40,8 @@ export const USES: Uses = {
     {
       heading: 'languages',
       items: [
-        { key: 'daily', value: 'Python · TypeScript · C · Java' },
-        { key: 'occasional', value: 'Assembly · Rust · Lua · C++' },
+        { key: 'daily', value: 'Python · TypeScript · Rust · Java' },
+        { key: 'occasional', value: 'C · C++ · C# · Go · SQL · Lua · GDScript · Assembly' },
       ],
     },
     {

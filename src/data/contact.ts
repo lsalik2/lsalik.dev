@@ -14,7 +14,7 @@ export const CONTACT_SECTIONS: readonly ContactSection[] = [
     links: [
       { label: 'GitHub', url: 'https://github.com/lsalik2' },
       { label: 'LinkedIn', url: 'https://linkedin.com/in/luis-salik' },
-      { label: 'Discord User Link', url: 'https://discord.gg/6zdHqY7h' },
+      { label: 'Discord User Link', url: 'https://discord.com/users/302198984238170113' },
     ],
   },
   {

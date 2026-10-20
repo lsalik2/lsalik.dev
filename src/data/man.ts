@@ -155,7 +155,7 @@ export const MAN: Man = {
       blocks: [
         {
           type: 'prose',
-          text: 'Written by Luis Salik. Source at https://github.com/lsalik2/lsalik.dev.',
+          text: 'Written by lsalik2. Source at https://github.com/lsalik2/lsalik.dev.',
         },
       ],
     },
