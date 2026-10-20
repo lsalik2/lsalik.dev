@@ -54,4 +54,12 @@ describe('renderResume', () => {
   it('contains a PDF download hint', () => {
     expect(plain).toContain('resume.pdf');
   });
+
+  it('lists every job from the current resume.pdf, newest first', () => {
+    expect(RESUME.experience.map(job => job.company)).toEqual([
+      'MW Components',
+      'Valor Esports',
+      'Trimas Aerospace',
+    ]);
+  });
 });
