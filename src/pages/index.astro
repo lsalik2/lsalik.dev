@@ -2,7 +2,11 @@
 import Page from '../layouts/Page.astro';
 import TerminalFrame from '../components/TerminalFrame.astro';
 ---
-<Page title="Home" path="/">
+<Page
+  title="Home"
+  path="/"
+  description="Luis Salik (lsalik2): aerospace and software engineer with experience in data science and machine learning, founder of Quietfield and open-source developer."
+>
   <section class="hero">
     <h1 class="hero-title"><span class="accent">lsalik</span>.dev</h1>
     <p class="tagline">aerospace & software engineer</p>
@@ -13,9 +17,9 @@ import TerminalFrame from '../components/TerminalFrame.astro';
       <dt>name</dt>
       <dd>Luis Salik</dd>
       <dt>current role</dt>
-      <dd>data integration engineer</dd>
+      <dd>founder of <a href="https://quietfield.dev">quietfield</a></dd>
       <dt>focus</dt>
-      <dd>ML &middot; data science &middot; manufacturing processes</dd>
+      <dd>data science &middot; ML &middot; open-source apps &amp; tools</dd>
       <dt>github</dt>
       <dd><a href="https://github.com/lsalik2">lsalik2</a></dd>
       <dt>linkedin</dt>
@@ -26,10 +30,18 @@ import TerminalFrame from '../components/TerminalFrame.astro';
   <TerminalFrame title="./about">
     <p class="about-text">
       hi! i'm luis salik. i'm an <span class="accent">aerospace</span> and
-      <span class="accent">software engineer</span> specializing in
-      machine learning, control systems, data science, and
+      <span class="accent">software engineer</span> with experience in
+      data science, machine learning, control systems, and
       manufacturing processes. i like to build things; mostly software, mostly
       in the open. if it's on this website, then it was worth publishing.
+    </p>
+    <p class="about-text">
+      these days i run <a href="https://quietfield.dev">quietfield</a>, a small
+      software studio making apps, websites and games that keep your data yours.
+      its first release is <a href="/projects/finch">finch</a>, a free,
+      open-source media player for the steam deck, written in rust. i've also
+      released <a href="/projects/bashcraft">bashcraft</a>, a minecraft mod that
+      brings bash to the command line, and this site, both open source.
     </p>
   </TerminalFrame>
 
@@ -39,8 +51,8 @@ import TerminalFrame from '../components/TerminalFrame.astro';
       <li><span class="bullet">&rsaquo;</span> operating systems and low-level programming</li>
       <li><span class="bullet">&rsaquo;</span> machine learning and its applications</li>
       <li><span class="bullet">&rsaquo;</span> game design and development</li>
-      <li><span class="bullet">&rsaquo;</span> small, owned infrastructure</li>
-      <li><span class="bullet">&rsaquo;</span> anything that runs offline</li>
+      <li><span class="bullet">&rsaquo;</span> local-first, privacy-respecting software</li>
+      <li><span class="bullet">&rsaquo;</span> open-source apps and tools for linux and the terminal</li>
     </ul>
   </TerminalFrame>
 
@@ -105,6 +117,10 @@ import TerminalFrame from '../components/TerminalFrame.astro';
 
   .about-text .accent {
     color: var(--accent);
+  }
+
+  .about-text + .about-text {
+    margin-top: 0.75rem;
   }
 
   .interests-list {
