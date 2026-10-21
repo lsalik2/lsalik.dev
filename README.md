@@ -97,6 +97,13 @@ Blog posts live in `src/content/blog/` and project entries in `src/content/proje
 
 **Projects:** `title`, `date`, `endDate` (optional), `stack`, `status`, `description`, `permissions` (default `drwxr-xr-x`), `url` (optional), `repo` (optional; GitHub repos get stars and last-push info), `active` (default `false`; shows the `● working on` badge and lists the project first)
 
+## Swapping the ~/fun art
+
+The car and ball in `~/fun`'s esports section (browser and `curl`) are plain text in `src/data/art/`. To change them, replace the files:
+
+- `car.txt` and `ball.txt`: drawn side by side with their bottoms aligned, so any height works. The car, a 2-column gap and the ball must fit **76 columns** together, so the default 80-column terminal shows the whole scene; `tests/data/esports.test.ts` checks it. Use plain ASCII (plus `·` and `≈`), no tabs.
+- `caption.txt`: one line describing the picture, read out by screen readers in place of the art.
+
 ## Build-time integrations
 
 - **`og-images`:** renders a 1200×630 PNG per blog post and project at `/og/<collection>/<slug>.png` with satori and resvg, styled like a terminal window.
