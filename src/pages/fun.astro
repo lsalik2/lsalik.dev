@@ -556,25 +556,27 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
      it still doesn't fit; it never wraps. */
   .esports-art {
     margin: 0;
-    padding: 1rem 0.75rem;
+    padding: 1rem 0.5rem;
     border: 1px solid var(--border);
     border-radius: 4px;
     background-color: var(--bg-surface);
     overflow-x: auto;
   }
 
+  /* The font size lives on the row so the 2ch gap scales with the art. At
+     375px wide the smallest size fits the whole 74-column scene. */
   .art-row {
     display: flex;
     align-items: flex-end;
     gap: 2ch;
     width: max-content;
     margin: 0 auto;
+    font-size: clamp(5px, 1.3vw, 12.5px);
   }
 
   .art-row pre {
     margin: 0;
-    font-family: inherit;
-    font-size: clamp(6.5px, 1.3vw, 12.5px);
+    font: inherit;
     line-height: 1.2;
     white-space: pre;
   }
