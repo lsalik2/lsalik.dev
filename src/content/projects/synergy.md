@@ -6,6 +6,7 @@ status: "Concept"
 description: "Synergy is a combat-focused magic mod for Minecraft currently in development, using Fabric."
 permissions: "drwx------"
 active: true
+order: 10
 ---
 
 A lot of magic mods in Minecraft overcomplicate things. Too many keybinds, and now your players forget what button does what. Too many items, and now it becomes a hassle to switch items from inventory to hotbar just to use a spell. No proper scaling, and now you have players one-shotting bosses after just getting started playing, or maybe never becoming powerful because the level curve for the mod is badly tuned. And the most common issue I find with magic/combat mods; they never do the PvP interactions right.

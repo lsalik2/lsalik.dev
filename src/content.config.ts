@@ -26,6 +26,8 @@ const projects = defineCollection({
     permissions: z.string().default('drwxr-xr-x'),
     // Currently being worked on: badged and listed first on /projects.
     active: z.boolean().default(false),
+    // Position on /projects, 1 first. Projects without one follow the ordered ones.
+    order: z.number().int().positive().optional(),
   }),
 });
 

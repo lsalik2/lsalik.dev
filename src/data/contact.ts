@@ -25,7 +25,6 @@ export const CONTACT_SECTIONS: readonly ContactSection[] = [
       { label: 'Twitch', url: 'https://twitch.tv/slkrl' },
       { label: 'YouTube', url: 'https://youtube.com/@slk-rl' },
       { label: 'Steam', url: 'https://steamcommunity.com/id/SlkRL' },
-      { label: 'Discord Server', url: 'https://discord.gg/dsUfTqmE4d' },
     ],
   },
 ] as const;

@@ -6,6 +6,7 @@ status: "Beta"
 description: "A free, open-source media player for the couch, built for the Steam Deck and any Linux PC running Steam Big Picture."
 permissions: "drwx------"
 active: true
+order: 1
 ---
 
 Plug in a drive full of shows and movies, see them as a library, press A, watch. Finch has no accounts, no ads, no telemetry and no update nags; every network call it will ever make is opt-in and visible. It's named after my cat.
