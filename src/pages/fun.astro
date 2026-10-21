@@ -299,6 +299,12 @@ const external = { target: '_blank', rel: 'noopener noreferrer' };
     border-color: var(--accent);
   }
 
+  /* [hidden] loses to the display rule above; [copy] stays hidden until its
+     script shows it. */
+  .fun-button[hidden] {
+    display: none;
+  }
+
   .fun-button-solid {
     color: var(--bg);
     background-color: var(--accent);

@@ -21,3 +21,9 @@ it('takes the saying count from FORTUNES', () => {
   expect(src).toContain('FORTUNES.length');
   expect(src).not.toMatch(/\b43 sayings/);
 });
+
+it('keeps [copy] hidden until its script runs, despite the button display rule', () => {
+  // [hidden] loses to any author display rule, so it needs its own rule.
+  expect(src).toContain('data-copy="curl -L lsalik.dev" hidden');
+  expect(src).toMatch(/\.fun-button\[hidden\]\s*\{\s*display:\s*none;?\s*\}/);
+});
