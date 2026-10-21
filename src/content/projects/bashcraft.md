@@ -7,6 +7,7 @@ repo: "https://github.com/lsalik2/bashcraft"
 description: "A Fabric mod that brings bash to Minecraft commands: chains, pipes, variables, aliases and timers, with an optional client companion that highlights chains in chat."
 permissions: "drwxr-xr-x"
 active: true
+order: 2
 ---
 
 Minecraft runs one command at a time. BashCraft adds `/sh`, which understands `&&`, `||`, `;` and `|`, so `/sh locate structure #minecraft:village | tp @s` finds the nearest village and takes you there in one line. Pipes pull coordinates, numbers or text out of one command's output and feed them into the next, appended or dropped into `{x}`, `{y}`, `{z}` and `{value}` placeholders.

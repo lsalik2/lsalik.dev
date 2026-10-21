@@ -5,6 +5,7 @@ stack: [Python, discord.py]
 status: "Alpha"
 description: "The all-purpose, general utility bot to kill server bot bloat."
 permissions: "drwx------"
+order: 11
 ---
 
 SLKBOT takes the complete opposite appoach of most bots in Discord. Generally, most bots try to cram as many features as possible, but inevitably leave some gaps that end up needing to be filled by other bots, which also cram in many features. This ends up in a **"bot bloat"**, where multiple bots are added with overlapping functionalities. This can confuse end-users on which bot does what.
