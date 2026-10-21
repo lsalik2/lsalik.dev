@@ -18,6 +18,7 @@ import { stripAnsi } from '../../src/curl/ansi';
 import { RESUME } from '../../src/data/resume';
 import { maintainerLines } from '../../src/data/maintainers';
 import { FORTUNES } from '../../src/data/fortunes';
+import { ART, artScene, artWidth } from '../../src/data/esports';
 
 describe('renderHome', () => {
   it('contains ANSI escape codes', () => {
@@ -361,16 +362,19 @@ describe('renderFun', () => {
     ]) expect(plain).toContain(s);
   });
 
-  it('lists them in the same order as the ~/fun page: fortune, man, screensaver, ssh', () => {
+  it('lists them in the same order as the ~/fun page: the fortune, screensaver and man in ./play, then the commands in ./terminal', () => {
     const plain = stripAnsi(renderFun(80, FORTUNE));
     const at = (s: string) => plain.indexOf(s);
-    expect(at('lsalik.dev/fortune')).toBeLessThan(at('lsalik.dev/man'));
-    expect(at('lsalik.dev/man')).toBeLessThan(at('lsalik.dev/screensaver'));
-    expect(at('lsalik.dev/screensaver')).toBeLessThan(at('lsalik.dev/ssh'));
+    expect(at('$ fortune')).toBeGreaterThan(at('./play'));
+    expect(at('$ fortune')).toBeLessThan(at('lsalik.dev/screensaver'));
+    expect(at('lsalik.dev/screensaver')).toBeLessThan(at('lsalik.dev/man'));
+    expect(at('lsalik.dev/man')).toBeLessThan(at('./terminal'));
+    expect(at('./terminal')).toBeLessThan(at('lsalik.dev/fortune'));
+    expect(at('lsalik.dev/fortune')).toBeLessThan(at('lsalik.dev/ssh'));
   });
 
   it('puts each command and its description on one line when they fit', () => {
-    expect(stripAnsi(renderFun(80, FORTUNE))).toMatch(/curl -L lsalik\.dev\/ssh +meet the maintainers/);
+    expect(stripAnsi(renderFun(80, FORTUNE))).toMatch(/curl -L lsalik\.dev\/ssh +terminal only: meet the maintainers/);
   });
 
   it('stacks the description under the command on narrow terminals', () => {
@@ -380,9 +384,8 @@ describe('renderFun', () => {
     expect(lines[i + 1]).toContain('meet the maintainers');
   });
 
-  it('ends with the given fortune, after the box', () => {
+  it('opens ./play with the given fortune and its cat', () => {
     const plain = stripAnsi(renderFun(80, FORTUNE));
-    expect(plain.indexOf('$ fortune')).toBeGreaterThan(plain.indexOf('lsalik.dev/screensaver'));
     expect(plain).toContain('│ Clear is better than clever. │');
     expect(plain).toContain('( o.o )');
   });
@@ -390,5 +393,40 @@ describe('renderFun', () => {
   it('deals a fortune of its own by default', () => {
     const plain = stripAnsi(renderFun());
     expect(FORTUNES.some(f => plain.replace(/[│\s]+/g, ' ').includes(f))).toBe(true);
+  });
+});
+
+describe('renderFun sections', () => {
+  const plain = (w: number) => stripAnsi(renderFun(w, 'Talk is cheap. Show me the diff.'));
+  it('lists ./play, ./terminal and ./esports in that order', () => {
+    const out = plain(80);
+    expect(out.indexOf('./play')).toBeGreaterThan(-1);
+    expect(out.indexOf('./play')).toBeLessThan(out.indexOf('./terminal'));
+    expect(out.indexOf('./terminal')).toBeLessThan(out.indexOf('./esports'));
+  });
+  // Computed from the art files, so these hold after Luis swaps the art.
+  const sceneW = artWidth(artScene(ART.car, ART.ball));
+  const carW = artWidth(ART.car);
+  const carMark = [...ART.car].sort((a, b) => b.trim().length - a.trim().length)[0].trim();
+  const ballMark = [...ART.ball].sort((a, b) => b.trim().length - a.trim().length)[0].trim();
+  it('draws the car and the ball at the default 80 columns', () => {
+    expect(plain(80)).toContain(carMark);
+    expect(plain(80)).toContain(ballMark);
+  });
+  it('draws the scene from scene width + 4, the car alone just below, and no art below car width + 4', () => {
+    expect(plain(sceneW + 4)).toContain(ballMark);
+    expect(plain(sceneW + 3)).not.toContain(ballMark);
+    expect(plain(sceneW + 3)).toContain(carMark);
+    if (carW + 3 >= 40) expect(plain(carW + 3)).not.toContain(carMark);
+  });
+  it('keeps each career row on one line when it fits, and stacks it at 40', () => {
+    expect(plain(80)).toMatch(/2021 – 2024\s+esports coordinator\s+university of illinois/);
+    expect(plain(40)).not.toMatch(/2021 – 2024\s+esports coordinator/);
+    expect(plain(40)).toContain('esports coordinator');
+  });
+  it('puts the tracker before the other esports links and drops the Discord server', () => {
+    const out = plain(160);
+    expect(out.indexOf('rocketleague.tracker.network')).toBeLessThan(out.indexOf('liquipedia.net'));
+    expect(out).not.toContain('discord.gg');
   });
 });

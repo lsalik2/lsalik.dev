@@ -126,7 +126,7 @@ describe('the site man page', () => {
     const plain = stripAnsi(renderMan(MAN));
     expect(plain).toContain('/fun');
     // Definitions wrap to the page width, so compare with whitespace collapsed.
-    expect(plain.replace(/\s+/g, ' ')).toContain('the fun side: fortunes, the curl demo, the screensaver and cats in your terminal.');
+    expect(plain.replace(/\s+/g, ' ')).toContain('the fun side: a fortune, the screensaver, the curl demo, the ssh cats and my rocket league career.');
     expect(plain).toContain('g f');
     expect(plain).toContain('go to fun');
   });
@@ -135,5 +135,11 @@ describe('the site man page', () => {
     const plain = stripAnsi(renderMan(MAN));
     expect(plain).toContain('Written by lsalik2.');
     expect(plain).not.toContain('Luis Salik');
+  });
+});
+
+describe('the real man page', () => {
+  it('describes ~/fun with the rocket league career', () => {
+    expect(stripAnsi(renderMan(MAN))).toContain('my rocket league career');
   });
 });

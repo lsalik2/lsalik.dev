@@ -85,7 +85,7 @@ export const MAN: Man = {
             { term: '/blog/{slug}', def: 'individual blog post; rendered from markdown in src/content/blog.' },
             { term: '/uses', def: 'tools, software, and hardware. neofetch-style two-column layout under curl.' },
             { term: '/contact', def: 'contact links and channels.' },
-            { term: '/fun', def: 'the fun side: fortunes, the curl demo, the screensaver and cats in your terminal.' },
+            { term: '/fun', def: 'the fun side: a fortune, the screensaver, the curl demo, the ssh cats and my rocket league career.' },
             { term: '/resume', def: 'browsers redirect to /resume.pdf; curl receives the terminal resume.' },
             { term: '/man', def: 'this page.' },
             { term: '/fortune', def: 'a random fortune in a speech bubble, with a cat. Different every time.' },

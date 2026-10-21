@@ -5,7 +5,7 @@ import TerminalFrame from '../components/TerminalFrame.astro';
 import { CONTACT_SECTIONS } from '../data/contact';
 ---
 <Page title="Contact" path="/contact">
-  <PageHeader heading="contact" description="how to reach me, socials included." />
+  <PageHeader heading="contact" description="how to reach me." />
 
   {CONTACT_SECTIONS.map(section => (
     <TerminalFrame title={section.heading}>

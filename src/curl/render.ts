@@ -5,6 +5,7 @@ import { pickFortune } from '../data/fortunes';
 import { maintainerLines, type MaintainerLines } from '../data/maintainers';
 import { NAV_LINKS } from '../lib/nav';
 import { box, hr, sectionHeader, twoCol, wrap, PAGE_WIDTH } from './box';
+import { ART, ESPORTS, artForWidth, artWidth } from '../data/esports';
 import type { ContactSection } from '../data/contact';
 import type { Resume } from '../data/resume';
 import type { Uses } from '../data/uses';
@@ -446,26 +447,110 @@ export function renderFortune(fortune: string, width: number = PAGE_WIDTH): stri
 
 // curl -L lsalik.dev/fun — the extras, kept off the professional pages, and
 // a fortune to finish (it used to end curl home).
-const FUN_ENTRIES: ReadonlyArray<readonly [command: string, description: string]> = [
-  ['curl -L lsalik.dev/fortune', 'a fortune, with a cat'],
-  ['curl -L lsalik.dev/man', "the site's man page"],
+// The ~/fun page in the terminal: the same sections, in the same order, as the
+// browser page (./play, ./terminal, ./esports).
+const FUN_DESCRIPTION =
+  "the playful side of lsalik.dev: a random fortune draw, an animated ASCII screensaver, my rocket league career, and the website's terminal compatibility layer.";
+
+const FUN_PLAY: ReadonlyArray<readonly [command: string, description: string]> = [
   ['lsalik.dev/screensaver', 'the screensaver (browser only)'],
-  ['curl -L lsalik.dev/ssh', 'meet the maintainers'],
+  ['curl -L lsalik.dev/man', "the site's man page"],
 ];
+
+const FUN_TERMINAL: ReadonlyArray<readonly [command: string, description: string]> = [
+  ['curl -L lsalik.dev', 'this whole site, in your terminal'],
+  ['curl -L lsalik.dev/fortune', 'a fortune, with a cat'],
+  ['curl -L lsalik.dev/projects', 'every project, as ANSI text'],
+  ['curl -L lsalik.dev/ssh', 'terminal only: meet the maintainers'],
+  ['?cols=$COLUMNS', 'add it to any URL to fit your terminal'],
+];
+
+// Left and right columns side by side when every row fits `inner`; otherwise
+// each right-hand text goes under its left-hand one.
+function funPairs(
+  pairs: ReadonlyArray<readonly [string, string]>,
+  inner: number,
+  left: (s: string) => string,
+  right: (s: string) => string,
+): string[] {
+  const leftCol = Math.max(...pairs.map(([l]) => l.length));
+  const rightCol = Math.max(...pairs.map(([, r]) => r.length));
+  if (leftCol + 2 + rightCol <= inner) {
+    return pairs.map(([l, r]) => `${left(l.padEnd(leftCol))}  ${right(r)}`);
+  }
+  return pairs.flatMap(([l, r], i) => [...(i > 0 ? [''] : []), left(l), right(r)]);
+}
+
+// The esports career, one row per entry in fixed columns, or stacked when narrow.
+function funCareer(inner: number): string[] {
+  const career = ESPORTS.career;
+  const whenCol = Math.max(...career.map(c => c.when.length));
+  const roleCol = Math.max(...career.map(c => c.role.length));
+  const placeCol = Math.max(...career.map(c => c.place.length));
+  if (whenCol + 2 + roleCol + 2 + placeCol <= inner) {
+    return career.map(c => `${amber(c.when.padEnd(whenCol))}  ${c.role.padEnd(roleCol)}  ${dim(c.place)}`.trimEnd());
+  }
+  return career.flatMap((c, i) => [...(i > 0 ? [''] : []), amber(c.when), c.role, ...(c.place ? [dim(c.place)] : [])]);
+}
+
+// The car in blue, the ball as is; `art` is the scene or the car alone.
+function funArt(inner: number): string[] {
+  const art = artForWidth(inner);
+  const carW = artWidth(ART.car);
+  return art.map(line => blue(line.slice(0, carW)) + line.slice(carW));
+}
 
 export function renderFun(width: number = PAGE_WIDTH, fortune: string = pickFortune()): string {
   const inner = width - 4; // the box's borders and padding
-  const commandCol = Math.max(...FUN_ENTRIES.map(([command]) => command.length));
-  const descriptionCol = Math.max(...FUN_ENTRIES.map(([, description]) => description.length));
-  // Side by side when every row fits; otherwise each description goes under its command.
-  const sideBySide = commandCol + 2 + descriptionCol <= inner;
-  const rows = sideBySide
-    ? FUN_ENTRIES.map(([command, description]) => `${cyan(command.padEnd(commandCol))}  ${dim(description)}`)
-    : FUN_ENTRIES.flatMap(([command, description], i) => [
-        ...(i > 0 ? [''] : []),
-        cyan(command),
-        dim(description),
-      ]);
-  const funBox = box(rows, { title: '~/fun', width });
-  return [funBox, '', `${green('$')} fortune`, renderFortune(fortune, width)].join('\n');
+  // Boxes frame their lines verbatim (the fortune cat and the art need their
+  // indentation), so text lines are wrapped to the inner width here.
+  const fitText = (lines: readonly string[]) => lines.flatMap(line => (line === '' ? [''] : wrap(line, inner).split('\n')));
+
+  const play = box(
+    [
+      `${green('$')} fortune`,
+      ...renderFortune(fortune, inner).split('\n'),
+      '',
+      ...fitText(funPairs(FUN_PLAY, inner, cyan, dim)),
+    ],
+    { title: './play', width, wrap: false },
+  );
+
+  const terminal = box(fitText(funPairs(FUN_TERMINAL, inner, cyan, dim)), { title: './terminal', width, wrap: false });
+
+  const art = funArt(inner);
+  const stats = funPairs(ESPORTS.stats.map(s => [s.value, s.label] as const), inner, bold, dim);
+  const links = funPairs(ESPORTS.links.map(l => [l.label, l.url] as const), inner, s => s, cyan);
+  const esports = box(
+    [
+      ...fitText([dim(ESPORTS.subtitle), green(`● ${ESPORTS.status}`)]),
+      ...(art.length > 0 ? ['', ...art] : []),
+      '',
+      ...fitText([
+        `i'm ${blue(ESPORTS.handle)}. ${ESPORTS.intro}`,
+        '',
+        `${amber('fun fact:')} ${ESPORTS.funFact}`,
+        '',
+        ...stats,
+        '',
+        `${green('$')} git log --esports-career`,
+        ...funCareer(inner),
+        '',
+        `see my ranks: ${cyan(ESPORTS.trackerUrl)}`,
+        ...links,
+      ]),
+    ],
+    { title: './esports', width, wrap: false },
+  );
+
+  return [
+    sectionHeader('~/fun', width),
+    ...fitText([dim(FUN_DESCRIPTION)]),
+    '',
+    play,
+    '',
+    terminal,
+    '',
+    esports,
+  ].join('\n');
 }

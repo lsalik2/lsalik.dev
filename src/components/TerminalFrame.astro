@@ -9,6 +9,7 @@ const { title, id } = Astro.props;
 <div class="terminal-frame" id={id}>
   <div class="terminal-titlebar">
     <span class="terminal-title">── {title} ──</span>
+    <slot name="aside" />
   </div>
   <div class="terminal-body">
     <slot />
@@ -32,6 +33,13 @@ const { title, id } = Astro.props;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  /* Optional right-hand note in the title bar (slot="aside"). */
+  .terminal-titlebar :global([slot='aside']),
+  .terminal-titlebar :global(.terminal-aside) {
+    float: right;
+    margin-left: 1rem;
   }
 
   .terminal-body {

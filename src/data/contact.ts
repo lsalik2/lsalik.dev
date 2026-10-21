@@ -17,14 +17,4 @@ export const CONTACT_SECTIONS: readonly ContactSection[] = [
       { label: 'Discord User Link', url: 'https://discord.com/users/302198984238170113' },
     ],
   },
-  {
-    heading: 'esports',
-    links: [
-      { label: 'Liquipedia', url: 'https://liquipedia.net/rocketleague/SLK' },
-      { label: 'X', url: 'https://x.com/slkrl_' },
-      { label: 'Twitch', url: 'https://twitch.tv/slkrl' },
-      { label: 'YouTube', url: 'https://youtube.com/@slk-rl' },
-      { label: 'Steam', url: 'https://steamcommunity.com/id/SlkRL' },
-    ],
-  },
 ] as const;
