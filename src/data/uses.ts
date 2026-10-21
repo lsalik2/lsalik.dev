@@ -40,8 +40,8 @@ export const USES: Uses = {
     {
       heading: 'languages',
       items: [
-        { key: 'daily', value: 'Python · TypeScript · Rust · Java' },
-        { key: 'occasional', value: 'C · C++ · C# · Go · SQL · Lua · GDScript · Assembly' },
+        { key: 'daily', value: 'Python · SQL · TypeScript · Rust · Java' },
+        { key: 'occasional', value: 'C · C++ · C# · Go · Lua · GDScript · Assembly' },
       ],
     },
     {
