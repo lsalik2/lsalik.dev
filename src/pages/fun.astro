@@ -1,56 +1,192 @@
 ---
-// ~/fun: the playful side of the site, kept off the professional pages.
-// The fortune and the curl demo moved here from the home page.
+// ~/fun: the playful side of the site, kept off the professional pages, in
+// three sections: ./play (in the browser), ./terminal (the site in curl) and
+// ./esports. `curl /fun` (renderFun) prints the same sections in this order.
 import Page from '../layouts/Page.astro';
+import PageHeader from '../components/PageHeader.astro';
 import TerminalFrame from '../components/TerminalFrame.astro';
 import FortuneBubble from '../components/FortuneBubble.astro';
-import { pickFortune } from '../data/fortunes';
+import { FORTUNES, pickFortune } from '../data/fortunes';
+import { ART, ESPORTS, artScene } from '../data/esports';
+import { FINCH, RAVEN } from '../curl/cats';
+import { manPreview, screensaverFrame } from '../lib/fun-previews';
+
+const DESCRIPTION =
+  "the playful side of lsalik.dev: a random fortune draw, an animated ASCII screensaver, my rocket league career, and the website's terminal compatibility layer.";
 
 // A fresh one on every visit (pages are server-rendered, no-store).
 const fortune = pickFortune();
+const saverFrame = screensaverFrame(60, 12);
+const manText = manPreview(56, 9);
+const maintainers = artScene(FINCH, RAVEN, 6).join('\n');
+
+const TRIES = [
+  ['curl -L lsalik.dev/fortune', 'a fortune, with a cat'],
+  ['curl -L lsalik.dev/man', "the site's man page"],
+  ['curl -L lsalik.dev/projects', 'every project, as ANSI text'],
+  ['?cols=$COLUMNS', 'add it to any URL to fit your terminal'],
+] as const;
+
+const external = { target: '_blank', rel: 'noopener noreferrer' };
 ---
-<Page title="fun" path="/fun" description="the fun side of lsalik.dev: fortunes, a screensaver, cats in your terminal.">
-  <section class="curl-easter-egg" id="curl">
-    <button class="curl-teaser" id="curl-teaser" type="button" aria-expanded="false">
-      <div class="curl-teaser-titlebar">~ &mdash; bash &mdash; <span data-curl-size>80x24</span></div>
-      <div class="curl-teaser-body">
-        <span class="curl-prompt">$</span> curl -L lsalik.dev<span class="curl-cursor" aria-hidden="true"></span>
-        <span class="curl-hint">click to run</span>
+<Page title="fun" path="/fun" description={DESCRIPTION}>
+  <PageHeader heading="fun" description={DESCRIPTION} />
+
+  <p class="fun-ls">
+    <span><span class="prompt">$</span> ls ~/fun</span>
+    <a href="#play">play/</a>
+    <a href="#terminal">terminal/</a>
+    <a href="#esports">esports/</a>
+  </p>
+
+  <section id="play" class="fun-section" aria-labelledby="play-title">
+    <h2 id="play-title" class="fun-section-title"><span class="accent">./</span>play</h2>
+    <p class="fun-section-sub">things to try right here in your browser.</p>
+
+    <div class="play-cards">
+      <div class="play-wide">
+        <TerminalFrame title="$ fortune" id="fortune">
+          <div class="fortune-row">
+            <FortuneBubble fortune={fortune} width={40} narrowWidth={26} />
+            <div class="fortune-side">
+              <a href="/fun" class="fun-button" data-fortune-another data-astro-reload>[another]</a>
+              <p class="fun-hint">{FORTUNES.length} sayings so far.</p>
+              <p class="fun-hint">or in a terminal: <code>curl -L lsalik.dev/fortune</code></p>
+            </div>
+          </div>
+          <p class="fun-sr" aria-live="polite" data-fortune-live></p>
+        </TerminalFrame>
       </div>
-    </button>
-    <div class="curl-demo-wrapper" id="curl-demo-wrapper">
-      <div class="curl-demo-body">
-        <pre id="curl-demo-output"></pre>
-      </div>
+
+      <TerminalFrame title="./screensaver" id="screensaver">
+        <div class="preview saver-preview" aria-hidden="true">
+          <pre class="saver-field">{saverFrame}</pre>
+          <pre class="saver-clock" data-fun-clock></pre>
+        </div>
+        <p class="fun-text">the site's background, full screen, with a clock and your own colours.</p>
+        <div class="fun-actions">
+          <a href="/screensaver" class="fun-button" data-astro-reload>[launch]</a>
+          <span class="fun-hint">or press g s</span>
+        </div>
+      </TerminalFrame>
+
+      <TerminalFrame title="man lsalik.dev" id="man">
+        <div class="preview" aria-hidden="true">
+          <pre class="man-preview">{manText}</pre>
+        </div>
+        <p class="fun-text">the site's own man page: every route and keyboard shortcut.</p>
+        <div class="fun-actions">
+          <a href="/man" class="fun-button">[read it]</a>
+          <span class="fun-hint">or curl -L lsalik.dev/man</span>
+        </div>
+      </TerminalFrame>
     </div>
   </section>
 
-  <TerminalFrame title="$ fortune" id="fortune">
-    <FortuneBubble fortune={fortune} width={40} narrowWidth={26} />
-    <p class="fun-sr" aria-live="polite" data-fortune-live></p>
-    <a href="/fun" class="fun-button fun-another" data-fortune-another data-astro-reload>[another]</a>
-  </TerminalFrame>
+  <section id="terminal" class="fun-section" aria-labelledby="terminal-title">
+    <h2 id="terminal-title" class="fun-section-title"><span class="accent">./</span>terminal</h2>
+    <p class="fun-section-sub">this whole site can run in your terminal!</p>
 
-  <TerminalFrame title="man lsalik.dev" id="man">
-    <p class="fun-text">the site's own man page: every route and shortcut.</p>
-    <a href="/man" class="fun-button">[read it]</a>
-    <p class="fun-hint">or <code>curl -L lsalik.dev/man</code></p>
-  </TerminalFrame>
+    <div class="curl-easter-egg" id="curl">
+      <button class="curl-teaser" id="curl-teaser" type="button" aria-expanded="false">
+        <div class="curl-teaser-titlebar">~ &mdash; bash &mdash; <span data-curl-size>80x24</span></div>
+        <div class="curl-teaser-body">
+          <span class="curl-prompt">$</span> curl -L lsalik.dev<span class="curl-cursor" aria-hidden="true"></span>
+          <span class="curl-hint">click to run</span>
+        </div>
+      </button>
+      <div class="curl-demo-wrapper" id="curl-demo-wrapper">
+        <div class="curl-demo-body">
+          <pre id="curl-demo-output"></pre>
+        </div>
+      </div>
+    </div>
 
-  <TerminalFrame title="./screensaver" id="screensaver">
-    <p class="fun-text">the site's background, full screen, with a clock and your own colours.</p>
-    <a href="/screensaver" class="fun-button" data-astro-reload>[launch]</a>
-    <p class="fun-hint">or press g s, or click the ⠋ in the prompt</p>
-  </TerminalFrame>
+    <div class="try-it">
+      <span class="fun-muted">try it yourself:</span>
+      <span class="try-cmd"><span class="prompt">$</span> <code data-copy-text>curl -L lsalik.dev</code></span>
+      <button type="button" class="fun-button try-copy" data-copy="curl -L lsalik.dev" hidden>[copy]</button>
+    </div>
 
-  <TerminalFrame title="ssh lsalik.dev" id="ssh">
-    <p class="fun-text">terminal only: meet the maintainers.</p>
-    <code class="fun-cmd">curl -L lsalik.dev/ssh</code>
-  </TerminalFrame>
+    <TerminalFrame title="ssh lsalik.dev" id="ssh">
+      <span slot="aside" class="terminal-aside fun-amber">terminal only</span>
+      <div class="ssh-row">
+        <pre class="ssh-cats" aria-hidden="true">{maintainers}</pre>
+        <div class="ssh-text">
+          <p class="fun-text">an easter egg: ssh into the site and meet the maintainers, finch and raven.</p>
+          <code class="fun-cmd">curl -L lsalik.dev/ssh</code>
+        </div>
+      </div>
+    </TerminalFrame>
+
+    <TerminalFrame title="more to try">
+      <dl class="tries">
+        {TRIES.map(([cmd, what]) => (
+          <div class="try">
+            <dt><code class="fun-cmd">{cmd}</code></dt>
+            <dd>{what}</dd>
+          </div>
+        ))}
+      </dl>
+    </TerminalFrame>
+  </section>
+
+  <section id="esports" class="fun-section" aria-labelledby="esports-title">
+    <h2 id="esports-title" class="fun-section-title"><span class="accent">./</span>esports</h2>
+    <p class="fun-section-sub">{ESPORTS.subtitle}</p>
+
+    <TerminalFrame title={`${ESPORTS.handle} · rocket league`}>
+      <span slot="aside" class="terminal-aside fun-green">● {ESPORTS.status}</span>
+      <div class="esports">
+        <figure class="esports-art">
+          <div class="art-row" aria-hidden="true">
+            <pre class="art-car">{ART.car.join('\n')}</pre>
+            <pre class="art-ball">{ART.ball.join('\n')}</pre>
+          </div>
+          <figcaption class="fun-sr">{ART.caption}</figcaption>
+        </figure>
+
+        <p class="esports-text">i'm <span class="accent">{ESPORTS.handle}</span>. {ESPORTS.intro}</p>
+        <p class="esports-text"><span class="fun-amber">fun fact:</span> {ESPORTS.funFact}</p>
+
+        <ul class="stats">
+          {ESPORTS.stats.map(stat => (
+            <li class="stat">
+              <span class="stat-value">{stat.value}</span>
+              <span class="stat-label">{stat.label}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div class="career-scroll">
+          <div class="career">
+            <p class="career-cmd"><span class="prompt">$</span> git log --esports-career</p>
+            {ESPORTS.career.map(entry => (
+              <p class="career-row">
+                <span class="career-when">{entry.when}</span>
+                <span class="career-role">{entry.role}</span>
+                <span class="career-place">{entry.place}</span>
+              </p>
+            ))}
+          </div>
+        </div>
+
+        <div class="esports-links">
+          <a href={ESPORTS.trackerUrl} class="fun-button fun-button-solid" {...external}>[see my ranks →]</a>
+          <ul class="link-list">
+            {ESPORTS.links.map(link => (
+              <li><a href={link.url} {...external}>{link.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </TerminalFrame>
+  </section>
 </Page>
 
 <style>
-  /* Announces the new saying after [another]; the bubble itself is ASCII art. */
+  /* Announces the new saying after [another], and captions the art; both
+     visible pictures are ASCII. */
   .fun-sr {
     position: absolute;
     width: 1px;
@@ -58,6 +194,65 @@ const fortune = pickFortune();
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+
+  .accent {
+    color: var(--accent);
+  }
+
+  .prompt {
+    color: var(--green);
+  }
+
+  .fun-muted {
+    color: var(--fg-muted);
+  }
+
+  .fun-amber {
+    color: var(--amber);
+  }
+
+  .fun-green {
+    color: var(--green);
+  }
+
+  .fun-ls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1.2rem;
+    margin: 0 0 2rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--bg-surface);
+    font-size: 0.9rem;
+  }
+
+  .fun-ls a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .fun-ls a:hover {
+    color: var(--accent-bright);
+  }
+
+  .fun-section {
+    margin: 0 0 2.5rem;
+  }
+
+  .fun-section-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--fg);
+    margin: 0 0 0.2rem;
+  }
+
+  .fun-section-sub {
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    margin: 0 0 1rem;
   }
 
   .fun-text {
@@ -68,7 +263,7 @@ const fortune = pickFortune();
   .fun-hint {
     font-size: 0.8rem;
     color: var(--fg-muted);
-    margin: 0.75rem 0 0;
+    margin: 0;
   }
 
   .fun-cmd {
@@ -78,19 +273,25 @@ const fortune = pickFortune();
 
   /* <code> otherwise falls back to the browser's default monospace. */
   .fun-cmd,
-  .fun-hint code {
+  .fun-hint code,
+  .try-cmd code {
     font-family: inherit;
   }
 
   .fun-button {
-    display: inline-block;
-    margin-top: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    box-sizing: border-box;
+    font: inherit;
     font-size: 0.85rem;
     color: var(--accent);
+    background: none;
     text-decoration: none;
     border: 1px solid var(--border);
     border-radius: 3px;
-    padding: 0.2rem 0.6rem;
+    padding: 0.2rem 0.8rem;
+    cursor: pointer;
   }
 
   .fun-button:hover {
@@ -98,13 +299,105 @@ const fortune = pickFortune();
     border-color: var(--accent);
   }
 
-  .fun-another {
-    margin-top: 0.75rem;
+  .fun-button-solid {
+    color: var(--bg);
+    background-color: var(--accent);
+    border-color: var(--accent);
   }
 
-  /* Spaced like the TerminalFrames around it (it was last on the home page). */
+  .fun-button-solid:hover {
+    color: var(--bg);
+    background-color: var(--accent-bright);
+  }
+
+  .fun-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+  }
+
+  /* ./play: the fortune across the top, then two cards that stack on phones. */
+  .play-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 1rem;
+  }
+
+  .play-wide {
+    grid-column: 1 / -1;
+  }
+
+  .play-cards :global(.terminal-frame) {
+    margin-bottom: 0;
+    min-width: 0;
+  }
+
+  .fortune-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2.5rem;
+  }
+
+  .fortune-row :global(.fortune-art) {
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  .fortune-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  /* Decorative previews: fixed height, clipped, never wider than the card. */
+  .preview {
+    position: relative;
+    height: 10rem;
+    overflow: hidden;
+    margin: 0 0 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background-color: var(--bg-surface);
+  }
+
+  .preview pre {
+    margin: 0;
+    font-family: inherit;
+    white-space: pre;
+  }
+
+  .saver-field {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.1;
+    color: var(--accent);
+    opacity: 0.45;
+  }
+
+  .saver-clock {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    line-height: 1;
+    color: var(--fg);
+  }
+
+  .man-preview {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.72rem;
+    line-height: 1.3;
+    color: var(--fg);
+  }
+
+  /* ./terminal */
   .curl-easter-egg {
-    margin: 0 0 1.5rem;
+    margin: 0 0 1rem;
   }
 
   .curl-teaser {
@@ -112,7 +405,7 @@ const fortune = pickFortune();
     width: 100%;
     text-align: left;
     background: none;
-    border: 1px solid var(--border);
+    border: 1px solid var(--accent);
     border-radius: 4px;
     padding: 0;
     color: var(--fg-muted);
@@ -124,7 +417,7 @@ const fortune = pickFortune();
   }
 
   .curl-teaser:hover {
-    border-color: var(--accent);
+    border-color: var(--accent-bright);
   }
 
   .curl-teaser-titlebar {
@@ -194,6 +487,202 @@ const fortune = pickFortune();
     letter-spacing: 0;
     white-space: pre; /* rendered to fit; wrapping would break the box art */
     margin: 0;
+  }
+
+  .try-it {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 1rem;
+    margin: 0 0 1.5rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--bg-surface);
+  }
+
+  .try-cmd {
+    font-size: 1.15rem;
+    color: var(--fg);
+  }
+
+  .try-copy {
+    margin-left: auto;
+  }
+
+  .ssh-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2.5rem;
+  }
+
+  .ssh-cats {
+    margin: 0;
+    font-family: inherit;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    white-space: pre;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .ssh-text {
+    flex: 1 1 16rem;
+    min-width: 0;
+  }
+
+  .tries {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 0.9rem 2rem;
+    margin: 0;
+  }
+
+  .tries dd {
+    margin: 0.15rem 0 0;
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+  }
+
+  /* ./esports */
+  .esports {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  /* The art scales down with the viewport and scrolls inside its panel when
+     it still doesn't fit; it never wraps. */
+  .esports-art {
+    margin: 0;
+    padding: 1rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--bg-surface);
+    overflow-x: auto;
+  }
+
+  .art-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 2ch;
+    width: max-content;
+    margin: 0 auto;
+  }
+
+  .art-row pre {
+    margin: 0;
+    font-family: inherit;
+    font-size: clamp(6.5px, 1.3vw, 12.5px);
+    line-height: 1.2;
+    white-space: pre;
+  }
+
+  .art-car {
+    color: var(--accent);
+  }
+
+  .art-ball {
+    color: var(--fg);
+  }
+
+  .esports-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    gap: 0.75rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--bg-surface);
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+  }
+
+  /* One line per entry, in fixed columns; on phones the log scrolls sideways
+     instead of wrapping. */
+  .career-scroll {
+    overflow-x: auto;
+  }
+
+  .career {
+    width: max-content;
+    white-space: nowrap;
+    font-size: 0.9rem;
+  }
+
+  .career p {
+    margin: 0 0 0.35rem;
+  }
+
+  .career-cmd {
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+  }
+
+  .career-row {
+    display: flex;
+    gap: 1.2rem;
+  }
+
+  .career-when {
+    flex: 0 0 15ch;
+    color: var(--amber);
+  }
+
+  .career-role {
+    flex: 0 0 20ch;
+  }
+
+  .career-place {
+    color: var(--fg-muted);
+  }
+
+  .esports-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border);
+  }
+
+  .link-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.1rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.85rem;
+  }
+
+  .link-list a {
+    color: var(--accent);
   }
 </style>
 
