@@ -1,16 +1,18 @@
 ---
 interface Props {
-  title: string;
+  title?: string; // without one, the frame has no title bar
   id?: string;
 }
 
 const { title, id } = Astro.props;
 ---
 <div class="terminal-frame" id={id}>
-  <div class="terminal-titlebar">
-    <span class="terminal-title">── {title} ──</span>
-    <slot name="aside" />
-  </div>
+  {title && (
+    <div class="terminal-titlebar">
+      <span class="terminal-title">── {title} ──</span>
+      <slot name="aside" />
+    </div>
+  )}
   <div class="terminal-body">
     <slot />
   </div>

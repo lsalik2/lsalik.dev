@@ -22,7 +22,7 @@ import { visibleWidth } from '../../src/curl/ansi';
 import { RESUME } from '../../src/data/resume';
 import { USES } from '../../src/data/uses';
 import { MAN } from '../../src/data/man';
-import { CONTACT_SECTIONS } from '../../src/data/contact';
+import { CONTACT_LINKS } from '../../src/data/contact';
 
 const posts: BlogPostSummary[] = [
   {
@@ -70,7 +70,7 @@ const VIEWS: Record<string, (w: number) => string> = {
   rss: w => renderRSS(posts, w),
   projectsIndex: w => renderProjectsIndex(projects, w),
   projectPost: w => renderProjectPost({ title: projects[0].title, status: 'Released', stack: projects[0].stack, content: 'Short body.', stats: projects[0].stats, active: true }, w),
-  contact: w => renderContact(CONTACT_SECTIONS, w),
+  contact: w => renderContact(CONTACT_LINKS, w),
   resume: w => renderResume(RESUME, w),
   man: w => renderMan(MAN, w),
   uses: w => renderUses(USES, w),

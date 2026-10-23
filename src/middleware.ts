@@ -20,7 +20,7 @@ import {
 import { pickFortune } from './data/fortunes';
 import { parseCols } from './lib/terminal-width';
 import { readingTime } from './lib/reading-time';
-import { CONTACT_SECTIONS } from './data/contact';
+import { CONTACT_LINKS } from './data/contact';
 import { RESUME } from './data/resume';
 import { USES } from './data/uses';
 import { MAN } from './data/man';
@@ -280,7 +280,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
   }
 
   if (pathname === '/contact' || pathname === '/contact/') {
-    return textResponse(renderContact(CONTACT_SECTIONS, cols));
+    return textResponse(renderContact(CONTACT_LINKS, cols));
   }
 
   if (pathname === '/uses' || pathname === '/uses/') {
