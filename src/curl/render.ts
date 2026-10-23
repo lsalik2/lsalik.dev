@@ -6,11 +6,11 @@ import { maintainerLines, type MaintainerLines } from '../data/maintainers';
 import { NAV_LINKS } from '../lib/nav';
 import { box, hr, sectionHeader, twoCol, wrap, PAGE_WIDTH } from './box';
 import { ART, ESPORTS, artForWidth, artWidth } from '../data/esports';
-import type { ContactSection } from '../data/contact';
+import type { ContactLink } from '../data/contact';
 import type { Resume } from '../data/resume';
 import type { Uses } from '../data/uses';
 import type { Man, ManBlock } from '../data/man';
-export type { ContactSection };
+export type { ContactLink };
 
 export interface BlogPostSummary {
   slug: string;
@@ -180,15 +180,10 @@ export function renderProjectsIndex(projects: ProjectSummary[], width: number = 
   return [header, '', ...projectBoxes].join('\n');
 }
 
-export function renderContact(sections: readonly ContactSection[], width: number = PAGE_WIDTH): string {
+export function renderContact(links: readonly ContactLink[], width: number = PAGE_WIDTH): string {
   const header = sectionHeader('~/contact', width);
-
-  const sectionBoxes = sections.map(section => {
-    const links = section.links.map(link => `  ${link.label}  ${cyan(link.url)}`);
-    return box(links, { title: section.heading, width });
-  });
-
-  return [header, '', ...sectionBoxes].join('\n');
+  const lines = links.map(link => `  ${link.label}  ${cyan(link.url)}`);
+  return [header, '', box(lines, { width })].join('\n');
 }
 
 export function renderResume(resume: Resume, width: number = PAGE_WIDTH): string {

@@ -11,7 +11,7 @@ import {
   renderSsh,
   renderScreensaverNote,
   renderFortune,
-  type ContactSection,
+  type ContactLink,
 } from '../../src/curl/render';
 import type { BlogPostSummary, BlogPostFull, ProjectSummary } from '../../src/curl/render';
 import { stripAnsi } from '../../src/curl/ansi';
@@ -181,33 +181,27 @@ describe('renderProjectsIndex', () => {
 });
 
 describe('renderContact', () => {
-  const sections: ContactSection[] = [
-    {
-      heading: 'professional',
-      links: [{ label: 'GitHub', url: 'https://github.com/lsalik2' }],
-    },
-    {
-      heading: 'esports',
-      links: [{ label: 'Twitch', url: 'https://twitch.tv/test' }],
-    },
+  const links: ContactLink[] = [
+    { label: 'GitHub', url: 'https://github.com/lsalik2' },
+    { label: 'LinkedIn', url: 'https://linkedin.com/in/test' },
   ];
 
   it('emits the ~/contact heading', () => {
-    const out = stripAnsi(renderContact(sections));
+    const out = stripAnsi(renderContact(links));
     expect(out).toContain('~/contact');
   });
 
-  it('includes section headings', () => {
-    const out = stripAnsi(renderContact(sections));
-    expect(out).toContain('professional');
-    expect(out).toContain('esports');
+  it('puts every link in one box with no title, since there is nothing to separate', () => {
+    const tops = stripAnsi(renderContact(links)).split('\n').filter(line => line.startsWith('┌'));
+    expect(tops).toHaveLength(1);
+    expect(tops[0]).toMatch(/^┌─+┐$/);
   });
 
   it('includes link labels and urls', () => {
-    const out = stripAnsi(renderContact(sections));
+    const out = stripAnsi(renderContact(links));
     expect(out).toContain('GitHub');
     expect(out).toContain('https://github.com/lsalik2');
-    expect(out).toContain('Twitch');
+    expect(out).toContain('LinkedIn');
   });
 });
 

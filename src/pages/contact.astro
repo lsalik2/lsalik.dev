@@ -2,23 +2,21 @@
 import Page from '../layouts/Page.astro';
 import PageHeader from '../components/PageHeader.astro';
 import TerminalFrame from '../components/TerminalFrame.astro';
-import { CONTACT_SECTIONS } from '../data/contact';
+import { CONTACT_LINKS } from '../data/contact';
 ---
 <Page title="Contact" path="/contact">
   <PageHeader heading="contact" description="how to reach me." />
 
-  {CONTACT_SECTIONS.map(section => (
-    <TerminalFrame title={section.heading}>
-      <dl class="contact-grid">
-        {section.links.map(link => (
-          <>
-            <dt>{link.label.toLowerCase()}</dt>
-            <dd><a href={link.url} target="_blank" rel="noopener noreferrer">{link.url.replace('https://', '')}</a></dd>
-          </>
-        ))}
-      </dl>
-    </TerminalFrame>
-  ))}
+  <TerminalFrame>
+    <dl class="contact-grid">
+      {CONTACT_LINKS.map(link => (
+        <>
+          <dt>{link.label.toLowerCase()}</dt>
+          <dd><a href={link.url} target="_blank" rel="noopener noreferrer">{link.url.replace('https://', '')}</a></dd>
+        </>
+      ))}
+    </dl>
+  </TerminalFrame>
 </Page>
 
 <style>
@@ -46,5 +44,21 @@ import { CONTACT_SECTIONS } from '../data/contact';
   .contact-grid a:hover {
     color: var(--accent-bright);
     text-decoration-color: var(--accent-bright);
+  }
+
+  /* On phones each link goes under its label, and a long one breaks rather than running out of the frame. */
+  @media (max-width: 600px) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+      gap: 0.1rem;
+    }
+
+    .contact-grid dd + dt {
+      margin-top: 0.6rem;
+    }
+
+    .contact-grid a {
+      overflow-wrap: anywhere;
+    }
   }
 </style>
